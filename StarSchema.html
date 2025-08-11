@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Star Schema Filter Flow</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --ink: #d1e9ff;
+      --accent: #60a5fa;
+      --accent-flow: #7dd3fc;
+      --accent-2: #34d399;
+      --muted: #93a7c1;
+      --glass: #cbd5e1;
+      --dark-purple: #b295f7;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 70% 20%, #1b2744 0%, #0b1220 60%, #050914 100%);
+      color: var(--ink);
+      font: 16px/1.3 Inter, Segoe UI, system-ui;
+      overflow-x: hidden;
+    }
+    .wrap {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    @media(max-width: 1024px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+    
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 16px;
+      height: fit-content;
+    }
+    
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .panel h2 { margin: .2rem 0 10px; font-size: 18px; }
+    .panel .grp { border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 10px 12px; margin: 10px 0; }
+    .panel .row { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 0; }
+    .panel .row label { display: flex; align-items: center; gap: 8px; margin-right: auto; }
+    .panel input[type=range] { width: 100%; }
+    .panel output { color: var(--ink); }
+
+    .plant {
+      position: relative;
+      overflow: hidden;
+      border-radius: 18px;
+      background: linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
+      padding: 16px;
+      text-align: center;
+    }
+    svg { 
+      width: 100%; 
+      height: 100%; 
+      display: block; 
+      height: auto;
+    }
+    
+    /* Styles for the main title and attribution */
+    .main-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--ink);
+        margin: 1rem 0 0.5rem;
+    }
+    .attribution {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+
+    /* SVG Elements */
+    .table {
+      fill: url(#glassGrad);
+      stroke: var(--glass);
+      stroke-width: 2;
+    }
+    .water {
+      fill: url(#waterGrad);
+      opacity: .95;
+      transition: height .25s ease, y .25s ease;
+    }
+    .label {
+      fill: var(--ink);
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .sublabel {
+      fill: var(--muted);
+      font-size: 13px;
+    }
+    
+    /* Style for Label Background */
+    .label-bg {
+        fill: rgba(0, 0, 0, 0.4);
+        stroke: none;
+        rx: 5;
+    }
+    
+    /* New filter icon style */
+    .filter-icon {
+        width: 18px;
+        height: 18px;
+        fill: var(--dark-purple);
+        vertical-align: middle;
+    }
+    
+    /* New style for the icons inside the tanks */
+    .tank-icon {
+        fill: var(--dark-purple);
+        transform: scale(1.5);
+    }
+
+
+    /* Pipes and Filters */
+    .pipe {
+      fill: none;
+      stroke: var(--muted);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke .2s ease;
+    }
+    .flow {
+      fill: none;
+      stroke: #0207a8; 
+      stroke-width: 10;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 10 20;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .flow.active-flow { animation: filter-flow 1.5s linear infinite; opacity: 1; }
+
+    @keyframes filter-flow { to { stroke-dashoffset: -80; } }
+
+    .kpi {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.08);
+      padding: 10px 15px;
+      border-radius: 12px;
+      text-align: left;
+    }
+    .kpi strong {
+      color: var(--ink);
+    }
+    
+    /* Styles for the new relationship table */
+    .relationships-section {
+        margin-top: 0;
+        text-align: left;
+        padding: 14px;
+        background: linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 18px;
+    }
+    .relationships-section h3 {
+        margin-top: 0;
+        font-size: 1.25rem;
+    }
+    .relationships-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    .relationships-table th, .relationships-table td {
+        padding: 8px;
+        border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+    .relationships-table th {
+        text-align: left;
+        color: var(--accent);
+    }
+    .relationships-table tr:last-child td {
+        border-bottom: none;
+    }
+    .relationships-table .bidirectional-row td {
+        color: var(--accent-2);
+        font-weight: 600;
+    }
+
+    /* New style for the separate explanation paragraph */
+    .explanation-section {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 16px;
+        text-align: center;
+        background: linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="left-column">
+      <section class="panel">
+        <h2>Filters</h2>
+        <div class="grp">
+          <div class="row">
+            <label>
+              <svg class="filter-icon" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+              </svg>
+              Time Filter
+            </label>
+            <output id="timeOut">0%</output>
+          </div>
+          <input type="range" id="filter-time" min="0" max="100" value="0" />
+          <div class="row">
+            <label>
+              <svg class="filter-icon" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              Place Filter
+            </label>
+            <output id="placeOut">0%</output>
+          </div>
+          <input type="range" id="filter-place" min="0" max="100" value="0" />
+          <div class="row">
+            <label>
+              <svg class="filter-icon" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+              Customer Filter
+            </label>
+            <output id="customerOut">0%</output>
+          </div>
+          <input type="range" id="filter-customer" min="0" max="100" value="0" />
+          <div class="row">
+            <label>
+              <svg class="filter-icon" viewBox="0 0 24 24">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03L21.84 4.29C22.06 3.81 21.75 3 21.24 3H5.23L4.2 1H2v2h2.2L6.15 12.22c-.16.29-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H8.28c-.31 0-.6-.1-.85-.25-.33-.2-.55-.47-.69-.77zM18 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+              </svg>
+              Product Filter
+            </label>
+            <output id="productOut">0%</output>
+          </div>
+          <input type="range" id="filter-product" min="0" max="100" value="0" />
+          <div class="row">
+            <label>
+              <svg class="filter-icon" viewBox="0 0 24 24">
+                <path d="M18 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-7.1 2.58c-.18-.32-.42-.62-.72-.87-.79-.65-1.69-.94-2.58-.94H7c-.16 0-.32.02-.47.05-1.28.25-2.27 1.34-2.48 2.65-.25 1.55.33 3.03 1.44 3.99l.86.75 3.32-1.63c.47-1.11 1.15-2.26 1.79-3.25zm.1 2.37-3.9 1.92-1.19-1.04c-.38-.34-.73-.72-1.04-1.15-.31-.43-.57-.88-.78-1.34-1.44-.99-2.2-2.52-2.21-4.08-.01-1.04.28-2.07.86-2.94C4.34 6.7 5.14 6 6 6c.07 0 .14.01.21.01h.52c.69 0 1.34.25 1.84.7l.7.64c.24.21.57.28.87.21.96-.2 1.98-.31 3-.31h.5c.34 0 .67.04 1 .09 1.83.25 3.3 1.94 3.3 3.86 0 1.63-.78 3.09-2.01 3.98l-2.01 1.43zM18 14.5c-2.33 0-7 1.17-7 3.5V20h14v-2c0-2.33-4.67-3.5-7-3.5z"/>
+              </svg>
+              Salesperson Filter
+            </label>
+            <output id="salespersonOut">0%</output>
+          </div>
+          <input type="range" id="filter-salesperson" min="0" max="100" value="0" />
+        </div>
+      </section>
+
+      <section class="relationships-section">
+        <h3>Relationship Flows in a Star Schema</h3>
+        <table class="relationships-table">
+          <thead>
+            <tr>
+              <th>Dimension Table</th>
+              <th>Relationship Direction</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Time</td>
+              <td>Unidirectional (Time → Fact)</td>
+              <td>Standard filter flow.</td>
+            </tr>
+            <tr>
+              <td>Place</td>
+              <td>Unidirectional (Place → Fact)</td>
+              <td>Standard filter flow.</td>
+            </tr>
+            <tr>
+              <td>Salesperson</td>
+              <td>Unidirectional (Salesperson → Fact)</td>
+              <td>Standard filter flow.</td>
+            </tr>
+            <tr>
+              <td>Product</td>
+            <td>Unidirectional (Product → Fact)</td>
+              <td>Standard filter flow.</td>
+            </tr>
+            <tr class="bidirectional-row">
+              <td>Customer</td>
+              <td>Bidirectional (Customer ↔ Fact)</td>
+              <td>Allows filtering customers by sales events and vice versa.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <section class="plant">
+      <h2 class="main-title">Star Schema Interactive Filter Flow</h2>
+      <p class="attribution">Designed and Developed by S. Rathinagiri and Gemini</p>
+      
+      <div class="kpi">
+        <strong>Active Rows: <span id="activeRows">100%</span></strong>
+      </div>
+      <svg viewBox="0 0 1100 800">
+        <defs>
+          <linearGradient id="glassGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="rgba(255,255,255,.08)" />
+            <stop offset="100%" stop-color="rgba(255,255,255,.02)" />
+          </linearGradient>
+          <linearGradient id="waterGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#c3ecff" />
+            <stop offset="100%" stop-color="#60a5fa" />
+          </linearGradient>
+        </defs>
+
+        <g id="sales-fact-group" transform="translate(400, 300)">
+          <rect class="table" width="300" height="200" rx="15" />
+          <rect id="water-fact" class="water" x="6" y="6" width="288" height="188" rx="10" />
+          <rect class="label-bg" x="40" y="70" width="220" height="45" />
+          <text class="label" x="150" y="87" text-anchor="middle">Sales Fact Table</text>
+          <text class="sublabel" x="150" y="107" text-anchor="middle">All measures & transactional data</text>
+        </g>
+        
+        <g id="dim-time-group" transform="translate(40, 100)">
+          <rect class="table" width="200" height="100" rx="10" />
+          <rect id="water-time" class="water" x="6" y="6" width="188" height="88" rx="8" />
+          <g class="tank-icon" transform="translate(100, -30)">
+             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+          </g>
+          <rect class="label-bg" x="50" y="40" width="100" height="25" />
+          <text class="label" x="100" y="58" text-anchor="middle">Time</text>
+        </g>
+
+         <g id="dim-place-group" transform="translate(40, 600)">
+         <rect class="table" width="200" height="100" rx="10" />
+         <rect id="water-place" class="water" x="6" y="6" width="188" height="88" rx="8" />
+         <g class="tank-icon" transform="translate(100, -30)">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+         </g>
+         <rect class="label-bg" x="50" y="40" width="100" height="25" />
+         <text class="label" x="100" y="58" text-anchor="middle">Place</text>
+       </g>
+
+        <g id="dim-customer-group" transform="translate(860, 100)">
+          <rect class="table" width="200" height="100" rx="10" />
+          <rect id="water-customer" class="water" x="6" y="6" width="188" height="88" rx="8" />
+          <g class="tank-icon" transform="translate(100, -30)">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </g>
+          <rect class="label-bg" x="50" y="40" width="100" height="25" />
+          <text class="label" x="100" y="58" text-anchor="middle">Customer</text>
+        </g>
+
+        <g id="dim-product-group" transform="translate(860, 600)">
+         <rect class="table" width="200" height="100" rx="10" />
+         <rect id="water-product" class="water" x="6" y="6" width="188" height="88" rx="8" />
+         <g class="tank-icon" transform="translate(100, -30)">
+            <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03L21.84 4.29C22.06 3.81 21.75 3 21.24 3H5.23L4.2 1H2v2h2.2L6.15 12.22c-.16.29-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H8.28c-.31 0-.6-.1-.85-.25-.33-.2-.55-.47-.69-.77zM18 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+         </g>
+         <rect class="label-bg" x="50" y="40" width="100" height="25" />
+         <text class="label" x="100" y="58" text-anchor="middle">Product</text>
+       </g>
+
+        <g id="dim-salesperson-group" transform="translate(425, 0)">
+          <rect class="table" width="250" height="100" rx="10" />
+          <rect id="water-salesperson" class="water" x="6" y="6" width="238" height="88" rx="8" />
+          <g class="tank-icon" transform="translate(125, -30)">
+            <path d="M18 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm-7.1 2.58c-.18-.32-.42-.62-.72-.87-.79-.65-1.69-.94-2.58-.94H7c-.16 0-.32.02-.47.05-1.28.25-2.27 1.34-2.48 2.65-.25 1.55.33 3.03 1.44 3.99l.86.75 3.32-1.63c.47-1.11 1.15-2.26 1.79-3.25zm.1 2.37-3.9 1.92-1.19-1.04c-.38-.34-.73-.72-1.04-1.15-.31-.43-.57-.88-.78-1.34-1.44-.99-2.2-2.52-2.21-4.08-.01-1.04.28-2.07.86-2.94C4.34 6.7 5.14 6 6 6c.07 0 .14.01.21.01h.52c.69 0 1.34.25 1.84.7l.7.64c.24.21.57.28.87.21.96-.2 1.98-.31 3-.31h.5c.34 0 .67.04 1 .09 1.83.25 3.3 1.94 3.3 3.86 0 1.63-.78 3.09-2.01 3.98l-2.01 1.43zM18 14.5c-2.33 0-7 1.17-7 3.5V20h14v-2c0-2.33-4.67-3.5-7-3.5z"/>
+          </g>
+          <rect class="label-bg" x="75" y="40" width="100" height="25" />
+          <text class="label" x="125" y="58" text-anchor="middle">Salesperson</text>
+        </g>
+
+        <path id="pipe-time-fact" class="pipe" d="M 230 180 H 420 V 310" />
+        <path id="flow-time-fact" class="flow" d="M 230 180 H 420 V 310" />
+        <path id="pipe-place-fact" class="pipe" d="M 230 680 H 420 V 490" />
+        <path id="flow-place-fact" class="flow" d="M 230 680 H 420 V 490" />
+        
+        <path id="pipe-customer-fact" class="pipe" d="M 860 180 H 680 V 310" />
+        <path id="flow-customer-fact" class="flow" d="M 860 180 H 680 V 310" />
+        
+        <path id="pipe-product-fact" class="pipe" d="M 860 680 H 680 V 490" />
+        <path id="flow-product-fact" class="flow" d="M 860 680 H 680 V 490" />
+
+        <path id="pipe-salesperson-fact" class="pipe" d="M 550 100 V 300" />
+        <path id="flow-salesperson-fact" class="flow" d="M 550 100 V 300" />
+
+        <path id="pipe-fact-customer" class="pipe" d="M 680 450 H 1040 V 180" />
+        <path id="flow-fact-customer" class="flow reverse-anim" d="M 680 450 H 1040 V 180" />
+      </svg>
+    </section>
+  </div>
+
+  <section class="explanation-section">
+    <p>In a star schema, data typically flows from the descriptive dimension tables to the central fact table. This is represented by a **single-direction relationship** (one-way pipe). The Customer dimension has a special **bidirectional relationship** (two-way pipe) that allows filters to flow back to it from the fact table, which is useful for advanced analysis like filtering customers based on specific product purchases.</p>
+  </section>
+
+  <script>
+    const START_HEIGHT = {
+        'water-time': 88, 'water-place': 88, 'water-customer': 88, 'water-product': 88, 'water-salesperson': 88,
+        'water-fact': 188
+    };
+    const START_Y = {
+        'water-time': 6, 'water-place': 6, 'water-customer': 6, 'water-product': 6, 'water-salesperson': 6,
+        'water-fact': 6
+    };
+
+    const elements = {
+      activeRows: document.getElementById('activeRows'),
+      waterFact: document.getElementById('water-fact'),
+      
+      timeIn: document.getElementById('filter-time'), timeOut: document.getElementById('timeOut'), waterTime: document.getElementById('water-time'),
+      placeIn: document.getElementById('filter-place'), placeOut: document.getElementById('placeOut'), waterPlace: document.getElementById('water-place'),
+      customerIn: document.getElementById('filter-customer'), customerOut: document.getElementById('customerOut'), waterCustomer: document.getElementById('water-customer'),
+      productIn: document.getElementById('filter-product'), productOut: document.getElementById('productOut'), waterProduct: document.getElementById('water-product'),
+      salespersonIn: document.getElementById('filter-salesperson'), salespersonOut: document.getElementById('salespersonOut'), waterSalesperson: document.getElementById('water-salesperson'),
+
+      timeFlow: document.getElementById('flow-time-fact'),
+      placeFlow: document.getElementById('flow-place-fact'),
+      customerFlow: document.getElementById('flow-customer-fact'),
+      productFlow: document.getElementById('flow-product-fact'),
+      salespersonFlow: document.getElementById('flow-salesperson-fact'),
+      
+      customerBackFlow: document.getElementById('flow-fact-customer')
+    };
+
+    function setInitialRandomValues() {
+        const sliders = [
+            elements.timeIn,
+            elements.placeIn,
+            elements.customerIn,
+            elements.productIn,
+            elements.salespersonIn
+        ];
+        
+        sliders.forEach(slider => {
+            const randomValue = Math.floor(Math.random() * 51); // 0 to 50
+            slider.value = randomValue;
+        });
+    }
+    
+    function setWaterLevel(waterId, percentage) {
+      const el = document.getElementById(waterId);
+      const startHeight = START_HEIGHT[waterId];
+      const startY = START_Y[waterId];
+      const pctClamped = Math.max(0, Math.min(100, percentage));
+      const newHeight = (pctClamped / 100) * startHeight;
+      const newY = startY + (startHeight - newHeight);
+      
+      el.setAttribute('y', newY);
+      el.setAttribute('height', newHeight);
+    }
+    
+    function updateFlow() {
+      const filterPct = {
+        time: parseInt(elements.timeIn.value),
+        place: parseInt(elements.placeIn.value),
+        customer: parseInt(elements.customerIn.value),
+        product: parseInt(elements.productIn.value),
+        salesperson: parseInt(elements.salespersonIn.value),
+      };
+
+      const remainingPct = {
+        time: (100 - filterPct.time) / 100,
+        place: (100 - filterPct.place) / 100,
+        customer: (100 - filterPct.customer) / 100,
+        product: (100 - filterPct.product) / 100,
+        salesperson: (100 - filterPct.salesperson) / 100,
+      };
+
+      let finalPercentage = remainingPct.time * remainingPct.place * remainingPct.customer * remainingPct.product * remainingPct.salesperson;
+
+      elements.timeOut.textContent = `${filterPct.time}%`;
+      elements.placeOut.textContent = `${filterPct.place}%`;
+      elements.customerOut.textContent = `${filterPct.customer}%`;
+      elements.productOut.textContent = `${filterPct.product}%`;
+      elements.salespersonOut.textContent = `${filterPct.salesperson}%`;
+      
+      elements.timeFlow.classList.toggle('active-flow', filterPct.time > 0);
+      elements.placeFlow.classList.toggle('active-flow', filterPct.place > 0);
+      elements.productFlow.classList.toggle('active-flow', filterPct.product > 0);
+      elements.salespersonFlow.classList.toggle('active-flow', filterPct.salesperson > 0);
+      
+      const isAnyOtherFilterActive = (filterPct.time > 0 || filterPct.place > 0 || filterPct.product > 0 || filterPct.salesperson > 0);
+      elements.customerFlow.classList.toggle('active-flow', filterPct.customer > 0);
+      elements.customerBackFlow.classList.toggle('active-flow', isAnyOtherFilterActive);
+
+      setWaterLevel('water-time', remainingPct.time * 100);
+      setWaterLevel('water-place', remainingPct.place * 100);
+      setWaterLevel('water-product', remainingPct.product * 100);
+      setWaterLevel('water-salesperson', remainingPct.salesperson * 100);
+      
+      setWaterLevel('water-fact', finalPercentage * 100);
+      
+      if (filterPct.customer > 0 || isAnyOtherFilterActive) {
+          const allFiltersExceptCustomer = remainingPct.time * remainingPct.place * remainingPct.product * remainingPct.salesperson;
+          setWaterLevel('water-customer', allFiltersExceptCustomer * remainingPct.customer * 100);
+      } else {
+          setWaterLevel('water-customer', 100);
+      }
+
+      elements.activeRows.textContent = `${(finalPercentage * 100).toFixed(0)}%`;
+    }
+
+    elements.timeIn.addEventListener('input', updateFlow);
+    elements.placeIn.addEventListener('input', updateFlow);
+    elements.customerIn.addEventListener('input', updateFlow);
+    elements.productIn.addEventListener('input', updateFlow);
+    elements.salespersonIn.addEventListener('input', updateFlow);
+    
+    setInitialRandomValues();
+    updateFlow();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive DAX Filter Context Hierarchy – Water Plant Demo</title>
+  <style>
+    :root{ --bg:#0b1220; --panel:#0f172a; --ink:#d1e9ff; --accent:#60a5fa; --accent-2:#34d399; --warn:#f59e0b; --lock:#ef4444; --glass:#cbd5e1; --muted:#93a7c1; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 800px at 70% 20%, #1b2744 0%, #0b1220 60%, #050914 100%);color:var(--ink);font:16px/1.3 Inter,Segoe UI,system-ui,-apple-system,Roboto,Arial,sans-serif;overflow-x:hidden}
+    header{padding:18px 20px 10px;text-align:center;position:sticky;top:0;z-index:3;backdrop-filter:blur(6px);background:linear-gradient(180deg,rgba(11,18,32,.85),rgba(11,18,32,.35) 70%,rgba(11,18,32,0));border-bottom:1px solid rgba(255,255,255,.06)}
+    header h1{margin:.2rem 0 .4rem;font-size:clamp(20px,3vw,34px)} header p{margin:0;color:var(--muted)}
+    .wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+    @media(max-width:1024px){.wrap{grid-template-columns:1fr}}
+    
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .panel h2{margin:.2rem 0 10px;font-size:18px}.panel .grp{border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 12px;margin:10px 0}
+    .panel .row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px;padding:6px 0}
+    .panel input[type=range]{width:100%}.panel .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.1)}.muted{color:var(--muted)}
+    
+    .plant{position:relative;overflow:hidden;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));min-height:820px;padding:16px}
+    .legend{position:absolute;right:12px;top:12px;display:flex;gap:8px;flex-wrap:wrap}.legend .item{display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px 10px;background:rgba(0,0,0,.25)}.dot{width:12px;height:12px;border-radius:50%}
+    svg{width:100%;height:100%;display:block}
+    .tank{fill:url(#glassGrad);stroke:var(--glass);stroke-width:2;transition:opacity .2s ease, filter .2s ease}
+    .water{fill:url(#waterGrad);opacity:.95;transition:height .25s ease,y .25s ease}
+    .label{fill:var(--ink);font-weight:700;font-size:13px}.sublabel{fill:var(--muted);font-size:11px}
+    /* Pipes */
+    .pipe{fill:none;stroke:rgba(90,120,160,.55);stroke-width:14;stroke-linecap:round;stroke-linejoin:round;filter:url(#glow);transition:opacity .2s ease}
+    .flow{fill:none;stroke:#00ffff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;filter:url(#glow);stroke-dasharray:10 28;animation:flow 1.05s linear infinite;transition:opacity .2s ease}
+    .calcpipe{fill:none;stroke:#34d399;stroke-width:18;stroke-linecap:round;stroke-linejoin:round;filter:url(#glow)}
+    .calcflow{fill:none;stroke:#196345;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;filter:url(#glow);stroke-dasharray:12 26;animation:flow .9s linear infinite}
+    .pipe.warn{stroke:#fed7aa}.flow.warn{stroke:#fb923c}.lock{fill:var(--lock)}
+    .dim{opacity:.35;filter:grayscale(80%)}
+    @keyframes flow{to{stroke-dashoffset:-80}}
+    .tip{position:absolute;pointer-events:none;background:#0b1220;border:1px solid rgba(255,255,255,.12);padding:8px 10px;border-radius:10px;color:var(--ink);font-size:12px;min-width:220px;white-space:pre-line;opacity:0;transform:translate(-50%,-6px) scale(.96);transition:opacity .12s ease,transform .12s ease}
+    .tip.show{opacity:1;transform:translate(-50%,-10px) scale(1)}
+    .badge{position:absolute;bottom:10px;left:10px;color:var(--muted);font-size:12px}
+    .kpi{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:12px}.kpi strong{color:var(--ink)}
+    .btn{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(52,211,153,.12),rgba(52,211,153,.03));color:#d1fae5;padding:8px 12px;border-radius:12px;font-weight:700}
+    .btn.off{background:linear-gradient(180deg,rgba(96,165,250,.12),rgba(96,165,250,.03));color:#dbeafe;border-color:rgba(96,165,250,.25)}
+    .call{fill:rgba(0,0,0,.42);stroke:rgba(255,255,255,.18);stroke-width:1}
+    .call text{fill:#ffffff !important;font-weight:400 !important;font-size:12px;letter-spacing:.2px}
+    
+  
+    svg text[id^="val-"]{fill:#ffffff !important;font-weight:400 !important}
+  
+    /* Normalize vertical-only pipe widths to match others */
+    #f3to4, #f6to7 { stroke-width:10 !important; }
+    #pipe-3to4 .pipe, #pipe-6to7 .pipe { stroke-width:14 !important; }
+
+  
+#pipe-3to4 .pipe,
+#pipe-3to4 .flow,
+#pipe-6to7 .pipe,
+#pipe-6to7 .flow {
+    stroke-width: 10px;
+}
+
+
+#pipe-6to7-overlay .pipe, #pipe-3to4-overlay .pipe { stroke: rgba(180,210,255,.9); filter: url(#glow); }
+#pipe-6to7-overlay .flow, #pipe-3to4-overlay .flow { stroke:#7dd3fc; filter:url(#glow); stroke-dasharray:12 26; animation: flow 1.2s linear infinite; }
+
+
+/* --- Active/Inactive flow visual states --- */
+.pipe--alt { stroke: rgba(200,230,255,.9) !important; }
+.flow--alt { stroke: #000eeb !important; stroke-dasharray: 14 26 !important; }
+.flow--stopped { animation: none !important; stroke-dasharray: none !important; opacity: .18 !important; }
+.calcflow--stopped { animation: none !important; stroke-dasharray: none !important; opacity: .18 !important; }
+.group-dim .pipe { opacity: .3; }
+
+
+.water.wflow{ filter:url(#wave); }
+
+/* Styles for the new filter hierarchy table */
+.filter-hierarchy-section {
+    margin-top: 16px;
+    background: linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    max-width: 1400px; /* Use full width */
+    margin: 16px auto; /* Center it */
+}
+.filter-hierarchy-section h3 {
+    margin-top: 0;
+    font-size: 1.25rem;
+}
+.filter-hierarchy-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    table-layout: fixed; /* Force equal column widths */
+}
+.filter-hierarchy-table th, .filter-hierarchy-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    text-align: left;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden;     /* Hide overflowing text */
+    text-overflow: ellipsis; /* Show ellipsis for hidden text */
+}
+.filter-hierarchy-table th {
+    color: var(--accent);
+}
+.filter-hierarchy-table tr:last-child td {
+    border-bottom: none;
+}
+.filter-hierarchy-table .locked-row td {
+    color: var(--lock);
+    font-weight: 600;
+}
+.filter-hierarchy-table .override-row td {
+    color: var(--accent-2);
+    font-weight: 600;
+}
+</style>
+</head><body>
+  <header>
+    <h1>The Definitive DAX Filter Context – Water Plant</h1>
+    <p>Data flows from the <strong>Data Model</strong> through filters. <strong>Row-Level Security</strong> is a locked tap. <strong>CALCULATE()</strong> can rewrite filters (except RLS).</p>
+  </header>
+
+  <div class="wrap">
+    <div class="left-column">
+      <section class="panel" aria-label="Controls">
+        <h2>Controls</h2>
+        <div class="grp">
+          <div class="row"><label>Row Level Security (RLS)</label><span class="pill">🔒 Locked</span></div>
+          <div class="row"><span class="muted">RLS keeps only <span id="rlsPct">80</span>% of the model.</span><input id="rls" type="range" min="10" max="100" step="5" value="80"/></div>
+        </div>
+        <div class="grp">
+          <div class="row"><label>Report Level Filter</label><output id="repOut">90%</output></div>
+          <input id="rep" type="range" min="0" max="100" value="90" step="5"/>
+          <div class="row"><label>Page Level Filter</label><output id="pagOut">85%</output></div>
+          <input id="pag" type="range" min="0" max="100" value="85" step="5"/>
+          <div class="row"><label>Visual Level Filter</label><output id="visOut">70%</output></div>
+          <input id="vis" type="range" min="0" max="100" value="70" step="5"/>
+          <div class="row"><label>Slicer / Interactions</label><output id="sliOut">60%</output></div>
+          <input id="sli" type="range" min="0" max="100" value="60" step="5"/>
+          <div class="row"><label>Line-level filter</label><output id="linOut">95%</output></div>
+          <input id="lin" type="range" min="0" max="100" value="95" step="5"/>
+        </div>
+        <div class="grp">
+          <div class="row"><label>Use CALCULATE()</label><button id="calcBtn" class="btn off" aria-pressed="false">OFF</button></div>
+          <div class="row"><span class="muted">When ON: override report/page/visual/slicer/line with</span><span class="pill" title="New filter expression inside CALCULATE()">Filter Strength</span></div>
+          <div class="row"><label>CALCULATE filter</label><output id="calOut">88%</output></div>
+          <input id="cal" type="range" min="0" max="100" value="88" step="4"/>
+        </div>
+        <div class="grp"><div class="row"><label>Reset</label><button id="resetBtn" class="btn">Reset to defaults</button></div></div>
+        <p class="muted" style="margin-top:10px">Hover any tank/pipe for notes. Flow = model × RLS × active filters (or <em>CALCULATE</em> override).</p>
+      </section>
+    </div>
+    
+    <section class="plant" aria-label="Water plant diagram">
+      <div class="legend">
+        <div class="item"><span class="dot" style="background:#7dd3fc"></span>Active Flow</div>
+        <div class="item"><span class="dot" style="background:#fb923c"></span>Interactive Filters</div>
+        <div class="item"><span class="dot" style="background:#34d399"></span>CALCULATE()</div>
+        <div class="item"><span class="dot" style="background:#ef4444"></span>RLS Lock</div>
+      </div>
+
+      <svg viewBox="0 0 1100 840" role="img" aria-label="DAX filter water plant">
+        <defs>
+          <linearGradient id="glassGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="rgba(255,255,255,.08)"/><stop offset="100%" stop-color="rgba(255,255,255,.02)"/></linearGradient>
+          <linearGradient id="waterGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#c3ecff"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#7dd3fc" flood-opacity=".55"/></filter>
+        
+          <filter id="wave" x="-20%" y="-20%" width="140%" height="140%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="1" seed="2">
+              <animate attributeName="baseFrequency" values="0.012;0.02;0.012" dur="2.2s" repeatCount="indefinite"/>
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" scale="3.5"/>
+          </filter>
+
+        </defs>
+
+        <g id="g1" transform="translate(60,40)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-model" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">1) Data Model (Pool)</text><text class="sublabel" x="12" y="40">All data before any filter</text><g transform="translate(160,8)"><rect class="call" width="80" height="28" rx="8"/><text id="val-model" x="10" y="18">100%</text></g></g>
+        <g id="g2" transform="translate(420,40)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-rls" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">2) Row Level Security</text><text class="sublabel" x="12" y="40">Locked tap: can't be overridden</text><g transform="translate(160,98)"><rect class="call" width="80" height="28" rx="8"/><text id="val-rls" x="10" y="18">80%</text></g></g>
+        <g id="g3" transform="translate(780,40)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-rep" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">3) Report Filter</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-rep" x="10" y="18">90%</text></g></g>
+
+        <g id="g6" transform="translate(60,260)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-sli" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">6) Slicer / Interactions</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-sli" x="10" y="18">60%</text></g></g>
+        <g id="g5" transform="translate(420,260)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-vis" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">5) Visual Filter</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-vis" x="10" y="18">70%</text></g></g>
+        <g id="g4" transform="translate(780,260)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-pag" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">4) Page Filter</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-pag" x="10" y="18">85%</text></g></g>
+
+        <g id="g7" transform="translate(60,480)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-lin" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">7) Line-level Filter (visual)</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-lin" x="10" y="18">95%</text></g></g>
+        <g id="g8" transform="translate(420,480)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-cal" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">8) CALCULATE()</text><text class="sublabel" x="12" y="40">Rewrites filters (not RLS)</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-cal" x="10" y="18">—</text></g></g>
+        <g id="g9" transform="translate(780,460)"><rect class="tank" x="60" y="-20" width="80" height="220" rx="12"/><rect id="w-out" class="water" x="66" y="-14" width="68" height="208" rx="8"/><text class="label" x="-10" y="-10">9) Result: Evaluation Context</text></g>
+
+        <g id="pipes-row1">
+          <path class="pipe" d="M 292 176 H 360 V 48 H 428"/>
+          <path id="f12" class="flow" d="M 292 176 H 360 V 48 H 428"/>
+          <path class="pipe" d="M 652 176 H 720 V 48 H 788"/>
+          <path id="f23" class="flow" d="M 652 176 H 720 V 48 H 788"/>
+        </g>
+        <g id="pipe-3to4">
+          <path class="pipe" d="M 1012 176 H 1060 V 268 H 1012"/>
+          <path id="f3to4" class="flow" d="M 1012 176 H 1060 V 268 H 1012"/>
+        </g>
+        <g id="pipes-row2">
+          <path class="pipe" d="M 788 392 H 720 V 268 H 652"/>
+          <path id="f45" class="flow" d="M 788 392 H 720 V 268 H 652"/>
+          <path class="pipe" d="M 412 392 H 360 V 268 H 292"/>
+          <path id="f56" class="flow" d="M 412 392 H 360 V 268 H 292"/>
+        </g>
+        <g id="pipe-6to7">
+          <path class="pipe" d="M 68 392 H 20 V 488 H 68"/>
+          <path id="f6to7" class="flow" d="M 68 392 H 20 V 488 H 68"/>
+        </g>
+        <g id="pipes-row3">
+          <path class="pipe" d="M 292 612 H 360 V 488 H 428"/>
+          <path id="f78" class="flow" d="M 292 612 H 360 V 488 H 428"/>
+          <path class="pipe" d="M 652 612 H 750 V 448 H 848"/>
+          <path id="f89" class="flow" d="M 652 612 H 750 V 448 H 848"/>
+        </g>
+        <g id="pipe-2to8">
+          <path class="calcpipe" d="M 540 188 V 240 H 560 V 472"/>
+          <path id="f2to8" class="calcflow" d="M 540 188 V 240 H 560 V 472"/>
+        </g>
+
+        <g id="hit-areas" fill="transparent">
+          <rect id="hit-model" x="60" y="40" width="240" height="140"/>
+          <rect id="hit-rls" x="420" y="40" width="240" height="140"/>
+          <rect id="hit-rep" x="780" y="40" width="240" height="140"/>
+          <rect id="hit-pag" x="780" y="260" width="240" height="140"/>
+          <rect id="hit-vis" x="420" y="260" width="240" height="140"/>
+          <rect id="hit-sli" x="60" y="260" width="240" height="140"/>
+          <rect id="hit-lin" x="60" y="480" width="240" height="140"/>
+          <rect id="hit-cal" x="420" y="480" width="240" height="140"/>
+          <rect id="hit-out" x="840" y="460" width="100" height="220"/>
+        </g>
+      </svg>
+
+      <div id="tooltip" class="tip" role="status" aria-live="polite"></div>
+      <div class="badge">Made for DAX explorers 🧭</div>
+      <div class="kpi">Active rows: <strong id="rows">—</strong> (from 1,000,000)</div>
+    </section>
+  </div>
+  
+  <section class="filter-hierarchy-section">
+    <h3>DAX Filter Context Hierarchy</h3>
+    <p>This hierarchy demonstrates how filters are applied to your data model. Filters are applied sequentially, with each subsequent filter further reducing the active dataset.</p>
+    <table class="filter-hierarchy-table">
+      <thead>
+        <tr>
+          <th>Filter Type</th>
+          <th>Behavior</th>
+          <th>Override with `CALCULATE()`</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="locked-row">
+          <td>Row-Level Security</td>
+          <td>A security filter applied at the data source.</td>
+          <td>No, this filter is **locked** 🔒.</td>
+        </tr>
+        <tr>
+          <td>Report Level</td>
+          <td>Applies to all pages and visuals in the report.</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Page Level</td>
+          <td>Applies to all visuals on a single page.</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Visual Level</td>
+          <td>Applies to a single visual.</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Slicer/Interactions</td>
+          <td>Applied by user interaction with visuals or slicers.</td>
+          <td>Yes</td>
+        </tr>
+        <tr>
+          <td>Line-level filter</td>
+          <td>A filter defined on an individual DAX expression line.</td>
+          <td>Yes</td>
+        </tr>
+        <tr class="override-row">
+          <td>`CALCULATE()`</td>
+          <td>A powerful DAX function that can modify or remove filter contexts.</td>
+          <td>N/A, it is the override mechanism itself.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <script>
+    const START_ROWS = 1_000_000;
+    const els = { rls: rls, rlsPct: document.getElementById('rlsPct'), rep: rep, pag: pag, vis: vis, sli: sli, lin: lin, cal: cal,
+      repOut: repOut, pagOut: pagOut, visOut: visOut, sliOut: sliOut, linOut: linOut, calOut: calOut, calcBtn: calcBtn, resetBtn: resetBtn, rows: document.getElementById('rows') };
+
+    const meters = { model: w('model'), rls: w('rls'), rep: w('rep'), pag: w('pag'), vis: w('vis'), sli: w('sli'), lin: w('lin'), cal: w('cal'), out: w('out'),
+      valModel:t('val-model'), valRls:t('val-rls'), valRep:t('val-rep'), valPag:t('val-pag'), valVis:t('val-vis'), valSli:t('val-sli'), valLin:t('val-lin'), valCal:t('val-cal') };
+
+    const flows = ['f12','f23','f3to4','f45','f56','f6to7','f78','f89','f2to8'].map(id=>document.getElementById(id));
+    const waterIds = ['w-model','w-rls','w-rep','w-pag','w-vis','w-sli','w-lin','w-cal','w-out'];
+    const metrics = {}; waterIds.forEach(id=>{ const r=document.getElementById(id); const b=r.getBBox(); metrics[id]={y:b.y,h:b.height}; });
+
+    const tankGroups = { g3:document.getElementById('g3'), g4:document.getElementById('g4'), g5:document.getElementById('g5'), g6:document.getElementById('g6'), g7:document.getElementById('g7'), g8:document.getElementById('g8') };
+    const pipeGroups = {
+      row1: document.getElementById('pipes-row1'),
+      row2: document.getElementById('pipes-row2'),
+      row3: document.getElementById('pipes-row3'),
+      p3to4: document.getElementById('pipe-3to4'),
+      p6to7: document.getElementById('pipe-6to7'),
+      p2to8: document.getElementById('pipe-2to8')
+    };
+
+    function w(name){ return document.getElementById('w-'+name); }
+    function t(id){ return document.getElementById(id); }
+
+    function setFillY(rect,pct){ const m=metrics[rect.id]; const pctClamped=Math.max(0,Math.min(100,pct)); const newH=Math.max(6,m.h*(pctClamped/100)); const newY=m.y+(m.h-newH); rect.setAttribute('y',newY); rect.setAttribute('height',newH); }
+    function fmt(n){ return n.toLocaleString('en-IN'); }
+    function r0(n){ return Math.round(n); }
+
+    function updateFlowVisual(outPct, calcOn){
+  const width = 8 + (outPct/100)*10;
+  const dur   = Math.max(0.4, 1.8 - (outPct/100)*1.2);
+
+  const setGroup = (group, {active}) => {
+    if(!group) return;
+    group.classList.toggle('group-dim', !active);
+    group.querySelectorAll('.flow').forEach(f=>{
+     // f.style.strokeWidth = width+'px';
+      f.style.animationDuration = dur+'s';
+      f.classList.toggle('flow--stopped', !active);
+      f.classList.toggle('flow--alt', active);
+    });
+    group.querySelectorAll('.pipe').forEach(p=>{
+      p.classList.toggle('pipe--alt', active);
+    });
+  };
+
+  // helper to toggle a single segment using its flow id (grabs the adjacent pipe)
+  const setSeg = (flowId, active) => {
+    const f = document.getElementById(flowId);
+    if(!f) return;
+    f.style.strokeWidth = (8 + (outPct/100)*10) + 'px';
+    f.style.animationDuration = Math.max(0.4, 1.8 - (outPct/100)*1.2) + 's';
+    f.classList.toggle('flow--stopped', !active);
+    f.classList.toggle('flow--alt', active);
+    const prev = f.previousElementSibling;
+    if(prev && prev.classList.contains('pipe')){
+      prev.classList.toggle('pipe--alt', active);
+      prev.style.opacity = active ? 1 : 0.35;
+    }
+  };
+
+  // Row sets
+  setGroup(pipeGroups.row1,  {active:true});   // keep base 1->2 visible
+  setGroup(pipeGroups.row3,  {active:true});   // keep 8->9 active
+  setGroup(pipeGroups.p2to8, {active: calcOn});
+  setGroup(pipeGroups.p3to4, {active: !calcOn});
+  setGroup(pipeGroups.row2,  {active: !calcOn});
+  setGroup(pipeGroups.p6to7, {active: !calcOn});
+
+  // Explicitly handle 2->3 and 7->8 segments
+  setSeg('f23', !calcOn);  // when calc ON, 2->3 inactive
+  setSeg('f78', !calcOn);  // when calc ON, 7->8 inactive
+
+  // Pause/restore calculate green
+  const green = document.getElementById('f2to8');
+  if (green) green.classList.toggle('calcflow--stopped', !calcOn);
+}
+
+    function setGroupOpacity(group, o){ if(!group) return; group.querySelectorAll('.pipe,.flow,.calcpipe,.calcflow').forEach(el=>{ el.style.opacity=o; }); }
+    function setDim(el, dim){ if(!el) return; el.classList.toggle('dim', !!dim); }
+
+    function setWaterFlow(ids, on){ ids.forEach(id=>{ const el = w(id); if(el){ el.classList.toggle('wflow', !!on); }}); }
+
+    let useCalculate=false;
+
+    function compute(){
+      const p={ rls:+els.rls.value, rep:+els.rep.value, pag:+els.pag.value, vis:+els.vis.value, sli:+els.sli.value, lin:+els.lin.value, cal:+els.cal.value };
+      els.rlsPct.textContent=p.rls; els.repOut.value=p.rep+'%'; els.pagOut.value=p.pag+'%'; els.visOut.value=p.vis+'%'; els.sliOut.value=p.sli+'%'; els.linOut.value=p.lin+'%'; els.calOut.value=p.cal+'%';
+
+      const cum={};
+      cum.model = 100;
+      cum.rls   = cum.model * (p.rls/100) * 100/100;
+      cum.rep   = cum.rls   * (useCalculate? 1 : (p.rep/100)) * 100/100;
+      cum.pag   = cum.rep   * (useCalculate? 1 : (p.pag/100)) * 100/100;
+      cum.vis   = cum.pag   * (useCalculate? 1 : (p.vis/100)) * 100/100;
+      cum.sli   = cum.vis   * (useCalculate? 1 : (p.sli/100)) * 100/100;
+      cum.lin   = cum.sli   * (useCalculate? 1 : (p.lin/100)) * 100/100;
+
+      // Tank fills
+      setFillY(meters.model, cum.model);
+      setFillY(meters.rls, cum.rls);
+      setFillY(meters.rep,   useCalculate? 100 : cum.rep);
+      setFillY(meters.pag,   useCalculate? 100 : cum.pag);
+      setFillY(meters.vis,   useCalculate? 100 : cum.vis);
+      setFillY(meters.sli,   useCalculate? 100 : cum.sli);
+      setFillY(meters.lin,   useCalculate? 100 : cum.lin);
+      setFillY(meters.cal,   useCalculate ? ((p.rls/100)*(p.cal/100)*100) : 100);
+
+      // Labels raw (cum)
+      meters.valModel.textContent = '100%';
+      meters.valRls.textContent   = r0(p.rls) + '%';
+      meters.valRep.textContent   = useCalculate? (r0(p.rep)+'% (—)') : (r0(p.rep)+'% ('+ r0(cum.rep) +'%)');
+      meters.valPag.textContent   = useCalculate? (r0(p.pag)+'% (—)') : (r0(p.pag)+'% ('+ r0(cum.pag) +'%)');
+      meters.valVis.textContent   = useCalculate? (r0(p.vis)+'% (—)') : (r0(p.vis)+'% ('+ r0(cum.vis) +'%)');
+      meters.valSli.textContent   = useCalculate? (r0(p.sli)+'% (—)') : (r0(p.sli)+'% ('+ r0(cum.sli) +'%)');
+      meters.valLin.textContent   = useCalculate? (r0(p.lin)+'% (—)') : (r0(p.lin)+'% ('+ r0(cum.lin) +'%)');
+      const calCum = Math.round((p.rls/100)*(p.cal/100)*100);
+      meters.valCal.textContent = useCalculate ? (Math.round(p.cal)+'% ('+calCum+'%)') : '—';
+
+      // Dim tanks when CALCULATE is ON; else dim CALCULATE
+      setDim(tankGroups.g3, useCalculate); // report
+      setDim(tankGroups.g4, useCalculate); // page
+      setDim(tankGroups.g5, useCalculate); // visual
+      setDim(tankGroups.g6, useCalculate); // slicer
+      setDim(tankGroups.g7, useCalculate); // line-level
+      setDim(tankGroups.g8, !useCalculate); // calculate when OFF
+
+      // Rows & flow state
+// Rows & flow state
+
+
+      const afterRls = START_ROWS * (p.rls/100);
+      const finalRows = useCalculate ? afterRls * (p.cal/100) : afterRls * (p.rep/100)*(p.pag/100)*(p.vis/100)*(p.sli/100)*(p.lin/100);
+      const outPct = Math.max((finalRows/START_ROWS)*100,0);
+      setFillY(meters.out, Math.max(outPct,2));
+      updateFlowVisual(outPct, useCalculate);
+      els.rows.textContent = fmt(Math.round(finalRows));
+      
+      
+// Tooltips (multiline with \n)
+      const tipData = {
+        'hit-model': 'Data Model:\n100% of rows',
+        'hit-rls':   `RLS:\n100% × ${p.rls}% = ${r0(cum.rls)}%`,
+        'hit-rep':   useCalculate ? 'Report:\nIgnored by CALCULATE()' : `Report:\n100% × ${p.rls}% × ${p.rep}% = ${r0(cum.rep)}%`,
+        'hit-pag':   useCalculate ? 'Page:\nIgnored by CALCULATE()'   : `Page:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% = ${r0(cum.pag)}%`,
+        'hit-vis':   useCalculate ? 'Visual:\nIgnored by CALCULATE()' : `Visual:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% × ${p.vis}% = ${r0(cum.vis)}%`,
+        'hit-sli':   useCalculate ? 'Slicer:\nIgnored by CALCULATE()' : `Slicer:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% × ${p.vis}% \n× ${p.sli}% = ${r0(cum.sli)}%`,
+        'hit-lin':   useCalculate ? 'Line:\nIgnored by CALCULATE()'   : `Line:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% × ${p.vis}% \n× ${p.sli}% × ${p.lin}% = ${r0(cum.lin)}%`,
+        'hit-cal':   useCalculate ? `CALCULATE:\n${p.cal}% of post-RLS` : 'CALCULATE: OFF',
+        'hit-out':   `Evaluation Context:\nActive rows: ${els.rows.textContent}\n(${r0(outPct)}%)`
+      };
+      
+      Object.entries(tipData).forEach(([id,msg])=>{ const el=document.getElementById(id); if(el) el.setAttribute('data-tip', msg); });
+      
+
+      // Toggle gentle water ripple on active tanks
+      if (useCalculate){
+        setWaterFlow(['model','rls','cal','out'], true);
+        setWaterFlow(['rep','pag','vis','sli','lin'], false);
+      } else {
+        setWaterFlow(['model','rls','rep','pag','vis','sli','lin','out'], true);
+        setWaterFlow(['cal'], false);
+      }
+    }
+
+    ['rls','rep','pag','vis','sli','lin','cal'].forEach(id=>els[id].addEventListener('input',compute));
+    calcBtn.addEventListener('click',()=>{useCalculate=!useCalculate; calcBtn.classList.toggle('off',!useCalculate); calcBtn.textContent=useCalculate?'ON':'OFF'; calcBtn.setAttribute('aria-pressed',String(useCalculate)); compute();});
+    resetBtn.addEventListener('click',()=>{ Object.assign(els.rls,{value:80}); Object.assign(els.rep,{value:90}); Object.assign(els.pag,{value:85}); Object.assign(els.vis,{value:70}); Object.assign(els.sli,{value:60}); Object.assign(els.lin,{value:95}); Object.assign(els.cal,{value:88}); useCalculate=false; calcBtn.classList.add('off'); calcBtn.textContent='OFF'; compute(); });
+
+    // Tooltip: position relative to the diagram container
+    const tip=document.getElementById('tooltip'); const plant=document.querySelector('.plant'); const hit=document.getElementById('hit-areas');
+    function showTip(e, text){ const rect=plant.getBoundingClientRect(); tip.textContent=text; tip.style.left=(e.clientX-rect.left)+'px'; tip.style.top=(e.clientY-rect.top)+'px'; tip.classList.add('show'); }
+    function hideTip(){ tip.classList.remove('show'); }
+    hit.querySelectorAll('rect').forEach(el=>{ el.addEventListener('mousemove', e=>{ const t=el.getAttribute('data-tip')||''; showTip(e,t); }); el.addEventListener('mouseleave', hideTip); });
+
+    compute();
+  </script>
+</body>
+</html>
