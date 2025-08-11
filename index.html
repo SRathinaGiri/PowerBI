@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power BI Infographics</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #0f172a;
+      --ink: #d1e9ff;
+      --accent: #60a5fa;
+      --muted: #93a7c1;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    header {
+      text-align: center;
+      padding-bottom: 2rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    .infographic-list {
+      list-style-type: none;
+      padding: 0;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .infographic-item {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .infographic-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .infographic-item h3 {
+      font-size: 1.4rem;
+      margin-top: 0;
+      color: var(--accent);
+    }
+    .infographic-item a {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .infographic-item a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Power BI Infographics</h1>
+      <p>A collection of interactive, animated infographics designed to demystify complex Power BI concepts and make them easy to learn.</p>
+    </header>
+
+    <ul class="infographic-list">
+      <li class="infographic-item">
+        <h3>Star Schema Filter Flow</h3>
+        <p>This visual demonstrates how filters cascade from dimension tables to the central fact table, including bidirectional relationships.</p>
+        <a href="StarSchema.html">View Infographic &rarr;</a>
+      </li>
+      <li class="infographic-item">
+        <h3>DAX Filter Context Water Plant</h3>
+        <p>An interactive model that explains the DAX filter context hierarchy and how CALCULATE() can modify the flow of filters.</p>
+        <a href="dax4.html">View Infographic &rarr;</a>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>
