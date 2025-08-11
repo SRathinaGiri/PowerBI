@@ -34,6 +34,32 @@ cd PowerBI
 # Open an animation
 open StarSchema.html
 
+➡️ What's Next?
+
+This project is a living document, and there are many ways you can help it grow. Here are a few ideas for what to do next:
+
+    Create New Infographics: Develop new animations for other complex Power BI concepts. Some ideas include:
+
+        Data Lineage: Visualize the journey of data from its source to a final report.
+
+        DAX FILTER() vs. KEEPFILTERS(): An interactive demo explaining the subtle but important differences.
+
+        Many-to-Many Relationships: Show how bridge tables work to connect two dimension tables.
+
+    Improve Existing Infographics: Enhance the current animations with new features, better explanations, or more streamlined code.
+
+    Add New Concepts: Create a new folder for a different data analysis tool, such as Python or SQL, and build a set of infographics for that ecosystem.
+
+    Contribute to the Code:
+
+        Refine the CSS: Make the existing styles more modular and reusable.
+
+        Improve Accessibility: Add ARIA labels and keyboard navigation to make the infographics accessible to all users.
+
+        Optimize Performance: Minify the code or optimize the SVG assets to make the files load faster.
+
+Your contribution, no matter how big or small, will help make the world of data analytics more accessible to everyone.
+
 🤝 Contributions
 
 We welcome contributions! If you have an idea for a new infographic or want to improve an existing one, please feel free to open an issue or a pull request. This project is a community effort to make learning Power BI accessible to everyone.
