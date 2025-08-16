@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive OLAP Data Cube</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            background-color: #34495e;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        /* Navigation menu styling */
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background-color: #2c3e50;
+        }
+
+        .nav-menu button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-menu button:hover {
+            background-color: #2980b9;
+        }
+
+        .nav-menu button.active {
+            background-color: #e67e22;
+        }
+
+        /* Main content and page styling */
+        .content {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 1400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .page.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .page h2 {
+            font-size: 2rem;
+            color: #f1c40f;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .description p {
+            margin: 0;
+        }
+
+        .puzzle-box {
+            background-color: #e67e22;
+            padding: 15px 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+            text-align: center;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .puzzle-box h4 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Cube and control styling */
+        .cube-container {
+            width: 450px;
+            height: 450px;
+            perspective: 1500px;
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #olap-cube, #diced-cube-container, #sliced-cube-container, #drilling-cube, #rolling-cube, #rolled-up-cube {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease-in-out;
+            cursor: grab;
+            transform: rotateX(-30deg) rotateY(45deg);
+        }
+
+        .small-cube {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            transform-style: preserve-3d;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .small-cube .face {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8em;
+            color: white;
+            backface-visibility: hidden;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+        }
+
+        .small-cube .face:hover {
+            background-color: rgba(46, 204, 113, 1);
+            cursor: pointer;
+        }
+
+        .small-cube .front { transform: rotateY(0deg) translateZ(50px); }
+        .small-cube .back { transform: rotateY(180deg) translateZ(50px); }
+        .small-cube .right { transform: rotateY(90deg) translateZ(50px); }
+        .small-cube .left { transform: rotateY(-90deg) translateZ(50px); }
+        .small-cube .top { transform: rotateX(90deg) translateZ(50px); }
+        .small-cube .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        /* New color classes for dimensions */
+        .product-a-color { background-color: rgba(231, 76, 60, 0.7) !important; } /* Red */
+        .product-b-color { background-color: rgba(241, 196, 15, 0.7) !important; } /* Yellow */
+        .product-c-color { background-color: rgba(52, 152, 219, 0.7) !important; } /* Blue */
+
+        .year-2023-color { background-color: rgba(155, 89, 182, 0.7) !important; } /* Purple */
+        .year-2024-color { background-color: rgba(26, 188, 156, 0.7) !important; } /* Green */
+        .year-2025-color { background-color: rgba(230, 126, 34, 0.7) !important; } /* Orange */
+
+        .region-seattle-color { background-color: rgba(52, 152, 219, 0.70) !important; }  /* light blue */
+        .region-london-color  { background-color: rgba(189, 195, 199, 0.70) !important; } /* light gray */
+        .region-delhi-color   { background-color: rgba(155, 89, 182, 0.70) !important; }  /* violet */
+
+
+        .fact-color { background-color: rgba(52, 152, 219, 0.9); } /* A solid blue for facts */
+
+        .dimension-label {
+            font-weight: bold;
+            font-size: 0.9em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .cube-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .cube-controls button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .cube-controls button:hover {
+            background-color: #27ae60;
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(52, 73, 94, 0.95);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            white-space: pre;
+            line-height: 1.4;
+            pointer-events: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-align: left;
+            transform: translate(-50%, -100%);
+            opacity: 1;
+        }
+
+        /* New styles for the container holding the cube and table */
+        .visuals-container {
+            display: flex;
+            gap: 50px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        /* New styles for the table */
+        .table-container {
+            background-color: #34495e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            color: #f1c40f;
+        }
+
+        #pivot-table-btn {
+            background: #3498db;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        #pivot-table-btn:hover {
+            background: #2980b9;
+        }
+
+        #data-table, #sliced-data-table, #diced-data-table, #detailed-data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #data-table th, #data-table td, #sliced-data-table th, #sliced-data-table td, #diced-data-table th, #diced-data-table td, #detailed-data-table th, #detailed-data-table td {
+            border: 1px solid #4a6681;
+            padding: 10px;
+            text-align: center;
+        }
+
+        #data-table thead th, #sliced-data-table thead th, #diced-data-table thead th, #detailed-data-table thead th {
+            color: white;
+        }
+
+        #data-table tbody th, #sliced-data-table tbody th, #diced-data-table tbody th, #detailed-data-table tbody th {
+            color: white;
+        }
+
+        #data-table tbody td, #sliced-data-table tbody td, #diced-data-table tbody td, #detailed-data-table tbody td {
+            color: #ecf0f1;
+        }
+
+        .table-corner {
+            background-color: #2c3e50 !important;
+        }
+
+        .total-cell {
+            background-color: #27ae60 !important;
+            font-weight: bold;
+        }
+
+        .slicing-ui, .dicing-ui {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .slicing-controls, .dicing-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slicing-controls select {
+            padding: 8px;
+            border-radius: 5px;
+            background-color: #34495e;
+            color: #ecf0f1;
+            border: 1px solid #4a6681;
+        }
+
+        .slicing-controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .dicing-ui {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .dicing-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .dicing-controls label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .dicing-controls button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .dicing-controls button:hover {
+            background-color: #c0392b;
+        }
+
+
+
+        #detailed-table-container {
+            width: auto;
+            max-width: 600px;
+        }
+
+        #detailed-data-table thead th {
+            color: white;
+            vertical-align: top;
+            font-weight: normal;
+        }
+
+        #detailed-data-table tbody th {
+            color: white;
+            vertical-align: middle;
+        }
+
+        #detailed-data-table thead th.multi-level-header {
+            font-weight: bold;
+        }
+
+        .rollup-dimension-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rolling-visuals-container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+        }
+
+        #rolled-up-cube-container {
+            width: 350px;
+            height: 350px;
+        }
+
+        #rolled-up-cube {
+            width: 250px;
+            height: 250px;
+        }
+
+
+        /* === Tweaks for Drilling Down layout (side-by-side) === */
+        .drilling-visuals-container {
+            display: flex;
+            gap: 50px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: nowrap;
+        }
+
+        /* Ensure the drilled cube and table are also side-by-side (already using .visuals-container) */
+        #drilled-view-container.visuals-container {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        /* === Tweaks for Rolling Up to avoid overlap === */
+        .rolling-visuals-container {
+            display: flex;
+            justify-content: center;
+            gap: 80px;            /* more breathing room */
+            align-items: flex-start;
+            flex-wrap: nowrap;      /* wrap on smaller screens to prevent overlap */
+        }
+
+        #rolled-up-cube-container {
+            flex: 0 0 380px;   /* fixed slot for cube */
+            margin-left: 40px;/* push cube further right */
+            margin-top: 60px;  /* push cube further down */
+            z-index: 0;           /* keep below table/controls */
+        }
+
+        #detailed-table-container {
+            flex: 0 0 640px;   /* reserve width for table */
+            max-width: 640px;
+            z-index: 1;           /* keep table above any 3D faces */
+            position: relative;
+        }
+
+        /* Extra safety: prevent pointer interference from cube faces outside container */
+        #rolled-up-cube, #drilling-cube {
+            overflow: visible;
+            pointer-events: auto;
+        }
+
+        /* Responsive fallback: stack vertically on very narrow screens */
+        @media (max-width: 900px) {
+            .drilling-visuals-container,
+            #drilled-view-container.visuals-container,
+            .rolling-visuals-container {
+                flex-wrap: nowrap;
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 40px;
+            }
+            #rolled-up-cube-container {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+        .attribution {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+         }
+
+
+        .rolling-controls-container {
+            position: relative;
+            z-index: 2;        /* keep controls above cube */
+        }
+
+        .slicing-radios{
+          display:grid;
+          grid-template-columns:repeat(3, 220px); /* fixed width per column */
+          gap:16px 24px;
+          justify-content:center;
+          justify-items:start;                    /* <- align each column left */
+        }
+        .slice-col{ text-align:left; }
+        .slice-col h4{margin:0 0 8px;font-weight:600;color:#f1c40f}
+        .slice-col label{
+          display:flex; align-items:center; gap:8px;  /* tidy bullet+text */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Interactive OLAP Data Cube</h1>
+        <p class="attribution">Designed and Developed by S. Rathinagiri and Gemini</p>
+    </div>
+
+    <nav class="nav-menu">
+        <button data-page="pivoting" class="active">Pivoting</button>
+        <button data-page="slicing">Slicing</button>
+        <button data-page="dicing">Dicing</button>
+        <button data-page="drilling">Drilling Down</button>
+        <button data-page="rolling">Rolling Up</button>
+    </nav>
+
+    <main class="content">
+
+        <div id="pivoting" class="page active">
+            <h2>Pivoting (Rotating the Cube)</h2>
+            <div class="description">
+                <p><strong>Pivoting</strong> changes the perspective of the cube by dragging it with your mouse, allowing you to view different dimensions on the visible axes. 🔄</p>
+            </div>
+            <div class="visuals-container">
+                <div class="cube-container">
+                    <div id="olap-cube">
+                        </div>
+                </div>
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>Current View (2D Table)</h3>
+                        <button id="pivot-table-btn" onclick="pivotTable()">🔄</button>
+                    </div>
+                    <table id="data-table">
+                        <thead>
+                            <tr id="table-head-row">
+                                <th class="table-corner"></th>
+                                <th id="table-col-header-0"></th>
+                                <th id="table-col-header-1"></th>
+                                <th id="table-col-header-2"></th>
+                                <th class="total-cell">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="cube-controls">
+                <button onclick="rotateCube('x', 90)">Rotate X (Product)</button>
+                <button onclick="rotateCube('y', 90)">Rotate Y (Time)</button>
+                <button onclick="rotateCube('z', 90)">Rotate Z (Region)</button>
+                <button onclick="resetCube()">Reset</button>
+            </div>
+        </div>
+
+        <div id="slicing" class="page">
+            <h2>Slicing</h2>
+            <div class="description">
+                <p><strong>Slicing</strong> is the process of creating a new, smaller cube by selecting a single value from a dimension. 🔪</p>
+            </div>
+            <div class="slicing-ui">
+                <div class="slicing-controls">
+                    <div class="dimension-selector">
+<select id="slice-product" style="display:none">
+  <option value="null">Select…</option>
+  <option value="0">Product A</option><option value="1">Product B</option><option value="2">Product C</option>
+</select>
+<select id="slice-time" style="display:none">
+  <option value="null">Select…</option>
+  <option value="0">2023</option><option value="1">2024</option><option value="2">2025</option>
+</select>
+<select id="slice-region" style="display:none">
+  <option value="null">Select…</option>
+  <option value="0">Seattle</option><option value="1">London</option><option value="2">Delhi</option>
+</select>
+
+<div id="slicing-radios" class="slicing-radios">
+  <div class="slice-col">
+    <h4>Product</h4>
+    <label><input type="radio" name="slice-choice" data-dim="x" data-index="0"> A</label>
+    <label><input type="radio" name="slice-choice" data-dim="x" data-index="1"> B</label>
+    <label><input type="radio" name="slice-choice" data-dim="x" data-index="2"> C</label>
+  </div>
+  <div class="slice-col">
+    <h4>Time</h4>
+    <label><input type="radio" name="slice-choice" data-dim="y" data-index="0" checked> 2023</label>
+    <label><input type="radio" name="slice-choice" data-dim="y" data-index="1"> 2024</label>
+    <label><input type="radio" name="slice-choice" data-dim="y" data-index="2"> 2025</label>
+  </div>
+  <div class="slice-col">
+    <h4>Region</h4>
+    <label><input type="radio" name="slice-choice" data-dim="z" data-index="0"> Seattle</label>
+    <label><input type="radio" name="slice-choice" data-dim="z" data-index="1"> London</label>
+    <label><input type="radio" name="slice-choice" data-dim="z" data-index="2"> Delhi</label>
+  </div>
+</div>                    
+                    </div>
+                </div>
+            </div>
+            <div id="sliced-cube-visuals" class="visuals-container" style="display: none;">
+                <div id="sliced-cube-container" class="cube-container"></div>
+                <div id="sliced-table-container" class="table-container">
+                    <h3>Sliced View</h3>
+                    <table id="sliced-data-table">
+                        <thead>
+                            <tr id="sliced-table-head-row">
+                                <th class="table-corner"></th>
+                                <th></th><th></th><th></th>
+                                <th class="total-cell">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sliced-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="dicing" class="page">
+            <h2>Dicing</h2>
+            <div class="description">
+                <p><strong>Dicing</strong> is a subset of the full cube. Select a combination of dimensions to create your own sub-cube! 🎲</p>
+            </div>
+            <div class="dicing-ui">
+                <div class="dicing-controls-container">
+                    <div class="dicing-controls">
+                        <div class="dicing-dimension">
+                            <label>Product:</label>
+                            <label><input type="checkbox" name="dice-product" value="0" checked> Product A</label>
+                            <label><input type="checkbox" name="dice-product" value="1" checked> Product B</label>
+                            <label><input type="checkbox" name="dice-product" value="2"> Product C</label>
+                        </div>
+                        <div class="dicing-dimension">
+                            <label>Time:</label>
+                            <label><input type="checkbox" name="dice-time" value="0" checked> 2023</label>
+                            <label><input type="checkbox" name="dice-time" value="1" checked> 2024</label>
+                            <label><input type="checkbox" name="dice-time" value="2"> 2025</label>
+                        </div>
+                        <div class="dicing-dimension">
+                            <label>Region:</label>
+                            <label><input type="checkbox" name="dice-region" value="0" checked> Seattle</label>
+                            <label><input type="checkbox" name="dice-region" value="1" checked> London</label>
+                            <label><input type="checkbox" name="dice-region" value="2"> Delhi</label>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="diceCube()">Dice!</button>
+                <button onclick="resetDicing()">Reset</button>
+            </div>
+            <div id="diced-cube-visuals" class="visuals-container" style="display: none;">
+                <div id="diced-cube-container" class="cube-container">
+                    </div>
+                <div id="diced-table-container" class="table-container" style="display: none;">
+                    <h3>Diced View</h3>
+                    <table id="diced-data-table">
+                        <thead>
+                            <tr id="diced-table-head-row">
+                                <th class="table-corner"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="diced-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+      <div id="drilling" class="page">
+            <h2>Drilling Down</h2>
+            <div class="description">
+                <p><strong>Drilling Down</strong> allows you to navigate from a summary level to a more detailed level of data, such as moving from 'Year' to 'Quarter' to 'Month' in the Time dimension. ⬇️</p>
+            </div>
+            <div class="drilling-controls-container">
+                <div class="drilling-controls">
+                    <label>Drill on:</label>
+                    <label>
+                        <input type="radio" name="drill-dimension" value="time" checked> Time
+                    </label>
+                    <label>
+                        <input type="radio" name="drill-dimension" value="region"> Region
+                    </label>
+                </div>
+            </div>
+            <div class="drilling-visuals-container">
+                <div class="cube-container">
+                    <div id="drilling-cube"></div> 
+                </div>
+                <div id="drilled-view-container" class="visuals-container" style="display: none;">
+                    <div id="drilled-cube-container" class="cube-container"></div>
+                    <div class="table-container">
+                        <h3>Drilled View</h3>
+                        <table id="drilled-data-table">
+                            <thead>
+                                <tr id="drilled-table-head-row">
+                                    <th class="table-corner"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="drilled-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="cube-controls">
+                <button onclick="initializeDrilling()">Reset</button>
+            </div>
+        </div>
+        
+        <div id="rolling" class="page">
+            <h2>Rolling Up</h2>
+            <div class="description">
+                <p><strong>Rolling Up</strong> aggregates data from a lower level to a higher level. For example, rolling up from 'Quarter' to 'Year' or from 'Street' to 'Region'. ⬆️</p>
+            </div>
+            <div class="rolling-ui">
+                <div class="rolling-controls-container">
+                    <div class="rolling-controls">
+                        <div class="drill-toggle">
+                          <label><input type="radio" name="rollup-option" value="time" checked> Time</label>
+                          <label><input type="radio" name="rollup-option" value="region"> Region</label>
+                        </div>
+
+                        <div id="time-checkboxes">
+                          <label><input type="checkbox" name="rollup-time" value="0" checked> 2023</label>
+                          <label><input type="checkbox" name="rollup-time" value="1" checked> 2024</label>
+                          <label><input type="checkbox" name="rollup-time" value="2" checked> 2025</label>
+                        </div>
+
+                        <div id="region-checkboxes" style="display:none">
+                          <label><input type="checkbox" name="rollup-region" value="0" checked> Seattle</label>
+                          <label><input type="checkbox" name="rollup-region" value="1" checked> London</label>
+                          <label><input type="checkbox" name="rollup-region" value="2" checked> Delhi</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="rolling-visuals-container">
+                    <div id="detailed-table-container" class="table-container">
+                        <h3>Detailed View</h3>
+                        <table id="detailed-data-table">
+                            <thead id="detailed-table-head">
+                                <tr id="detailed-table-head-row"></tr>
+                            </thead>
+                            <tbody id="detailed-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div id="rolled-up-cube-container" class="cube-container">
+                        <div id="rolled-up-cube"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="cube-controls">
+                <button onclick="resetRolling()">Reset</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // main.js
+        const navButtons = document.querySelectorAll('.nav-menu button');
+        const pages = document.querySelectorAll('.page');
+        const cube = document.getElementById('olap-cube');
+        let tooltip = null;
+        let rotation = { x: -30, y: 45, z: 0 };
+        let isPivoted = false;
+
+        const dimensions = {
+            x: ['Product A', 'Product B', 'Product C'],
+            y: ['2023', '2024', '2025'],
+            z: ['Seattle', 'London', 'Delhi']
+        };
+
+        // Year -> Quarters (each is [region][product])
+        const hierarchicalData = {
+            '2023': {
+                'Q1': [[22, 24, 26],[44, 46, 48],[66, 68, 70]],
+                'Q2': [[27, 29, 32],[54, 56, 59],[81, 83, 86]],
+                'Q3': [[25, 27, 30],[50, 52, 55],[75, 77, 80]],
+                'Q4': [[26, 30, 32],[52, 56, 58],[78, 82, 84]]
+            },
+            '2024': {
+                'Q1': [[28, 30, 33],[50, 52, 55],[72, 74, 77]],
+                'Q2': [[35, 37, 40],[62, 64, 67],[89, 91, 94]],
+                'Q3': [[32, 35, 37],[57, 60, 62],[82, 85, 87]],
+                'Q4': [[35, 38, 40],[61, 64, 66],[87, 90, 92]]
+            },
+            '2025': {
+                'Q1': [[35, 37, 39],[57, 59, 61],[79, 81, 83]],
+                'Q2': [[43, 45, 48],[70, 72, 75],[97, 99, 102]],
+                'Q3': [[40, 42, 45],[65, 67, 70],[90, 92, 95]],
+                'Q4': [[42, 46, 48],[68, 72, 74],[94, 98, 100]]
+            }
+        };
+
+        const hierarchicalStreetData = {
+            'Seattle': {
+                '2023': {
+                    streets: ['Pine St', 'Market St', '1st Ave'],
+                    data: [[31, 34, 37], [37, 41, 45], [32, 35, 38]]
+                },
+                '2024': {
+                    streets: ['Pine St', 'Market St', '1st Ave'],
+                    data: [[40, 42, 46], [48, 51, 55], [42, 47, 49]]
+                },
+                '2025': {
+                    streets: ['Pine St', 'Market St', '1st Ave'],
+                    data: [[50, 50, 55], [57, 61, 64], [53, 59, 61]]
+                }
+            },
+            'London': {
+                '2023': {
+                    streets: ['Oxford St', 'Regent St', 'Fleet St'],
+                    data: [[62, 65, 68], [74, 78, 82], [64, 67, 70]]
+                },
+                '2024': {
+                    streets: ['Oxford St', 'Regent St', 'Fleet St'],
+                    data: [[71, 74, 77], [84, 88, 92], [75, 78, 81]]
+                },
+                '2025': {
+                    streets: ['Oxford St', 'Regent St', 'Fleet St'],
+                    data: [[79, 83, 86], [95, 99, 103], [86, 88, 91]]
+                }
+            },
+            'Delhi': {
+                '2023': {
+                    streets: ['Janpath', 'Connaught Pl', 'Chandni Ch'],
+                    data: [[92, 96, 99], [110, 114, 118], [98, 100, 103]]
+                },
+                '2024': {
+                    streets: ['Janpath', 'Connaught Pl', 'Chandni Ch'],
+                    data: [[101, 105, 108], [121, 125, 129], [108, 110, 113]]
+                },
+                '2025': {
+                    streets: ['Janpath', 'Connaught Pl', 'Chandni Ch'],
+                    data: [[110, 114, 117], [132, 136, 140], [118, 120, 123]]
+                }
+            }
+        };
+
+        const aggregatedData = {
+            'yearRollup': [
+                [
+                    [100, 110, 120],
+                    [200, 210, 220],
+                    [300, 310, 320]
+                ]
+            ],
+            'regionRollup': [
+                [
+                    [100, 110, 120],
+                    [130, 140, 150],
+                    [160, 170, 180]
+                ]
+            ]
+        };
+
+        const sampleData = [
+            [
+                [100, 110, 120],
+                [130, 140, 150],
+                [160, 170, 180]
+            ],
+            [
+                [200, 210, 220],
+                [230, 240, 250],
+                [260, 270, 280]
+            ],
+            [
+                [300, 310, 320],
+                [330, 340, 350],
+                [360, 370, 380]
+            ]
+        ];
+
+        const dimensionColors = {
+            x: ['product-a-color', 'product-b-color', 'product-c-color'],
+            y: ['year-2023-color', 'year-2024-color', 'year-2025-color'],
+            z: ['region-seattle-color', 'region-london-color', 'region-delhi-color'],
+            quarter: ['quarter-q1-color', 'quarter-q2-color', 'quarter-q3-color', 'quarter-q4-color'],
+            street: ['street-pine-color', 'street-market-color', 'street-1st-color', 'street-oxford-color', 'street-regent-color', 'street-fleet-color', 'street-janpath-color', 'street-connaught-color', 'street-chandni-color']
+        };
+
+        function showPage(pageId) {
+            pages.forEach(page => page.classList.remove('active'));
+            
+            const currentPage = document.getElementById(pageId);
+            if (currentPage) {
+                currentPage.classList.add('active');
+            }
+
+            if (pageId === 'pivoting') {
+                const mainCubeContainer = document.querySelector('#pivoting .cube-container');
+                if (mainCubeContainer) mainCubeContainer.style.display = 'flex';
+                const olapCube = document.getElementById('olap-cube');
+                if (olapCube) createCubeGrid(olapCube, dimensions.x, dimensions.y, dimensions.z, sampleData, 100);
+                updateTable('pivoting');
+            } else if (pageId === 'slicing') {
+                initializeSlicing();
+            } else if (pageId === 'dicing') {
+                initializeDicing();
+            } else if (pageId === 'drilling') {
+                const drillingCubeContainer = document.querySelector('#drilling .cube-container');
+                if (drillingCubeContainer) drillingCubeContainer.style.display = 'flex';
+                const drillingCube = document.getElementById('drilling-cube');
+                if (drillingCube) createCubeGrid(drillingCube, dimensions.x, dimensions.y, dimensions.z, sampleData, 100);
+                initializeDrilling();
+            } else if (pageId === 'rolling') {
+                initializeRolling();
+            }
+        }
+
+        function createCubeGrid(container, xLabels, yLabels, zLabels, data, cubeSize) {
+            if (!container) return;
+            container.innerHTML = '';
+            
+            for (let z = 0; z < zLabels.length; z++) {
+                for (let y = 0; y < yLabels.length; y++) {
+                    for (let x = 0; x < xLabels.length; x++) {
+                        const cube = document.createElement('div');
+                        cube.classList.add('small-cube');
+                        const translateX = (x - (xLabels.length - 1) / 2) * cubeSize;
+                        const translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
+                        const translateZ = (z - (zLabels.length - 1) / 2) * cubeSize;
+                        cube.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
+                        const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                        faces.forEach(faceName => {
+                            const face = document.createElement('div');
+                            face.classList.add('face', faceName);
+                            const content = data[z][y][x];
+                            face.textContent = content;
+                            
+                            const tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[y]}\nRegion: ${zLabels[z]}\nSales: ${content}`;
+                            face.dataset.tooltip = tooltipContent;
+                            face.addEventListener('mouseenter', showTooltip);
+                            face.addEventListener('mouseleave', hideTooltip);
+
+                            if (xLabels.length === 3 && yLabels.length === 3 && zLabels.length === 3) {
+                                 face.classList.add(getDimensionColorClass(xLabels[x]));
+                                 face.classList.add(getDimensionColorClass(yLabels[y]));
+                                 face.classList.add(getDimensionColorClass(zLabels[z]));
+                            } else {
+                                const fixedX = xLabels.length === 1 ? dimensions.x.indexOf(xLabels[0]) : -1;
+                                const fixedY = yLabels.length === 1 ? dimensions.y.indexOf(yLabels[0]) : -1;
+                                const fixedZ = zLabels.length === 1 ? dimensions.z.indexOf(zLabels[0]) : -1;
+                                if (fixedX !== -1) face.classList.add(dimensionColors.x[fixedX]);
+                                else if (fixedY !== -1) face.classList.add(dimensionColors.y[fixedY]);
+                                else if (fixedZ !== -1) face.classList.add(dimensionColors.z[fixedZ]);
+                                else face.classList.add('fact-color');
+                            }
+
+                            cube.appendChild(face);
+                        });
+                        container.appendChild(cube);
+                    }
+                }
+            }
+        }
+
+        function showTooltip(event) {
+            hideTooltip();
+            const face = event.target;
+            if (!face.dataset.tooltip) return;
+            tooltip = document.createElement('div');
+            tooltip.classList.add('tooltip');
+            tooltip.textContent = face.dataset.tooltip;
+            document.body.appendChild(tooltip);
+            const rect = face.getBoundingClientRect();
+            tooltip.style.left = `${rect.left + (rect.width / 2)}px`;
+            tooltip.style.top = `${rect.top - 10}px`;
+            tooltip.style.transform = `translate(-50%, -100%)`;
+        }
+
+        function hideTooltip() {
+            if (tooltip) { tooltip.remove(); tooltip = null; }
+        }
+
+        function getVisibleFace() {
+            const radX = (rotation.x % 360) * Math.PI / 180;
+            const radY = (rotation.y % 360) * Math.PI / 180;
+            const faces = {
+                'front': Math.cos(radY) * Math.cos(radX), 'back': -Math.cos(radY) * Math.cos(radX),
+                'left': Math.sin(radY) * Math.cos(radX), 'right': -Math.sin(radY) * Math.cos(radX),
+                'top': -Math.sin(radX), 'bottom': Math.sin(radX)
+            };
+            let maxVisibility = -1;
+            let visibleFace = 'front';
+            for (const face in faces) {
+                if (faces[face] > maxVisibility) { maxVisibility = faces[face]; visibleFace = face; }
+            }
+            return visibleFace;
+        }
+
+        function updateTable(page, dataParams = {}) {
+            let tableHeadRow, tableBody;
+
+            if (page === 'pivoting') {
+                tableHeadRow = document.getElementById('table-head-row');
+                tableBody = document.getElementById('table-body');
+            } else if (page === 'slicing') {
+                tableHeadRow = document.getElementById('sliced-table-head-row');
+                tableBody = document.getElementById('sliced-table-body');
+            } else if (page === 'dicing') {
+                tableHeadRow = document.getElementById('diced-table-head-row');
+                tableBody = document.getElementById('diced-table-body');
+            } else if (page === 'rolling') {
+                tableHeadRow = document.getElementById('detailed-table-head-row');
+                tableBody = document.getElementById('detailed-table-body');
+            } else {
+                return; // Page not found
+            }
+
+            if (!tableHeadRow || !tableBody) return;
+
+            let colLabels = dataParams.colLabels;
+            let rowLabels = dataParams.rowLabels;
+            let dataSlice = dataParams.dataSlice;
+            let fixedDimension = dataParams.fixedDimensionColorClass;
+            
+            // Pivoting page logic
+            if (page === 'pivoting') {
+                const visibleFace = getVisibleFace();
+                switch (visibleFace) {
+                    case 'front': colLabels = dimensions.x; rowLabels = dimensions.y; dataSlice = sampleData[2]; fixedDimension = dimensionColors.z[2]; break;
+                    case 'back': colLabels = dimensions.x; rowLabels = dimensions.y; dataSlice = sampleData[0]; fixedDimension = dimensionColors.z[0]; break;
+                    case 'right': colLabels = dimensions.z; rowLabels = dimensions.y; dataSlice = []; for (let y = 0; y < 3; y++) { dataSlice[y] = []; for (let z = 0; z < 3; z++) { dataSlice[y][z] = sampleData[z][y][2]; } } fixedDimension = dimensionColors.x[2]; break;
+                    case 'left': colLabels = dimensions.z; rowLabels = dimensions.y; dataSlice = []; for (let y = 0; y < 3; y++) { dataSlice[y] = []; for (let z = 0; z < 3; z++) { dataSlice[y][z] = sampleData[z][y][0]; } } fixedDimension = dimensionColors.x[0]; break;
+                    case 'top': colLabels = dimensions.x; rowLabels = dimensions.z; dataSlice = []; for (let z = 0; z < 3; z++) { dataSlice[z] = []; for (let x = 0; x < 3; x++) { dataSlice[z][x] = sampleData[z][0][x]; } } fixedDimension = dimensionColors.y[0]; break;
+                    case 'bottom': colLabels = dimensions.x; rowLabels = dimensions.z; dataSlice = []; for (let z = 0; z < 3; z++) { dataSlice[z] = []; for (let x = 0; x < 3; x++) { dataSlice[z][x] = sampleData[z][2][x]; } } fixedDimension = dimensionColors.y[2]; break;
+                }
+            }
+
+
+            let finalColLabels = isPivoted ? rowLabels : colLabels;
+            let finalRowLabels = isPivoted ? colLabels : rowLabels;
+            let finalDataSlice = isPivoted ? transpose(dataSlice) : dataSlice;
+            tableHeadRow.innerHTML = `<th class="table-corner"></th>`;
+            finalColLabels.forEach((label) => {
+                const th = document.createElement('th');
+                th.textContent = label;
+                th.classList.add(getDimensionColorClass(label));
+                tableHeadRow.appendChild(th);
+            });
+            const rowTotalHeader = document.createElement('th');
+            rowTotalHeader.textContent = 'Total';
+            rowTotalHeader.classList.add('total-cell');
+            tableHeadRow.appendChild(rowTotalHeader);
+            let grandTotal = 0;
+            let colTotals = Array(finalColLabels.length).fill(0);
+            tableBody.innerHTML = '';
+            for (let r = 0; r < finalRowLabels.length; r++) {
+                const row = document.createElement('tr');
+                const rowHeader = document.createElement('th');
+                rowHeader.textContent = finalRowLabels[r];
+                rowHeader.classList.add(getDimensionColorClass(rowHeader.textContent));
+                row.appendChild(rowHeader);
+                let rowTotal = 0;
+                for (let c = 0; c < finalColLabels.length; c++) {
+                    const cell = document.createElement('td');
+                    const dataValue = finalDataSlice[r][c];
+                    cell.textContent = dataValue;
+                    cell.classList.add(fixedDimension);
+                    row.appendChild(cell);
+                    rowTotal += dataValue;
+                    colTotals[c] += dataValue;
+                }
+                const totalCell = document.createElement('td');
+                totalCell.textContent = rowTotal;
+                totalCell.classList.add('total-cell');
+                row.appendChild(totalCell);
+                grandTotal += rowTotal;
+                tableBody.appendChild(row);
+            }
+            const totalRow = document.createElement('tr');
+            const totalRowHeader = document.createElement('th');
+            totalRowHeader.textContent = 'Total';
+            totalRow.appendChild(totalRowHeader);
+            for (let i = 0; i < colTotals.length; i++) {
+                const totalCell = document.createElement('td');
+                totalCell.textContent = colTotals[i];
+                totalCell.classList.add('total-cell');
+                totalRow.appendChild(totalCell);
+            }
+            const grandTotalCell = document.createElement('td');
+            grandTotalCell.textContent = grandTotal;
+            grandTotalCell.classList.add('total-cell');
+            totalRow.appendChild(grandTotalCell);
+            tableBody.appendChild(totalRow);
+        }
+
+        function getDimensionColorClass(label) {
+            const xIndex = dimensions.x.indexOf(label); if (xIndex !== -1) return dimensionColors.x[xIndex];
+            const yIndex = dimensions.y.indexOf(label); if (yIndex !== -1) return dimensionColors.y[yIndex];
+            const zIndex = dimensions.z.indexOf(label); if (zIndex !== -1) return dimensionColors.z[zIndex];
+            const quarterIndex = ['Q1', 'Q2', 'Q3', 'Q4'].indexOf(label); if (quarterIndex !== -1) return dimensionColors.quarter[quarterIndex];
+            const streetIndex = ['Pine St', 'Market St', '1st Ave', 'Oxford St', 'Regent St', 'Fleet St', 'Janpath', 'Connaught Pl', 'Chandni Ch'].indexOf(label); if (streetIndex !== -1) return dimensionColors.street[streetIndex];
+            return '';
+        }
+        function transpose(matrix) {
+            if (!matrix || matrix.length === 0) return [];
+            return matrix[0].map((col, i) => matrix.map(row => row[i]));
+        }
+
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                showPage(button.dataset.page);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('pivoting');
+        });
+
+        // pivoting.js
+        function rotateCube(axis, angle) {
+            if (axis === 'x') { rotation.x += angle; }
+            else if (axis === 'y') { rotation.y += angle; }
+            else if (axis === 'z') { rotation.z += angle; }
+            cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`;
+            isPivoted = false;
+            updateTable('pivoting');
+        }
+
+        function resetCube() {
+            rotation = { x: -30, y: 45, z: 0 };
+            cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`;
+            isPivoted = false;
+            updateTable('pivoting');
+        }
+
+        function pivotTable() {
+            isPivoted = !isPivoted;
+            updateTable('pivoting');
+        }
+
+        let isDragging = false;
+        let prevX = 0; let prevY = 0;
+        if(cube) {
+            cube.addEventListener('mousedown', (e) => {
+                isDragging = true; cube.style.cursor = 'grabbing'; prevX = e.clientX; prevY = e.clientY; cube.style.transition = 'none';
+            });
+            cube.addEventListener('mouseup', () => {
+                isDragging = false; cube.style.cursor = 'grab'; cube.style.transition = 'transform 0.5s ease-in-out'; isPivoted = false; updateTable('pivoting');
+            });
+            cube.addEventListener('mouseleave', () => {
+                isDragging = false; cube.style.cursor = 'grab'; cube.style.transition = 'transform 0.5s ease-in-out';
+            });
+            cube.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - prevX; const deltaY = e.clientY - prevY;
+                rotation.y += deltaX * 0.5; rotation.x -= deltaY * 0.5;
+                cube.style.transform = `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) rotateZ(${rotation.z}deg)`;
+                prevX = e.clientX; prevY = e.clientY;
+            });
+        }
+
+        // slicing.js
+        function setupSlicingControls() {
+            const productSelect = document.getElementById('slice-product');
+            const timeSelect = document.getElementById('slice-time');
+            const regionSelect = document.getElementById('slice-region');
+
+            productSelect.addEventListener('change', sliceCube);
+            timeSelect.addEventListener('change', sliceCube);
+            regionSelect.addEventListener('change', sliceCube);
+        }
+
+        function setupSlicingRadios() {
+          const prod = document.getElementById('slice-product');
+          const time = document.getElementById('slice-time');
+          const region = document.getElementById('slice-region');
+
+          document.querySelectorAll('#slicing-radios input[name="slice-choice"]')
+            .forEach(r => r.addEventListener('change', () => {
+              // reset all selects to 'null', then set the chosen one
+              prod.value = 'null'; time.value = 'null'; region.value = 'null';
+              const dim = r.dataset.dim, idx = r.dataset.index;
+              if (dim === 'x') prod.value = idx;
+              else if (dim === 'y') time.value = idx;
+              else region.value = idx;
+              sliceCube(); // reuse your existing logic
+            }));
+        }
+
+        function initializeSlicing() {
+            document.getElementById('slice-product').value = 'null';
+            document.getElementById('slice-time').value = 'null';
+            document.getElementById('slice-region').value = 'null';
+            document.getElementById('sliced-cube-visuals').style.display = 'none';
+          setupSlicingControls();
+          setupSlicingRadios();
+          // pick a default radio (e.g., Time: 2023) and fire change
+          const def = document.querySelector('#slicing-radios input[data-dim="y"][data-index="0"]');
+          if (def) {
+            def.checked = true;
+            def.dispatchEvent(new Event('change', { bubbles: true }));
+          } else {
+            sliceCube(); // fallback
+          }  
+        }
+
+        function resetSlicing() {
+            initializeSlicing();
+        }
+
+        function sliceCube() {
+            const selectedProduct = document.getElementById('slice-product').value;
+            const selectedTime = document.getElementById('slice-time').value;
+            const selectedRegion = document.getElementById('slice-region').value;
+
+            const selectedSlice = {};
+            if (selectedProduct !== 'null') selectedSlice.x = parseInt(selectedProduct);
+            if (selectedTime !== 'null') selectedSlice.y = parseInt(selectedTime);
+            if (selectedRegion !== 'null') selectedSlice.z = parseInt(selectedRegion);
+            
+            let selectedCount = Object.keys(selectedSlice).length;
+            if (selectedCount !== 1) {
+                document.getElementById('sliced-cube-visuals').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('sliced-cube-visuals').style.display = 'flex';
+
+            let colLabels, rowLabels, dataSlice, fixedDimensionColorClass;
+            let xCubeLabels, yCubeLabels, zCubeLabels, dataForCube;
+
+            if (selectedSlice.x !== undefined) {
+                colLabels = dimensions.z;
+                rowLabels = dimensions.y;
+                fixedDimensionColorClass = dimensionColors.x[selectedSlice.x];
+                dataSlice = [];
+                for(let r = 0; r < 3; r++) {
+                    dataSlice[r] = [];
+                    for (let c = 0; c < 3; c++) {
+                        dataSlice[r][c] = sampleData[c][r][selectedSlice.x];
+                    }
+                }
+                xCubeLabels = [dimensions.x[selectedSlice.x]];
+                yCubeLabels = dimensions.y;
+                zCubeLabels = dimensions.z;
+                dataForCube = [];
+                for (let z = 0; z < zCubeLabels.length; z++) {
+                    dataForCube[z] = [];
+                    for (let y = 0; y < yCubeLabels.length; y++) {
+                        dataForCube[z][y] = [sampleData[z][y][selectedSlice.x]];
+                    }
+                }
+            } else if (selectedSlice.y !== undefined) {
+                colLabels = dimensions.x;
+                rowLabels = dimensions.z;
+                fixedDimensionColorClass = dimensionColors.y[selectedSlice.y];
+                dataSlice = [];
+                for(let r = 0; r < 3; r++) {
+                    dataSlice[r] = [];
+                    for (let c = 0; c < 3; c++) {
+                        dataSlice[r][c] = sampleData[r][selectedSlice.y][c];
+                    }
+                }
+                xCubeLabels = dimensions.x;
+                yCubeLabels = [dimensions.y[selectedSlice.y]];
+                zCubeLabels = dimensions.z;
+                dataForCube = [];
+                for (let z = 0; z < zCubeLabels.length; z++) {
+                    dataForCube[z] = [sampleData[z][selectedSlice.y]];
+                }
+            } else if (selectedSlice.z !== undefined) {
+                colLabels = dimensions.x;
+                rowLabels = dimensions.y;
+                fixedDimensionColorClass = dimensionColors.z[selectedSlice.z];
+                dataSlice = sampleData[selectedSlice.z];
+                xCubeLabels = dimensions.x;
+                yCubeLabels = dimensions.y;
+                zCubeLabels = [dimensions.z[selectedSlice.z]];
+                dataForCube = [sampleData[selectedSlice.z]];
+            }
+            
+            const dataParams = {
+                colLabels: colLabels,
+                rowLabels: rowLabels,
+                dataSlice: dataSlice,
+                fixedDimensionColorClass: fixedDimensionColorClass
+            };
+            updateTable('slicing', dataParams);
+            createSlicedCube(xCubeLabels, yCubeLabels, zCubeLabels, dataForCube);
+        }
+
+        function createSlicedCube(xLabels, yLabels, zLabels, data) {
+            const slicedCubeContainer = document.getElementById('sliced-cube-container');
+            if (!slicedCubeContainer) return;
+            slicedCubeContainer.innerHTML = '';
+            const cubeSize = 100;
+            
+            for (let z = 0; z < zLabels.length; z++) {
+                for (let y = 0; y < yLabels.length; y++) {
+                    for (let x = 0; x < xLabels.length; x++) {
+                        const cube = document.createElement('div');
+                        cube.classList.add('small-cube');
+                        
+                        const translateX = (x - (xLabels.length - 1) / 2) * cubeSize;
+                        const translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
+                        const translateZ = (z - (zLabels.length - 1) / 2) * cubeSize;
+                        
+                        cube.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
+                        
+                        const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                        faces.forEach(faceName => {
+                            const face = document.createElement('div');
+                            face.classList.add('face', faceName);
+                            const content = data[z][y][x];
+                            face.textContent = content;
+
+                            const tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[y]}\nRegion: ${zLabels[z]}\nSales: ${content}`;
+                            face.dataset.tooltip = tooltipContent;
+
+                            face.addEventListener('mouseenter', showTooltip);
+                            face.addEventListener('mouseleave', hideTooltip);
+                            
+                            const fixedX = xLabels.length === 1 ? dimensions.x.indexOf(xLabels[0]) : -1;
+                            const fixedY = yLabels.length === 1 ? dimensions.y.indexOf(yLabels[0]) : -1;
+                            const fixedZ = zLabels.length === 1 ? dimensions.z.indexOf(zLabels[0]) : -1;
+
+                            if (fixedX !== -1) face.classList.add(dimensionColors.x[fixedX]);
+                            else if (fixedY !== -1) face.classList.add(dimensionColors.y[fixedY]);
+                            else if (fixedZ !== -1) face.classList.add(dimensionColors.z[fixedZ]);
+                            else face.classList.add('fact-color');
+                            
+                            cube.appendChild(face);
+                        });
+                        slicedCubeContainer.appendChild(cube);
+                    }
+                }
+            }
+        }
+
+        // dicing.js
+        function initializeDicing() {
+            const dicedCubeVisuals = document.getElementById('diced-cube-visuals');
+            dicedCubeVisuals.style.display = 'flex';
+            document.getElementById('diced-cube-container').style.display = 'block';
+            document.getElementById('diced-table-container').style.display = 'block';
+
+            // Set a default diced cube (2x2x2)
+            const checkboxes = document.querySelectorAll('.dicing-controls input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (parseInt(cb.value) < 2) {
+                    cb.checked = true;
+                } else {
+                    cb.checked = false;
+                }
+            });
+
+            diceCube();
+        }
+
+        function resetDicing() {
+            const checkboxes = document.querySelectorAll('.dicing-controls input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (parseInt(cb.value) < 2) {
+                    cb.checked = true;
+                } else {
+                    cb.checked = false;
+                }
+            });
+            diceCube();
+        }
+
+        function diceCube() {
+            const selectedX = Array.from(document.querySelectorAll('input[name="dice-product"]:checked')).map(cb => parseInt(cb.value));
+            const selectedY = Array.from(document.querySelectorAll('input[name="dice-time"]:checked')).map(cb => parseInt(cb.value));
+            const selectedZ = Array.from(document.querySelectorAll('input[name="dice-region"]:checked')).map(cb => parseInt(cb.value));
+            
+            if (selectedX.length === 0 || selectedY.length === 0 || selectedZ.length === 0) {
+                alert("Please select at least one value for each dimension.");
+                document.getElementById('diced-cube-container').innerHTML = '';
+                document.getElementById('diced-table-container').style.display = 'none';
+                return;
+            }
+            
+            const dicedData = [];
+            const dicedXLabels = selectedX.map(index => dimensions.x[index]);
+            const dicedYLabels = selectedY.map(index => dimensions.y[index]);
+            const dicedZLabels = selectedZ.map(index => dimensions.z[index]);
+
+            for (let z of selectedZ) {
+                const zSlice = [];
+                for (let y of selectedY) {
+                    const ySlice = [];
+                    for (let x of selectedX) {
+                        ySlice.push(sampleData[z][y][x]);
+                    }
+                    zSlice.push(ySlice);
+                }
+                dicedData.push(zSlice);
+            }
+            
+            createDicedCube(dicedXLabels, dicedYLabels, dicedZLabels, dicedData);
+
+            const dataParams = {
+                colLabels: dicedXLabels,
+                rowLabels: dicedYLabels,
+                dataSlice: dicedData[dicedData.length - 1], // Show the last Z-slice
+                fixedDimensionColorClass: dimensionColors.z[selectedZ[selectedZ.length - 1]]
+            };
+            updateTable('dicing', dataParams);
+        }
+
+        function createDicedCube(xLabels, yLabels, zLabels, dicedData) {
+            const dicedCubeContainer = document.getElementById('diced-cube-container');
+            dicedCubeContainer.style.display = 'flex';
+            dicedCubeContainer.innerHTML = '';
+            const cubeSize = 100;
+            
+            for (let z = 0; z < zLabels.length; z++) {
+                for (let y = 0; y < yLabels.length; y++) {
+                    for (let x = 0; x < xLabels.length; x++) {
+                        const cube = document.createElement('div');
+                        cube.classList.add('small-cube');
+                        
+                        const translateX = (x - (xLabels.length - 1) / 2) * cubeSize;
+                        const translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
+                        const translateZ = (z - (zLabels.length - 1) / 2) * cubeSize;
+                        
+                        cube.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
+                        
+                        const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                        faces.forEach(faceName => {
+                            const face = document.createElement('div');
+                            face.classList.add('face', faceName);
+                            const content = dicedData[z][y][x];
+                            face.textContent = content;
+
+                            const tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[y]}\nRegion: ${zLabels[z]}\nSales: ${content}`;
+                            face.dataset.tooltip = tooltipContent;
+
+                            face.addEventListener('mouseenter', showTooltip);
+                            face.addEventListener('mouseleave', hideTooltip);
+                            
+                            const fixedX = xLabels.length === 1 ? dimensions.x.indexOf(xLabels[0]) : -1;
+                            const fixedY = yLabels.length === 1 ? dimensions.y.indexOf(yLabels[0]) : -1;
+                            const fixedZ = zLabels.length === 1 ? dimensions.z.indexOf(zLabels[0]) : -1;
+
+                            if (fixedX !== -1) face.classList.add(dimensionColors.x[fixedX]);
+                            else if (fixedY !== -1) face.classList.add(dimensionColors.y[fixedY]);
+                            else if (fixedZ !== -1) face.classList.add(dimensionColors.z[fixedZ]);
+                            else face.classList.add('fact-color');
+                            
+                            cube.appendChild(face);
+                        });
+                        dicedCubeContainer.appendChild(cube);
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = document.querySelectorAll('.dicing-controls input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', diceCube);
+            });
+
+            const resetButton = document.querySelector('#dicing button[onclick="resetDicing()"]');
+            resetButton.addEventListener('click', () => {
+                initializeDicing();
+            });
+        });
+
+        // drilling.js
+        const drilledCubeContainer = document.getElementById('drilled-cube-container');
+        const mainCubeInDrillingPage = document.getElementById('drilling-cube');
+        let drillLevel = 'summary';
+        let selectedDrillDimension = 'time'; // Default value
+
+        function setupDrillingControls() {
+            const radioButtons = document.querySelectorAll('input[name="drill-dimension"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    selectedDrillDimension = e.target.value;
+                });
+            });
+        }
+
+        function initializeDrilling() {
+            drillLevel = 'summary';
+            const mainCubeContainer = document.querySelector('#drilling .cube-container');
+            if (mainCubeContainer) {
+                mainCubeContainer.style.display = 'flex';
+            }
+            const drilledView = document.getElementById('drilled-view-container');
+            if (drilledView) {
+                drilledView.style.display = 'none';
+            }
+            
+            const defaultRadio = document.querySelector('input[name="drill-dimension"][value="time"]');
+            if(defaultRadio) defaultRadio.checked = true;
+            selectedDrillDimension = 'time';
+
+            document.querySelector('#drilling h2').textContent = "Drilling Down";
+            document.querySelector('#drilling .description p').innerHTML = "<strong>Drilling Down</strong> allows you to navigate from a summary level to a more detailed level of data, such as moving from 'Year' to 'Quarter' to 'Month' in the Time dimension. ⬇️";
+
+            const mainCubeFaces = document.querySelectorAll('#drilling-cube .small-cube .face');
+            mainCubeFaces.forEach(face => {
+                face.removeEventListener('click', handleDrillDown); 
+                face.addEventListener('click', handleDrillDown);
+            });
+            
+            setupDrillingControls();
+        }
+
+        function handleDrillDown(event) {
+            const face = event.target;
+            const tooltipContent = face.dataset.tooltip;
+            const parts = tooltipContent.split('\n');
+            
+            const product = parts[0].split(': ')[1];
+            const year = parts[1].split(': ')[1];
+            const region = parts[2].split(': ')[1];
+            const sales = parts[3].split(': ')[1];
+
+            let drilledDimensions = {};
+            let dataForCube = [];
+            let dataForTable = [];
+            let drilledOnDimension = selectedDrillDimension;
+            let drilledTotalSales = 0;
+
+            if (drilledOnDimension === 'time' && year !== 'null' && year !== 'undefined' && hierarchicalData[year]) {
+                drilledDimensions = {
+                    x: [product],
+                    y: Object.keys(hierarchicalData[year]),
+                    z: [region]
+                };
+                const productIndex = dimensions.x.indexOf(product);
+                const regionIndex = dimensions.z.indexOf(region);
+
+                dataForCube = Object.values(hierarchicalData[year]).map(quarterData => {
+                    return [[quarterData[regionIndex][productIndex]]];
+                });
+                
+                dataForTable = Object.values(hierarchicalData[year]).map(quarterData => {
+                    return [quarterData[regionIndex][productIndex]];
+                });
+
+                drilledTotalSales = dataForTable.reduce((total, row) => total + row[0], 0);
+
+            } else if (drilledOnDimension === 'region' && region !== 'null' && region !== 'undefined' && hierarchicalStreetData[region] && hierarchicalStreetData[region][year]) {
+                drilledDimensions = {
+                    x: [product],
+                    y: [year],
+                    z: hierarchicalStreetData[region][year].streets
+                };
+                const productIndex = dimensions.x.indexOf(product);
+                const streetData = hierarchicalStreetData[region][year].data;
+
+                dataForCube = streetData.map(streetArray => [[streetArray[productIndex]]]);
+                dataForTable = streetData.map(streetArray => [streetArray[productIndex]]);
+                
+                drilledTotalSales = dataForTable.reduce((total, row) => total + row[0], 0);
+
+            } else {
+                alert("Please click on a valid dimension for your selected drill-down option.");
+                return;
+            }
+            
+            const drilledView = document.getElementById('drilled-view-container');
+            if (drilledView) {
+                drilledView.style.display = 'flex';
+            }
+
+            const drilledViewHeader = document.querySelector('#drilled-table-container h3');
+            if (drilledViewHeader) {
+                drilledViewHeader.innerHTML = `Drilled View: <strong>${product}</strong> in <strong>${region}</strong> for <strong>${year}</strong> <br> (Total Sales: ${drilledTotalSales})`;
+            }
+
+            createDrilledCube(drilledDimensions, dataForCube, drilledOnDimension);
+            updateDrilledTable(drilledDimensions, dataForTable);
+        }
+
+        function createDrilledCube(drilledDimensions, data, drilledOnDimension) {
+            drilledCubeContainer.innerHTML = '';
+            const cubeSize = 100;
+
+            const xLabels = drilledDimensions.x;
+            const yLabels = drilledDimensions.y;
+            const zLabels = drilledDimensions.z;
+
+            for (let z = 0; z < zLabels.length; z++) {
+                for (let y = 0; y < yLabels.length; y++) {
+                    for (let x = 0; x < xLabels.length; x++) {
+                        const cube = document.createElement('div');
+                        cube.classList.add('small-cube');
+                        
+                        let translateX, translateY, translateZ;
+                        
+                        if (drilledOnDimension === 'time') {
+                            translateX = (x - (xLabels.length - 1) / 2) * cubeSize;
+                            translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
+                            translateZ = (z - (zLabels.length - 1) / 2) * cubeSize;
+                        } else if (drilledOnDimension === 'region') {
+                            translateX = (z - (zLabels.length - 1) / 2) * cubeSize;
+                            translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
+                            translateZ = (x - (xLabels.length - 1) / 2) * cubeSize;
+                        }
+
+                        cube.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
+
+                        const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
+                        faces.forEach(faceName => {
+                            const face = document.createElement('div');
+                            face.classList.add('face', faceName);
+
+                            let content;
+                            let tooltipContent;
+                            
+                            if (drilledOnDimension === 'time') {
+                                content = data[y][0][x];
+                                tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[y]}\nRegion: ${zLabels[0]}\nSales: ${content}`;
+                                face.classList.add(getDimensionColorClass(yLabels[y]));
+                                face.classList.add(getDimensionColorClass(zLabels[0]));
+                            } else if (drilledOnDimension === 'region') {
+                                content = data[z][0][x];
+                                tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[0]}\nRegion: ${zLabels[z]}\nSales: ${content}`;
+                                face.classList.add(getDimensionColorClass(yLabels[0]));
+                                face.classList.add(getDimensionColorClass(zLabels[z]));
+                            }
+                            
+                            face.textContent = content;
+                            face.dataset.tooltip = tooltipContent;
+
+                            face.addEventListener('mouseenter', showTooltip);
+                            face.addEventListener('mouseleave', hideTooltip);
+
+                            face.classList.add(getDimensionColorClass(xLabels[x]));
+                            cube.appendChild(face);
+                        });
+                        drilledCubeContainer.appendChild(cube);
+                    }
+                }
+            }
+        }
+
+        function updateDrilledTable(drilledDimensions, data) {
+            const tableHeadRow = document.getElementById('drilled-table-head-row');
+            const tableBody = document.getElementById('drilled-table-body');
+
+            if (!tableHeadRow || !tableBody) return;
+
+            const colLabels = drilledDimensions.x;
+            const rowLabels = drilledDimensions.y.length > 1 ? drilledDimensions.y : drilledDimensions.z;
+            const dataSlice = data;
+
+            tableHeadRow.innerHTML = `<th class="table-corner"></th>`;
+            colLabels.forEach((label) => {
+                const th = document.createElement('th');
+                th.textContent = label;
+                th.classList.add(getDimensionColorClass(label));
+                tableHeadRow.appendChild(th);
+            });
+
+            const rowTotalHeader = document.createElement('th');
+            rowTotalHeader.textContent = 'Total';
+            rowTotalHeader.classList.add('total-cell');
+            tableHeadRow.appendChild(rowTotalHeader);
+
+            let grandTotal = 0;
+            let colTotals = Array(colLabels.length).fill(0);
+            tableBody.innerHTML = '';
+
+            for (let r = 0; r < rowLabels.length; r++) {
+                const row = document.createElement('tr');
+                const rowHeader = document.createElement('th');
+                rowHeader.textContent = rowLabels[r];
+                rowHeader.classList.add(getDimensionColorClass(rowHeader.textContent));
+                row.appendChild(rowHeader);
+
+                let rowTotal = 0;
+                for (let c = 0; c < colLabels.length; c++) {
+                    const cell = document.createElement('td');
+                    const dataValue = dataSlice[r][c];
+                    cell.textContent = dataValue;
+                    cell.classList.add('fact-color');
+                    row.appendChild(cell);
+                    rowTotal += dataValue;
+                    colTotals[c] += dataValue;
+                }
+
+                const totalCell = document.createElement('td');
+                totalCell.textContent = rowTotal;
+                totalCell.classList.add('total-cell');
+                row.appendChild(totalCell);
+                grandTotal += rowTotal;
+                tableBody.appendChild(row);
+            }
+
+            const totalRow = document.createElement('tr');
+            const totalRowHeader = document.createElement('th');
+            totalRowHeader.textContent = 'Total';
+            totalRow.appendChild(totalRowHeader);
+
+            for (let i = 0; i < colTotals.length; i++) {
+                const totalCell = document.createElement('td');
+                totalCell.textContent = colTotals[i];
+                totalCell.classList.add('total-cell');
+                totalRow.appendChild(totalCell);
+            }
+
+            const grandTotalCell = document.createElement('td');
+            grandTotalCell.textContent = grandTotal;
+            grandTotalCell.classList.add('total-cell');
+            totalRow.appendChild(grandTotalCell);
+            tableBody.appendChild(totalRow);
+        }
+
+        // rolling.js
+        let selectedRollupOption = 'time';
+
+        function setupRollingControls() {
+            const rollupOptions = document.querySelectorAll('input[name="rollup-option"]');
+            const timeCheckboxes = document.querySelectorAll('input[name="rollup-time"]');
+            const regionCheckboxes = document.querySelectorAll('input[name="rollup-region"]');
+            
+            rollupOptions.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    selectedRollupOption = radio.value;
+                    if (selectedRollupOption === 'time') {
+                        document.getElementById('time-checkboxes').style.display = 'flex';
+                        document.getElementById('region-checkboxes').style.display = 'none';
+                    } else {
+                        document.getElementById('time-checkboxes').style.display = 'none';
+                        document.getElementById('region-checkboxes').style.display = 'flex';
+                    }
+                    handleRollupSelection();
+                });
+            });
+
+            timeCheckboxes.forEach(cb => cb.addEventListener('change', handleRollupSelection));
+            regionCheckboxes.forEach(cb => cb.addEventListener('change', handleRollupSelection));
+        }
+
+        function initializeRolling() {
+            const rolledUpCubeContainer = document.getElementById('rolled-up-cube');
+            if (rolledUpCubeContainer) {
+                const aggregatedData = getAggregatedData();
+                createCubeGrid(rolledUpCubeContainer, dimensions.x, dimensions.y, dimensions.z, aggregatedData, 100);
+            }
+            
+            setupRollingControls();
+            handleRollupSelection();
+        }
+
+        function resetRolling() {
+            document.querySelector('input[name="rollup-option"][value="time"]').checked = true;
+            document.getElementById('time-checkboxes').style.display = 'flex';
+            document.getElementById('region-checkboxes').style.display = 'none';
+
+            const allCheckboxes = document.querySelectorAll('#rolling input[type="checkbox"]');
+            allCheckboxes.forEach(cb => {
+                cb.checked = true;
+            });
+            
+            handleRollupSelection();
+        }
+
+        function handleRollupSelection() {
+            const detailedTableBody = document.getElementById('detailed-table-body');
+            const detailedTableHead = document.getElementById('detailed-table-head');
+            if (!detailedTableBody || !detailedTableHead) return;
+
+            detailedTableBody.innerHTML = '';
+            detailedTableHead.innerHTML = '';
+            
+            let selectedYears = Array.from(document.querySelectorAll('input[name="rollup-time"]:checked')).map(cb => dimensions.y[parseInt(cb.value)]);
+            let selectedRegions = Array.from(document.querySelectorAll('input[name="rollup-region"]:checked')).map(cb => dimensions.z[parseInt(cb.value)]);
+
+            if (selectedYears.length === 0 || selectedRegions.length === 0) {
+                const rolledUpCubeContainer = document.getElementById('rolled-up-cube');
+                rolledUpCubeContainer.innerHTML = '';
+                return;
+            }
+
+            const aggregatedData = getAggregatedData(selectedYears, selectedRegions);
+            const rolledUpCubeContainer = document.getElementById('rolled-up-cube');
+            if (rolledUpCubeContainer) {
+                createCubeGrid(rolledUpCubeContainer, dimensions.x, selectedYears, selectedRegions, aggregatedData, 100);
+            }
+
+            const headerRow = document.createElement('tr');
+
+            if (selectedRollupOption === 'time') {
+                headerRow.innerHTML = `
+                    <th>Year</th>
+                    <th>Quarter</th>
+                    <th>Region</th>
+                    <th>Product</th>
+                    <th>Sales</th>
+                `;
+            } else { // region
+                headerRow.innerHTML = `
+                    <th>Year</th>
+                    <th>Region</th>
+                    <th>Street</th>
+                    <th>Product</th>
+                    <th>Sales</th>
+                `;
+            }
+            detailedTableHead.appendChild(headerRow);
+            
+            if (selectedRollupOption === 'time') {
+                selectedYears.forEach(year => {
+                    selectedRegions.forEach(region => {
+                        const yearData = hierarchicalData[year];
+                        const quarters = Object.keys(yearData);
+                        const regionIndex = dimensions.z.indexOf(region);
+                        
+                        quarters.forEach(quarter => {
+                            const quarterData = yearData[quarter][regionIndex];
+                            dimensions.x.forEach((product, productIndex) => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${year}</td>
+                                    <td>${quarter}</td>
+                                    <td>${region}</td>
+                                    <td>${product}</td>
+                                    <td>${quarterData[productIndex]}</td>
+                                `;
+                                detailedTableBody.appendChild(row);
+                            });
+                        });
+                    });
+                });
+            } else { // region
+                selectedRegions.forEach(region => {
+                    selectedYears.forEach(year => {
+                        const yearData = hierarchicalStreetData[region];
+                        if (yearData && yearData[year]) {
+                            const streets = yearData[year].streets;
+                            const streetSalesData = yearData[year].data;
+                            
+                            streets.forEach((street, streetIndex) => {
+                                const salesArray = streetSalesData[streetIndex];
+                                dimensions.x.forEach((product, productIndex) => {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${year}</td>
+                                        <td>${region}</td>
+                                        <td>${street}</td>
+                                        <td>${product}</td>
+                                        <td>${salesArray[productIndex]}</td>
+                                    `;
+                                    detailedTableBody.appendChild(row);
+                                });
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        function getAggregatedData(years = dimensions.y, regions = dimensions.z) {
+            const aggregatedCube = [];
+            const productCount = dimensions.x.length;
+            
+            regions.forEach((region, zIndex) => {
+                const regionSlice = [];
+                years.forEach((year, yIndex) => {
+                    const yearSlice = [];
+                    for (let x = 0; x < productCount; x++) {
+                        yearSlice.push(sampleData[zIndex][yIndex][x]);
+                    }
+                    regionSlice.push(yearSlice);
+                });
+                aggregatedCube.push(regionSlice);
+            });
+            
+            return aggregatedCube;
+        }
+    </script>
+</body>
+</html>
