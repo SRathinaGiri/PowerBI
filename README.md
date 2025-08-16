@@ -12,11 +12,19 @@ Our goal is to provide a go-to resource for developers, data analysts, and anyon
 
 Each animation is a self-contained HTML file that you can open directly in your web browser.
 
-1. The Star Schema Filter Flow
+**1. OLTP Vs. OLAP**
+
+An interactive infographic that visually demonstrates OLTP vs OLAP: at a Glance and why Columnstore databases are used in analytics.
+   
+**2. OLAP - Data Cube Operations**
+
+An interactive infographic that visually demonstrates OLAP data cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations linked with tabular data.
+
+**3. The Star Schema Filter Flow**
 
 An interactive visual that demonstrates how filters cascade from dimension tables to the central fact table in a star schema. It highlights the standard unidirectional relationships and the special bidirectional relationship used for the customer dimension.
 
-2. The DAX Filter Context Water Plant
+**4. The DAX Filter Context Water Plant**
 
 This infographic visualizes the DAX filter context hierarchy as a water filtration plant. It shows how filters from different levels (Report, Page, Visual, etc.) are applied sequentially and how the powerful CALCULATE() function can override these filters, with the exception of Row-Level Security (RLS).
 
