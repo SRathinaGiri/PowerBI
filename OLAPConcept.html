@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLTP vs OLAP: An Interactive Infographic</title>
+    <style>
+        /* --- GLOBAL STYLES --- */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #212529; /* Dark background */
+            margin: 0;
+        }
+
+        /* Global text color fix for dark background */
+        h1, h2, h3, h4, h5, h6, p {
+            color: #f8f9fa;
+        }
+        
+        .full-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 120px 20px; /* Increased top padding for header */
+            box-sizing: border-box;
+        }
+        
+        header.main-header {
+            width: 100%;
+            background-color: #1a1d20;
+            color: #ccc;
+            text-align: center;
+            padding: 5px 0;
+            font-size: 0.9em;
+            position: fixed;
+            top: 0; /* Position at the very top */
+            z-index: 1001; /* Higher than nav */
+        }
+        
+        header.main-header h1 { font-size: 1.5em; margin: 10px 0 0; }
+        header.main-header p { margin: 0 0 10px; }
+
+        nav.main-nav {
+            position: fixed;
+            top: 68px; /* Position below main header */
+            width: 100%;
+            background-color: #343a40;
+            padding: 10px 0;
+            text-align: center;
+            z-index: 1000;
+        }
+        .main-nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* --- PAGE 1: COMPARISON --- */
+        #page-1 .main-wrapper { width: 100%; max-width: 1200px; }
+        #page-1 .container { display: flex; gap: 40px; width: 100%; }
+        #page-1 .panel { background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 25px; flex: 1; border-top: 5px solid; }
+        #page-1 .panel.oltp { border-top-color: #28a745; }
+        #page-1 .panel.olap { border-top-color: #007bff; }
+        #page-1 .panel h2, #page-1 .panel h3 { color: #333; }
+        #page-1 ul { list-style: none; padding: 0; color: #333; }
+        #page-1 ul li { font-size: 1.1em; padding: 10px 0; border-bottom: 1px solid #eee; opacity: 0; transform: translateY(20px); }
+        #page-1 ul li.visible { opacity: 1; transform: translateY(0); transition: all 0.5s ease-out; }
+        #page-1 .notes-section { display: flex; gap: 20px; margin-top: 30px; }
+        #page-1 .note { flex: 1; background-color: #fff; padding: 20px; border-radius: 8px; border-left: 5px solid #6c757d; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        #page-1 .note p { font-size: 0.95em; line-height: 1.5; color: #212529; }
+        #page-1 .note h3 { color: #333; }
+
+
+        /* --- PAGE 2: STORAGE --- */
+        #page-2 .container { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 90%; max-width: 900px; text-align: center; }
+        #page-2 .container h1, #page-2 .container h3, #page-2 .container p { color: #333; }
+        #page-2 .controls { margin: 20px 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        #page-2 button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; background-color: #007bff; color: white; }
+        #page-2 #p2-runColOnRowBtn, #page-2 #p2-runColOnColBtn { background-color: #fd7e14; }
+        #page-2 #p2-reset { background-color: #6c757d; }
+        #page-2 .table-grid { display: grid; gap: 5px; margin-top: 20px; color: #333; }
+        #page-2 .cell { padding: 15px; background-color: #e9ecef; border-radius: 5px; transition: all 0.3s ease-in-out; }
+        #page-2 .header { color: white; font-weight: bold; }
+        #page-2 .highlight-table { background-color: #28a745; color: white; }
+        #page-2 #p2-info-box { margin: 25px 0; font-size: 1.2em; min-height: 30px; }
+        #page-2 .storage-section { display: flex; gap: 20px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        #page-2 .storage-layout { flex: 1; }
+        #page-2 .storage-vis { display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; border-radius: 5px; min-height: 60px; }
+        #page-2 .storage-block { width: 25px; height: 25px; border-radius: 3px; color: white; font-size: 0.7em; display: flex; justify-content: center; align-items: center; transition: all 0.3s; opacity: 0.6; }
+        #page-2 .highlight-storage { transform: scale(1.2); opacity: 1; }
+
+        /* --- PAGE 3: SCHEMAS --- */
+        #page-3 .container { display: flex; gap: 40px; width: 100%; max-width: 1200px; }
+        #page-3 .schema-container { background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 20px; flex: 1; text-align: center; }
+        #page-3 .schema-container h2 { color: #333; }
+        #page-3 .diagram { position: relative; height: 400px; margin-top: 20px; }
+        #page-3 .entity, #page-3 .fact-table, #page-3 .dim-table { position: absolute; display: flex; flex-direction: column; padding: 10px; border-radius: 8px; opacity: 0; transform: scale(0.5); transition: all 0.5s ease-out; color: #333; }
+        #page-3 .entity { background-color: #e9f7ef; border: 2px solid #28a745; }
+        #page-3 .fact-table { background-color: #e7f1ff; border: 2px solid #007bff; }
+        #page-3 .dim-table { background-color: #fff8e1; border: 2px solid #ffc107; }
+        #page-3 #p3-er-customer { top: 30px; left: 200px; }
+        #page-3 #p3-er-orders { top: 250px; left: 200px; }
+        #page-3 #p3-star-fact { top: 150px; left: 320px; }
+        #page-3 #p3-star-dim-cust { top: 20px; left: 325px; }
+        #page-3 #p3-star-dim-prod { top: 165px; left: 50px; }
+        #page-3 #p3-star-dim-date { top: 290px; left: 325px; }
+        #page-3 .connector-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        #page-3 line { stroke: #343a40; stroke-width: 3; stroke-dasharray: 300; stroke-dashoffset: 300; transition: stroke-dashoffset 0.8s ease-in-out, opacity 0.5s; opacity: 0; }
+        #page-3 .visible { opacity: 1 !important; transform: scale(1) !important; }
+        #page-3 line.visible { stroke-dashoffset: 0 !important; opacity: 1; }
+
+        /* --- PAGE 4: CUBE --- */
+        #page-4 .container {
+            width: 90%;
+            max-width: 900px;
+            position: relative;
+            text-align: center;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #page-4 .container h1, #page-4 .container h3 { color: #333; }
+        #page-4 .reports-container { display: flex; justify-content: space-around; width: 100%; position: relative; opacity: 1; transition: opacity 1s ease-in-out; }
+        #page-4 .chart { background-color: #fff; padding: 20px; border-radius: 8px; width: 28%; }
+        #page-4 .bar-chart { display: flex; justify-content: space-around; align-items: flex-end; height: 150px; border-left: 2px solid #ccc; border-bottom: 2px solid #ccc; }
+        #page-4 .bar { width: 25%; position: relative; }
+        #page-4 .bar .label { position: absolute; width: 100%; top: 10px; left: 50%; transform: translateX(-50%); font-size: 0.9em; font-weight: bold; color: white; }
+        #page-4 .hl-1 { background-color: #fd7e14; height: 90%; }
+        #page-4 .hl-2 { background-color: #28a745; height: 75%; }
+        #page-4 .hl-3 { background-color: #6f42c1; height: 60%; }
+        #page-4 .scene { width: 100%; height: 350px; perspective: 1500px; position: absolute; top: 80px; left: 0; opacity: 0; transition: opacity 1s ease-in-out; }
+        #page-4 .cube-space { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transform: scale(1.2); }
+        #page-4 .cube-space.is-spinning { animation: p4-spin 10s linear infinite; }
+        @keyframes p4-spin { from { transform: scale(1.2) rotateX(-20deg) rotateY(-30deg); } to { transform: scale(1.2) rotateX(340deg) rotateY(330deg); } }
+        #page-4 .cube { width: 50px; height: 50px; position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; opacity: 0; transition: all 1.5s ease-in-out; }
+        #page-4 .cube.is-visible { opacity: 1; }
+        #page-4 #p4-cube1 { transform: translateX(-100px) translateY(-50px) translateZ(80px); }
+        #page-4 #p4-cube2 { transform: translateX(50px) translateY(80px) translateZ(-50px); }
+        #page-4 #p4-cube3 { transform: translateX(90px) translateY(-80px) translateZ(20px); }
+        #page-4 .face { position: absolute; width: 50px; height: 50px; color: white; font-size: 14px; display: flex; justify-content: center; align-items: center; }
+        #page-4 #p4-cube1 .face { background-color: rgba(253, 126, 20, 0.8); border: 1px solid #c85e08; }
+        #page-4 #p4-cube2 .face { background-color: rgba(40, 167, 69, 0.8); border: 1px solid #19692c; }
+        #page-4 #p4-cube3 .face { background-color: rgba(111, 66, 193, 0.8); border: 1px solid #4d2d8a; }
+        #page-4 .face.front { transform: rotateY(0deg) translateZ(25px); }
+        #page-4 .face.back { transform: rotateY(180deg) translateZ(25px); }
+        #page-4 .face.right { transform: rotateY(90deg) translateZ(25px); }
+        #page-4 .face.left { transform: rotateY(-90deg) translateZ(25px); }
+        #page-4 .face.top { transform: rotateX(90deg) translateZ(25px); }
+        #page-4 .face.bottom { transform: rotateX(-90deg) translateZ(25px); }
+        #page-4 .axis { position: absolute; color: #333; font-weight: bold; opacity: 0; transition: opacity 1s ease-in-out; }
+        #page-4 .axis.x-axis { top: 300px; left: 50%; transform: translateX(-150px); }
+        #page-4 .axis.y-axis { top: 200px; left: 50%; transform: translateX(-150px) rotate(-90deg) translateY(-100px); transform-origin: top left; }
+        #page-4 .axis.z-axis { top: 200px; left: 50%; transform: translateX(100px) rotateY(90deg) translateY(100px); }
+        #page-4 #p4-info-box { position: relative; margin-top: 360px; font-size: 1.2em; color: #555; }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>OLTP vs OLAP</h1>
+        <p>Developed by S. Rathinagiri with Gemini</p>
+    </header>
+
+    <nav class="main-nav">
+        <a href="#page-1">1. Comparison</a>
+        <a href="#page-2">2. Storage</a>
+        <a href="#page-3">3. Schemas</a>
+        <a href="#page-4">4. The Cube</a>
+    </nav>
+
+    <section id="page-1" class="full-page">
+        <div class="main-wrapper">
+            <h1 style="text-align: center; margin-bottom: 2rem;">OLTP vs OLAP: At a Glance</h1>
+            <div class="container">
+                <div class="panel oltp">
+                    <h2>OLTP 🏃‍♀️</h2>
+                    <ul>
+                        <li><strong>Purpose:</strong> Day-to-day operations</li>
+                        <li><strong>Data:</strong> Real-time, current</li>
+                        <li><strong>Queries:</strong> Simple, fast (Read/Write)</li>
+                        <li><strong>Database:</strong> Row-based storage</li>
+                    </ul>
+                </div>
+                <div class="panel olap">
+                    <h2>OLAP 🧠</h2>
+                    <ul>
+                        <li><strong>Purpose:</strong> Analysis & decision making</li>
+                        <li><strong>Data:</strong> Historical, aggregated</li>
+                        <li><strong>Queries:</strong> Complex, multi-dimensional</li>
+                        <li><strong>Database:</strong> Columnar storage</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="notes-section">
+                <div class="note"><h3>OLTP: Normalized & ER Diagrams</h3><p>Highly <strong>normalized</strong> to reduce redundancy, often visualized with ER diagrams where central <strong>entities</strong> are linked to attributes.</p></div>
+                <div class="note"><h3>Data Sorting & Primary Keys</h3><p>Data is sorted by a <strong>primary key</strong> (like 'OrderID') for fast lookups, essential for transactional operations.</p></div>
+                <div class="note"><h3>OLAP: Star Schema</h3><p>Uses <strong>Star Schemas</strong> where a central <strong>fact</strong> table (like 'Sales') is surrounded by <strong>dimension</strong> tables.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-2" class="full-page">
+        <div class="container">
+            <h1>Database Access Simulation</h1>
+            <div class="controls">
+                <button id="p2-runRowQuery">Get Record (OLTP)</button>
+                <button id="p2-runColOnRowBtn">Total Sales (on Row Store)</button>
+                <button id="p2-runColOnColBtn">Total Sales (on Column Store)</button>
+                <button id="p2-reset">Reset</button>
+            </div>
+            <div id="p2-table-container" class="table-grid"></div>
+            <p id="p2-info-box">Click a button to start the simulation.</p>
+            <div class="storage-section">
+                <div class="storage-layout"><h3>Disk (Row-Based)</h3><div id="p2-row-storage-vis" class="storage-vis"></div></div>
+                <div class="storage-layout"><h3>Disk (Columnar)</h3><div id="p2-column-storage-vis" class="storage-vis"></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-3" class="full-page">
+        <div class="container">
+            <div class="schema-container">
+                <h2>OLTP: Entity-Relationship Diagram</h2>
+                <div class="diagram" id="p3-er-diagram">
+                    <div class="entity" id="p3-er-customer"><strong>Customers</strong><span>(PK) CustomerID</span><span>...</span></div>
+                    <div class="entity" id="p3-er-orders"><strong>Orders</strong><span>(PK) OrderID</span><span>(FK) CustomerID</span><span>...</span></div>
+                    <svg class="connector-svg"><line id="p3-er-line" /></svg>
+                </div>
+            </div>
+            <div class="schema-container">
+                <h2>OLAP: Star Schema</h2>
+                <div class="diagram" id="p3-star-schema">
+                    <div class="fact-table" id="p3-star-fact"><strong>Sales Fact</strong><span>(FK)s...</span><span>SalesAmount</span></div>
+                    <div class="dim-table" id="p3-star-dim-cust"><strong>DimCustomer</strong><span>(PK) CustomerID</span></div>
+                    <div class="dim-table" id="p3-star-dim-prod"><strong>DimProduct</strong><span>(PK) ProductID</span></div>
+                    <div class="dim-table" id="p3-star-dim-date"><strong>DimDate</strong><span>(PK) DateID</span></div>
+                    <svg class="connector-svg">
+                        <line id="p3-star-line-1" /><line id="p3-star-line-2" /><line id="p3-star-line-3" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-4" class="full-page">
+        <div class="container">
+            <h1>From 2D Reports to a Sparse 3D Data Cube</h1>
+            <div class="reports-container" id="p4-reportsContainer">
+                <div class="chart"><h3>Product Sales</h3><div class="bar-chart"><div class="bar hl-1"><span class="label">Laptop (150)</span></div><div class="bar hl-2"><span class="label">Mouse (100)</span></div><div class="bar hl-3"><span class="label">Keyboard (80)</span></div></div></div>
+                <div class="chart"><h3>Monthly Sales</h3><div class="bar-chart"><div class="bar hl-1"><span class="label">Jan (150)</span></div><div class="bar hl-3"><span class="label">Feb (80)</span></div><div class="bar hl-2"><span class="label">Mar (100)</span></div></div></div>
+                <div class="chart"><h3>Customer Sales</h3><div class="bar-chart"><div class="bar hl-2"><span class="label">Cust A (100)</span></div><div class="bar hl-1"><span class="label">Cust B (150)</span></div><div class="bar hl-3"><span class="label">Cust C (80)</span></div></div></div>
+            </div>
+            <div class="scene" id="p4-sceneContainer">
+                <div class="cube-space" id="p4-cubeSpace">
+                    <div class="cube" id="p4-cube1">
+                        <div class="face front"><span>150</span></div><div class="face back"></div>
+                        <div class="face right"></div><div class="face left"></div>
+                        <div class="face top"></div><div class="face bottom"></div>
+                    </div>
+                    <div class="cube" id="p4-cube2">
+                        <div class="face front"><span>100</span></div><div class="face back"></div>
+                        <div class="face right"></div><div class="face left"></div>
+                        <div class="face top"></div><div class="face bottom"></div>
+                    </div>
+                    <div class="cube" id="p4-cube3">
+                        <div class="face front"><span>80</span></div><div class="face back"></div>
+                        <div class="face right"></div><div class="face left"></div>
+                        <div class="face top"></div><div class="face bottom"></div>
+                    </div>
+                </div>
+                <div class="axis x-axis">Product</div>
+                <div class="axis y-axis">Month</div>
+                <div class="axis z-axis">Customer</div>
+            </div>
+            <p id="p4-info-box">Multiple transactions are tracked across different reports.</p>
+        </div>
+    </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    // --- STATE MANAGEMENT for looping animations ---
+    const pageState = {
+        'page-3': { timer: null, isRunning: false },
+        'page-4': { timer: null, isRunning: false }
+    };
+
+    // ===================================================================
+    // --- PAGE 1 LOGIC: SIDE-BY-SIDE COMPARISON ---
+    // ===================================================================
+    function initPage1() {
+        const listItems = document.querySelectorAll('#page-1 ul li');
+        listItems.forEach((item, index) => {
+            item.style.transitionDelay = `${index * 0.15}s`;
+            item.classList.add('visible');
+        });
+    }
+
+    // ===================================================================
+    // --- PAGE 2 LOGIC: ROW VS COLUMN STORAGE ---
+    // ===================================================================
+    function initPage2() {
+        if (document.getElementById('page-2').dataset.initialized) return;
+        document.getElementById('page-2').dataset.initialized = true;
+
+        const tableContainer = document.getElementById('p2-table-container');
+        const infoBox = document.getElementById('p2-info-box');
+        const rowBtn = document.getElementById('p2-runRowQuery');
+        const colOnRowBtn = document.getElementById('p2-runColOnRowBtn');
+        const colOnColBtn = document.getElementById('p2-runColOnColBtn');
+        const resetBtn = document.getElementById('p2-reset');
+        const rowStorageVis = document.getElementById('p2-row-storage-vis');
+        const colStorageVis = document.getElementById('p2-column-storage-vis');
+
+        const tableData = [
+            { OrderID: 1001, CustomerID: 58, Product: 'Laptop', Sales: 1200 },
+            { OrderID: 1002, CustomerID: 23, Product: 'Mouse', Sales: 50 },
+            { OrderID: 1005, CustomerID: 23, Product: 'Webcam', Sales: 80 },
+            { OrderID: 1006, CustomerID: 71, Product: 'Laptop', Sales: 1500 },
+            { OrderID: 1010, CustomerID: 23, Product: 'Monitor', Sales: 400 }
+        ];
+        const headers = Object.keys(tableData[0]);
+        const colors = { OrderID: '#007bff', CustomerID: '#6f42c1', Product: '#fd7e14', Sales: '#ffc107' };
+        const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        function setButtonsDisabled(disabled) {
+            rowBtn.disabled = disabled;
+            colOnRowBtn.disabled = disabled;
+            colOnColBtn.disabled = disabled;
+        }
+
+        function createElements() {
+            tableContainer.innerHTML = '';
+            rowStorageVis.innerHTML = '';
+            colStorageVis.innerHTML = '';
+            tableContainer.style.gridTemplateColumns = `repeat(${headers.length}, 1fr)`;
+            headers.forEach(header => {
+                const headerCell = document.createElement('div');
+                headerCell.classList.add('cell', 'header');
+                headerCell.textContent = header;
+                headerCell.style.backgroundColor = colors[header];
+                tableContainer.appendChild(headerCell);
+            });
+            tableData.forEach((row, rowIndex) => {
+                headers.forEach(header => {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = rowIndex;
+                    cell.dataset.col = header;
+                    cell.textContent = row[header];
+                    tableContainer.appendChild(cell);
+                    const block = document.createElement('div');
+                    block.classList.add('storage-block');
+                    block.style.backgroundColor = colors[header];
+                    rowStorageVis.appendChild(block);
+                });
+            });
+            headers.forEach(header => {
+                tableData.forEach((row) => {
+                    const block = document.createElement('div');
+                    block.classList.add('storage-block');
+                    block.style.backgroundColor = colors[header];
+                    colStorageVis.appendChild(block);
+                });
+            });
+        }
+
+        function resetAnimation() {
+            document.querySelectorAll('#page-2 .cell, #page-2 .storage-block').forEach(el => {
+                el.classList.remove('highlight-table', 'highlight-storage');
+            });
+            infoBox.textContent = 'Click a button to start the simulation.';
+            setButtonsDisabled(false);
+        }
+
+        async function runRowQuery() {
+            resetAnimation();
+            setButtonsDisabled(true);
+            infoBox.textContent = 'Query: Get all info for OrderID 1005.';
+            const startTime = performance.now();
+            await sleep(500);
+            const targetRowIndex = '2'; // Corresponds to OrderID 1005
+            document.querySelectorAll(`#page-2 .cell[data-row='${targetRowIndex}']`).forEach(cell => cell.classList.add('highlight-table'));
+            infoBox.textContent = 'Reading contiguous data block from disk...';
+            const blocksToHighlight = Array.from(rowStorageVis.children).slice(targetRowIndex * headers.length, (targetRowIndex * headers.length) + headers.length);
+            blocksToHighlight.forEach(block => block.classList.add('highlight-storage'));
+            await sleep(100);
+            const endTime = performance.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(2);
+            infoBox.textContent = `Finished! Took ${duration}s with 1 sequential read.`;
+            setButtonsDisabled(false);
+        }
+
+        async function runColumnOnRowStore() {
+            resetAnimation();
+            setButtonsDisabled(true);
+            infoBox.textContent = 'Query: Total Sales on Row-Based Storage...';
+            const targetCol = 'Sales';
+            document.querySelectorAll(`#page-2 .cell[data-col='${targetCol}']`).forEach(c => c.classList.add('highlight-table'));
+            await sleep(1000);
+            infoBox.textContent = 'Reading data requires jumping between records...';
+            const salesBlocks = Array.from(rowStorageVis.children).filter((_, index) => (index % headers.length) === (headers.indexOf(targetCol)));
+            const startTime = performance.now();
+            for (const block of salesBlocks) {
+                block.classList.add('highlight-storage');
+                await sleep(150);
+                block.classList.remove('highlight-storage');
+            }
+            const endTime = performance.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(2);
+            infoBox.textContent = `Finished! Took ${duration}s with ${salesBlocks.length} disk seeks.`;
+            setButtonsDisabled(false);
+        }
+        
+        async function runColumnOnColStore() {
+            resetAnimation();
+            setButtonsDisabled(true);
+            infoBox.textContent = 'Query: Total Sales on Column-Based Storage...';
+            const targetCol = 'Sales';
+            document.querySelectorAll(`#page-2 .cell[data-col='${targetCol}']`).forEach(c => c.classList.add('highlight-table'));
+            await sleep(1000);
+            infoBox.textContent = 'Reading data that is stored together sequentially...';
+            const salesBlocks = Array.from(colStorageVis.children).slice(headers.indexOf(targetCol) * tableData.length, (headers.indexOf(targetCol) + 1) * tableData.length);
+            const startTime = performance.now();
+            salesBlocks.forEach(block => block.classList.add('highlight-storage'));
+            await sleep(300);
+            const endTime = performance.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(2);
+            infoBox.textContent = `Finished! Took ${duration}s with 1 sequential read.`;
+            setButtonsDisabled(false);
+        }
+
+        rowBtn.addEventListener('click', runRowQuery);
+        colOnRowBtn.addEventListener('click', runColumnOnRowStore);
+        colOnColBtn.addEventListener('click', runColumnOnColStore);
+        resetBtn.addEventListener('click', resetAnimation);
+
+        createElements();
+    }
+
+
+    // ===================================================================
+    // --- PAGE 3 LOGIC: SCHEMA ANIMATIONS ---
+    // ===================================================================
+    function startPage3Animation() {
+        if (pageState['page-3'].isRunning) return;
+        pageState['page-3'].isRunning = true;
+        
+        const animatedElements = ['p3-er-customer', 'p3-er-orders', 'p3-er-line', 'p3-star-fact', 'p3-star-dim-cust', 'p3-star-dim-prod', 'p3-star-dim-date', 'p3-star-line-1', 'p3-star-line-2', 'p3-star-line-3'];
+        const connect = (lineId, startElId, endElId, diagramId, startSide, endSide) => { const line = document.getElementById(lineId); const startEl = document.getElementById(startElId); const endEl = document.getElementById(endElId); const diagram = document.getElementById(diagramId); const diagramRect = diagram.getBoundingClientRect(); const startRect = startEl.getBoundingClientRect(); const endRect = endEl.getBoundingClientRect(); const getCoords = (rect, side) => { switch (side) { case 'top': return { x: rect.left + rect.width / 2, y: rect.top }; case 'bottom': return { x: rect.left + rect.width / 2, y: rect.bottom }; case 'left': return { x: rect.left, y: rect.top + rect.height / 2 }; case 'right': return { x: rect.right, y: rect.top + rect.height / 2 }; default: return { x: 0, y: 0 }; } }; const startPoint = getCoords(startRect, startSide); const endPoint = getCoords(endRect, endSide); line.setAttribute('x1', startPoint.x - diagramRect.left); line.setAttribute('y1', startPoint.y - diagramRect.top); line.setAttribute('x2', endPoint.x - diagramRect.left); line.setAttribute('y2', endPoint.y - diagramRect.top); };
+        const show = (elementId, delay) => setTimeout(() => document.getElementById(elementId)?.classList.add('visible'), delay);
+
+        const runLoop = () => {
+            animatedElements.forEach(id => document.getElementById(id)?.classList.remove('visible'));
+            
+            setTimeout(() => {
+                show('p3-er-customer', 200); show('p3-er-orders', 800);
+                setTimeout(() => { connect('p3-er-line', 'p3-er-customer', 'p3-er-orders', 'p3-er-diagram', 'bottom', 'top'); show('p3-er-line', 0); }, 1400);
+
+                show('p3-star-fact', 2200); show('p3-star-dim-cust', 2800); show('p3-star-dim-prod', 3100); show('p3-star-dim-date', 3400);
+                setTimeout(() => { connect('p3-star-line-1', 'p3-star-dim-prod', 'p3-star-fact', 'p3-star-schema', 'right', 'left'); connect('p3-star-line-2', 'p3-star-dim-cust', 'p3-star-fact', 'p3-star-schema', 'bottom', 'top'); connect('p3-star-line-3', 'p3-star-dim-date', 'p3-star-fact', 'p3-star-schema', 'top', 'bottom'); show('p3-star-line-1', 0); show('p3-star-line-2', 200); show('p3-star-line-3', 400); }, 4000);
+            }, 500);
+
+            pageState['page-3'].timer = setTimeout(runLoop, 7000);
+        };
+        runLoop();
+    }
+    function stopPage3Animation() {
+        clearTimeout(pageState['page-3'].timer);
+        pageState['page-3'].isRunning = false;
+    }
+
+    // ===================================================================
+    // --- PAGE 4 LOGIC: SPARSE DATA CUBE ---
+    // ===================================================================
+    function startPage4Animation() {
+        if (pageState['page-4'].isRunning) return;
+        pageState['page-4'].isRunning = true;
+
+        const reportsContainer = document.getElementById('p4-reportsContainer');
+        const sceneContainer = document.getElementById('p4-sceneContainer');
+        const cubeSpace = document.getElementById('p4-cubeSpace');
+        const cubes = document.querySelectorAll('#page-4 .cube');
+        const axes = document.querySelectorAll('#page-4 .axis');
+        const infoBox = document.getElementById('p4-info-box');
+
+        const runLoop = () => {
+            infoBox.textContent = 'Multiple transactions are tracked across different reports.';
+            reportsContainer.style.opacity = 1; sceneContainer.style.opacity = 0; cubeSpace.classList.remove('is-spinning');
+            cubes.forEach(cube => cube.classList.remove('is-visible')); axes.forEach(axis => axis.style.opacity = 0);
+            
+            setTimeout(() => { infoBox.textContent = 'Each transaction is plotted as a point in the dimensional space.'; reportsContainer.style.opacity = 0; sceneContainer.style.opacity = 1; }, 4000);
+            setTimeout(() => { infoBox.textContent = 'This forms a "sparse" data cube...'; axes.forEach(axis => axis.style.opacity = 1); cubes.forEach(cube => cube.classList.add('is-visible')); }, 5500);
+            setTimeout(() => { infoBox.textContent = '...showing relationships across all dimensions at once.'; cubeSpace.classList.add('is-spinning'); }, 7000);
+            
+            pageState['page-4'].timer = setTimeout(runLoop, 15000);
+        };
+        runLoop();
+    }
+    function stopPage4Animation() {
+        clearTimeout(pageState['page-4'].timer);
+        pageState['page-4'].isRunning = false;
+    }
+
+
+    // ===================================================================
+    // --- INTERSECTION OBSERVER SETUP ---
+    // This is the "brain" that decides which animation to run.
+    // ===================================================================
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const pageId = entry.target.id;
+            if (entry.isIntersecting) {
+                // When a page comes into view, start its animation
+                if (pageId === 'page-1') initPage1();
+                if (pageId === 'page-2') initPage2();
+                if (pageId === 'page-3') startPage3Animation();
+                if (pageId === 'page-4') startPage4Animation();
+            } else {
+                // When a page scrolls out of view, stop its looping animation
+                if (pageId === 'page-3') stopPage3Animation();
+                if (pageId === 'page-4') stopPage4Animation();
+            }
+        });
+    }, { threshold: 0.5 }); // Trigger when 50% of the section is visible
+
+    // Tell the observer to watch each page
+    document.querySelectorAll('.full-page').forEach(page => {
+        observer.observe(page);
+    });
+});
+</script>
+</body>
+</html>
+}
+The final version of the infographic is available in the `OLAPConcept.html` file. Can you provide a detailed description of the file's contents and how it works?
