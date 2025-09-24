@@ -10,7 +10,8 @@ Our goal is to provide a go-to resource for developers, data analysts, and anyon
 
 🎨 Animations Included
 
-Each animation is a self-contained HTML file that you can open directly in your web browser.
+Each animation is a self-contained HTML file that you can open directly in your web browser. The content is organized inside the
+`pages/` directory to keep the project root tidy, and shared assets live under `assets/`.
 
 **1. OLTP Vs. OLAP**
 
@@ -28,6 +29,14 @@ An interactive visual that demonstrates how filters cascade from dimension table
 
 This infographic visualizes the DAX filter context hierarchy as a water filtration plant. It shows how filters from different levels (Report, Page, Visual, etc.) are applied sequentially and how the powerful CALCULATE() function can override these filters, with the exception of Row-Level Security (RLS).
 
+**5. Date Filter Context Train**
+
+An animation that uses a train yard metaphor to explain how time-intelligence calculations move between current, previous, and next date periods in DAX.
+
+**6. Stages of Data Analysis**
+
+Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
+
 🚀 How to Use
 
 Simply clone this repository and open any of the HTML files in your browser. The animations are built with vanilla HTML, CSS, and JavaScript, so no special software or server is required.
@@ -40,7 +49,13 @@ git clone https://github.com/SRathinagGiri/PowerBI.git
 cd PowerBI
 
 # Open an animation
-open StarSchema.html
+open pages/StarSchema.html
+
+# Explore the stages of data analysis page
+open pages/stages-of-data-analysis.html
+
+# Download the practice workbook (optional)
+open assets/resources/PBI.xlsx
 
 ➡️ What's Next?
 
