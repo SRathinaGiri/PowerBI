@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Intelligence Animation - Final Version</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #e6f7ff;
+        }
+        .container { width: 90%; max-width: 1200px; }
+        .station-name { text-align: center; font-size: 1.5em; font-weight: bold; color: #1a5276; margin-bottom: 20px; border: 2px dashed #1a5276; padding: 10px; background-color: #d4e6f1; }
+        .scene { position: relative; width: 100%; height: 300px; background-color: #a9cce5; border: 3px solid #5499c7; overflow: hidden; }
+        
+        #track-layout { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .track-path-rail { fill: none; stroke: #4a4a4a; stroke-width: 3; }
+        .track-path-sleepers { fill: none; stroke: url(#sleeper-pattern); stroke-width: 12; }
+
+        .platform {
+            position: absolute;
+            right: 0px;
+            width: 420px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        #platform-current { top: 15px; }
+        #platform-previous { top: 225px; }
+
+        .platform-name {
+            width: 200px; 
+            height: 40px;
+            line-height: 40px;
+            background-color: #34495e;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+        .flag-area { display: flex; justify-content: flex-end; width: 220px; }
+        .flag { background-color: #f1c40f; color: #333; width: 50px; font-size: 0.8em; border-radius: 3px; padding: 2px; margin: 0 2px; transition: opacity 0.3s; }
+        
+        .train { position: relative; width: 100%; height: 100%; visibility: hidden; }
+        .coach {
+            position: absolute; top: 0; left: 0; width: 80px; height: 40px;
+            background-color: #bdc3c7; border: 2px solid #2c3e50; color: #2c3e50;
+            display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.9em;
+            transition: background-color 0.5s;
+            offset-path: none;
+        }
+        .engine { 
+            width: 100px; 
+            height: 50px; 
+            background-color: #2980b9; 
+            color: black; 
+            z-index: 5; 
+        }
+        
+        @keyframes load-flag { 100% { transform: translateY(-30px); opacity: 0; } }
+        .flag.loading { animation: load-flag 0.5s forwards; }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .year-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .label-text {
+            color: #999;
+            transition: color 0.3s ease;
+        }
+        .year-selector .active {
+            color: #1a5276;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #f39c12;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        #start-animation-btn {
+            padding: 12px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            background-color: #27ae60;
+        }
+
+        #total-sales-display { margin-top: 20px; font-size: 1.8em; font-weight: bold; color: #1a5276; height: 40px; transition: opacity 0.5s; }
+        .formulas {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px solid #a9cce3;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .formulas p {
+            margin: 5px 0;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="station-name">Date Table Filter Context Station</div>
+        <div class="scene">
+            <svg id="track-layout">
+                <defs>
+                    <pattern id="sleeper-pattern" width="15" height="15" patternUnits="userSpaceOnUse" patternTransform="rotate(90)">
+                        <rect width="15" height="4" fill="#8B4513"></rect>
+                    </pattern>
+                </defs>
+                <path id="sleeper-path-2025" class="track-path-sleepers" d="M -150,140 L 250,140 C 350,140 400,80 500,80 L 1200,80"></path>
+                <path class="track-path-rail" d="M -150,134 L 250,134 C 350,134 400,74 500,74 L 1200,74"></path>
+                <path class="track-path-rail" d="M -150,146 L 250,146 C 350,146 400,86 500,86 L 1200,86"></path>
+                <path id="sleeper-path-2024" class="track-path-sleepers" d="M -150,140 L 250,140 C 350,140 400,220 500,220 L 1200,220"></path>
+                <path class="track-path-rail" d="M -150,134 L 250,134 C 350,134 400,214 500,214 L 1200,214"></path>
+                <path class="track-path-rail" d="M -150,146 L 250,146 C 350,146 400,226 500,226 L 1200,226"></path>
+            </svg>
+
+            <div class="platform" id="platform-current">
+                <div class="flag-area" id="flags-current"></div>
+                <div class="platform-name">Current Year (2025)</div>
+            </div>
+            <div class="platform" id="platform-previous">
+                <div class="flag-area" id="flags-previous"></div>
+                <div class="platform-name">Previous Year (2024)</div>
+            </div>
+
+            <div class="train" id="train">
+                <div class="coach engine"><span class="coach-label">Total Sales</span></div>
+                <div class="coach" id="coach-q1"><span class="coach-label">Q1</span></div>
+                <div class="coach" id="coach-q2"><span class="coach-label">Q2</span></div>
+                <div class="coach" id="coach-q3"><span class="coach-label">Q3</span></div>
+                <div class="coach" id="coach-q4"><span class="coach-label">Q4</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div class="year-selector">
+            <span class="label-text active" id="label-cy">Current Year</span>
+            <label class="switch">
+              <input type="checkbox" id="year-toggle">
+              <span class="slider"></span>
+            </label>
+            <span class="label-text" id="label-py">Previous Year</span>
+        </div>
+        <button id="start-animation-btn">Start Animation</button>
+    </div>
+
+    <div id="total-sales-display"></div>
+    <div class="formulas">
+        <p><strong>Total Sales</strong> = SUM('SalesFactTable'[Sales])</p>
+        <p><strong>PY Total Sales</strong> = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('DateTable'[Date]))</p>
+    </div>
+
+    <script>
+        const salesData = { 2025: { Q1: 120, Q2: 150, Q3: 130, Q4: 180 }, 2024: { Q1: 110, Q2: 140, Q3: 125, Q4: 160 }};
+        const train = document.getElementById('train');
+        const coaches = Array.from(train.children);
+        const totalSalesDisplay = document.getElementById('total-sales-display');
+        const flagsCurrentContainer = document.getElementById('flags-current');
+        const flagsPreviousContainer = document.getElementById('flags-previous');
+        let currentYear = 2025;
+        const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+        let activeAnimations = [];
+        
+        const yearToggle = document.getElementById('year-toggle');
+        const startAnimationBtn = document.getElementById('start-animation-btn');
+        const labelCY = document.getElementById('label-cy');
+        const labelPY = document.getElementById('label-py');
+
+        function setupFlags() {
+            flagsCurrentContainer.innerHTML = '';
+            flagsPreviousContainer.innerHTML = '';
+            const reversedQuarters = [...quarters].reverse();
+            for (const year in salesData) {
+                const container = year === '2025' ? flagsCurrentContainer : flagsPreviousContainer;
+                reversedQuarters.forEach(quarter => {
+                    const flag = document.createElement('div');
+                    flag.className = 'flag';
+                    flag.id = `flag-${year}-${quarter}`;
+                    flag.textContent = `${quarter}: ${salesData[year][quarter]}`;
+                    container.appendChild(flag);
+                });
+            }
+        }
+        function displayTotal(year) { const total = Object.values(salesData[year]).reduce((sum, val) => sum + val, 0); totalSalesDisplay.textContent = `Total Sales for ${year}: ${total}`; totalSalesDisplay.style.opacity = 1; }
+        
+        function runAnimation(year) {
+            currentYear = year; 
+            totalSalesDisplay.style.opacity = 0; 
+            setupFlags();
+            activeAnimations.forEach(anim => anim.cancel());
+            activeAnimations = [];
+            train.style.visibility = 'visible';
+
+            const pathElement = document.getElementById(`sleeper-path-${year}`);
+            const pathValue = pathElement.getAttribute('d');
+            
+            coaches.forEach((coach, index) => {
+                const label = coach.querySelector('.coach-label');
+                if (label && !coach.classList.contains('engine')) {
+                    label.textContent = `Q${index}`;
+                }
+                coach.style.backgroundColor = '#bdc3c7';
+                coach.style.offsetPath = `path('${pathValue}')`;
+
+                const maxStopPoint = 90; 
+                const stopPoint = maxStopPoint - (index * 7);
+
+                const keyframes = [ { offsetDistance: '0%' }, { offsetDistance: `${stopPoint}%` } ];
+                const options = {
+                    duration: 5000, 
+                    delay: index * 350, 
+                    fill: 'forwards',
+                    easing: 'linear'
+                };
+                
+                const animation = coach.animate(keyframes, options);
+                activeAnimations.push(animation);
+            });
+            
+            const lastAnimation = activeAnimations[activeAnimations.length - 1];
+            if (lastAnimation) {
+                lastAnimation.onfinish = () => {
+                     quarters.forEach((q, index) => {
+                        setTimeout(() => {
+                            const flag = document.getElementById(`flag-${currentYear}-${q}`);
+                            const coach = document.getElementById(`coach-${q.toLowerCase()}`);
+                            if(flag && coach) { 
+                                flag.classList.add('loading'); 
+                                coach.style.backgroundColor = '#2ecc71';
+                                coach.querySelector('.coach-label').textContent = `${q}: ${salesData[currentYear][q]}`;
+                            }
+                            if (index === quarters.length - 1) { setTimeout(() => displayTotal(currentYear), 500); }
+                        }, index * 300);
+                    });
+                };
+            }
+        }
+
+        startAnimationBtn.addEventListener('click', () => {
+            const selectedYear = yearToggle.checked ? 2024 : 2025;
+            runAnimation(selectedYear);
+        });
+
+        yearToggle.addEventListener('change', () => {
+            if(yearToggle.checked) {
+                labelPY.classList.add('active');
+                labelCY.classList.remove('active');
+            } else {
+                labelCY.classList.add('active');
+                labelPY.classList.remove('active');
+            }
+        });
+
+        setupFlags();
+    </script>
+</body>
+</html>
