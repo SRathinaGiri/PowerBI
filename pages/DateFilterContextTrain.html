@@ -151,6 +151,20 @@
             font-size: 1.1em;
             color: #333;
         }
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fff;
+            border: 2px dashed #5499c7;
+            color: #1a5276;
+            max-width: 800px;
+            text-align: center;
+        }
+        .explanation p {
+            margin: 8px 0;
+            font-size: 1.05em;
+        }
         .back-link {
             position: fixed;
             top: 20px;
@@ -221,6 +235,10 @@
     </div>
 
     <div id="total-sales-display"></div>
+    <div class="explanation">
+        <p>Every measure is calculated and shown in the Power BI Visuals according to the current filter contex.</p>
+        <p id="context-description"></p>
+    </div>
     <div class="formulas">
         <p><strong>Total Sales</strong> = SUM('SalesFactTable'[Sales])</p>
         <p><strong>PY Total Sales</strong> = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('DateTable'[Date]))</p>
@@ -241,6 +259,15 @@
         const startAnimationBtn = document.getElementById('start-animation-btn');
         const labelCY = document.getElementById('label-cy');
         const labelPY = document.getElementById('label-py');
+        const contextDescription = document.getElementById('context-description');
+
+        function updateExplanation(year) {
+            if (year === 2025) {
+                contextDescription.textContent = 'Current Filter Context is Year 2025. Formula executed is Total Sales = SUM(SalesFactTable[Sales])';
+            } else {
+                contextDescription.textContent = 'Current Filter Context is Year 2024: Modified by Calculate Function and SamePeriodLastYear function. Formula executed is PY Sales = Calculate([Total Sales], SAMEPERIODLASTYEAR(DateTable[Date]))';
+            }
+        }
 
         function setupFlags() {
             flagsCurrentContainer.innerHTML = '';
@@ -305,7 +332,12 @@
                                 coach.style.backgroundColor = '#2ecc71';
                                 coach.querySelector('.coach-label').textContent = `${q}: ${salesData[currentYear][q]}`;
                             }
-                            if (index === quarters.length - 1) { setTimeout(() => displayTotal(currentYear), 500); }
+                            if (index === quarters.length - 1) {
+                                setTimeout(() => {
+                                    displayTotal(currentYear);
+                                    updateExplanation(currentYear);
+                                }, 500);
+                            }
                         }, index * 300);
                     });
                 };
@@ -328,6 +360,7 @@
         });
 
         setupFlags();
+        updateExplanation(currentYear);
     </script>
 </body>
 
