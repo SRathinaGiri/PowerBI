@@ -236,7 +236,7 @@
 
     <div id="total-sales-display"></div>
     <div class="explanation">
-        <p>Every measure is calculated and shown in the Power BI Visuals according to the current filter contex.</p>
+        <p>Every measure is calculated and shown in the Power BI Visuals according to the current filter context.</p>
         <p id="context-description"></p>
     </div>
     <div class="formulas">
@@ -265,7 +265,7 @@
             if (year === 2025) {
                 contextDescription.textContent = 'Current Filter Context is Year 2025. Formula executed is Total Sales = SUM(SalesFactTable[Sales])';
             } else {
-                contextDescription.textContent = 'Current Filter Context is Year 2024: Modified by Calculate Function and SamePeriodLastYear function. Formula executed is PY Sales = Calculate([Total Sales], SAMEPERIODLASTYEAR(DateTable[Date]))';
+                contextDescription.textContent = 'Current Filter Context is Year 2025: Modified by SamePeriodLastYear function as 2024 and formula is executed by Calculate Function. Formula executed is PY Sales = Calculate([Total Sales], SAMEPERIODLASTYEAR(DateTable[Date]))';
             }
         }
 
@@ -365,3 +365,4 @@
 </body>
 
 </html>
+
