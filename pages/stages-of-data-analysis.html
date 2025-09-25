@@ -35,6 +35,14 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 20px 40px rgba(5, 15, 35, 0.35);
     }
+    .stage ol {
+      margin: 1.5rem 0 0;
+      padding-left: 1.25rem;
+      color: #d1e9ff;
+    }
+    .stage li {
+      margin-bottom: 0.75rem;
+    }
     img {
       width: 100%;
       border-radius: 10px;
@@ -44,44 +52,64 @@
     a {
       color: #60a5fa;
     }
+    .top-bar {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 2rem;
+    }
     .back-link {
-      display: inline-block;
-      margin-top: 2.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.12);
+      color: #bfdbfe;
       text-decoration: none;
       font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: background 0.2s ease, transform 0.2s ease;
     }
     .back-link:hover {
-      text-decoration: underline;
+      background: rgba(96, 165, 250, 0.2);
+      transform: translateY(-2px);
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="top-bar">
+      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+    </div>
     <h1>Stages of Data Analysis</h1>
     <p>
-      Understanding the journey from raw data to valuable insights helps teams stay aligned and focused on measurable impact.
-      The stages below combine both the business and technical perspectives that guide a Power BI project from discovery to delivery.
+      The evolution of analytics tooling shows how teams moved from manual summaries to intelligent, automated insights. Each milestone below marks a leap that brought richer context, faster exploration, and smarter decisions to business intelligence.
     </p>
 
     <section class="stage">
-      <h2>1. Frame the Business Question</h2>
+      <h2>1. Cross Tabs to Pivot Tables</h2>
       <p>
-        Start by clarifying the decision that needs to be made and the metrics that will signal success. Interviews with stakeholders,
-        quick whiteboard sessions, and reviewing existing reports provide the context you need to frame the analytical goal in plain language.
+        Early analysis lived in static cross tabulations that compared two dimensions at a time. They established the foundation for structured thinking about measures versus categories, even if every new question meant rebuilding the summary by hand.
       </p>
+      <ol>
+        <li><strong>Cross Tabulation:</strong> Manual row-and-column layouts highlighted intersections like product by region, but flexibility was limited.</li>
+        <li><strong>Pivot Table Revolution:</strong> Spreadsheet tools automated the reshaping, letting analysts drag fields, aggregate on the fly, and explore scenarios without rewriting queries.</li>
+        <li><strong>Data Cubes:</strong> OLAP engines pre-calculated multi-dimensional aggregations so that thousands of pivot-table style combinations could be answered instantly.</li>
+      </ol>
       <img src="../assets/images/Stages_of_DataAnalysis.png" alt="Diagram showing the stages of data analysis from business question to insight">
     </section>
 
     <section class="stage">
-      <h2>2. Shape, Model, and Share the Insight</h2>
+      <h2>2. Interactive BI to AI-Enabled Insights</h2>
       <p>
-        Once the analytical target is clear, you can profile and shape the data, build a semantic model, and iterate on visuals that make the story obvious.
-        A tight feedback loop with stakeholders ensures the report answers the original question and sparks the next wave of inquiry.
+        As business questions grew broader, platforms layered richer interfaces and intelligence on top of cube technology. Modern BI removes the latency between curiosity and action by blending guided visuals with machine learning assistance.
       </p>
+      <ol start="4">
+        <li><strong>BI Interactive Visualization:</strong> Dashboards and storytelling visuals invite stakeholders to slice, filter, and drill without waiting on IT.</li>
+        <li><strong>AI-Enabled BI:</strong> Natural language queries, anomaly detection, and predictive insights surface patterns proactively so teams act before trends fade.</li>
+      </ol>
       <img src="../assets/images/Stages_of_DataAnalysis1.png" alt="Flow diagram depicting data preparation, modeling, and storytelling stages">
     </section>
-
-    <a class="back-link" href="../index.html">&larr; Back to Power BI Infographics</a>
   </div>
 </body>
 </html>
