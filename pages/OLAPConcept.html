@@ -52,14 +52,29 @@
             width: 100%;
             background-color: #343a40;
             padding: 10px 0;
-            text-align: center;
             z-index: 1000;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
         }
         .main-nav a {
             color: white;
-            margin: 0 15px;
             text-decoration: none;
             font-weight: bold;
+            padding: 4px 8px;
+        }
+        .main-nav .back-link {
+            background-color: #495057;
+            padding: 8px 18px;
+            border-radius: 999px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .main-nav .back-link:hover {
+            background-color: #6c757d;
+            transform: translateY(-2px);
         }
 
         /* --- PAGE 1: COMPARISON --- */
@@ -170,6 +185,7 @@
     </header>
 
     <nav class="main-nav">
+        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
         <a href="#page-1">1. Comparison</a>
         <a href="#page-2">2. Storage</a>
         <a href="#page-3">3. Schemas</a>

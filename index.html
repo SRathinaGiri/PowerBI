@@ -6,11 +6,12 @@
   <title>Power BI Infographics</title>
   <style>
     :root {
-      --bg: #0b1220;
-      --panel: #0f172a;
-      --ink: #d1e9ff;
-      --accent: #60a5fa;
-      --muted: #93a7c1;
+      --bg: linear-gradient(180deg, #f8fbff 0%, #eef2ff 100%);
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --accent: #2563eb;
+      --muted: #475569;
+      --shadow: rgba(15, 23, 42, 0.1);
     }
     body {
       margin: 0;
@@ -45,14 +46,15 @@
     }
     .infographic-item {
       background: var(--panel);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 1.5rem;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+      border-radius: 14px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 24px var(--shadow);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .infographic-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
     }
     .infographic-item h3 {
       font-size: 1.4rem;

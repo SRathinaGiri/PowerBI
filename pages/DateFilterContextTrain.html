@@ -151,9 +151,27 @@
             font-size: 1.1em;
             color: #333;
         }
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #1a5276;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(26, 82, 118, 0.25);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+        .back-link:hover {
+            background-color: #154360;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
+    <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
     <div class="container">
         <div class="station-name">Date Table Filter Context Station</div>
         <div class="scene">

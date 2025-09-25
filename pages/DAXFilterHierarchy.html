@@ -10,6 +10,9 @@
     body{margin:0;background:radial-gradient(1200px 800px at 70% 20%, #1b2744 0%, #0b1220 60%, #050914 100%);color:var(--ink);font:16px/1.3 Inter,Segoe UI,system-ui,-apple-system,Roboto,Arial,sans-serif;overflow-x:hidden}
     header{padding:18px 20px 10px;text-align:center;position:sticky;top:0;z-index:3;backdrop-filter:blur(6px);background:linear-gradient(180deg,rgba(11,18,32,.85),rgba(11,18,32,.35) 70%,rgba(11,18,32,0));border-bottom:1px solid rgba(255,255,255,.06)}
     header h1{margin:.2rem 0 .4rem;font-size:clamp(20px,3vw,34px)} header p{margin:0;color:var(--muted)}
+    .back-row{display:flex;justify-content:flex-start;margin-bottom:.5rem}
+    .back-link{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:999px;background:rgba(96,165,250,.15);color:#dbeafe;text-decoration:none;font-weight:600;letter-spacing:.01em;transition:background .2s ease,transform .2s ease}
+    .back-link:hover{background:rgba(96,165,250,.25);transform:translateY(-2px)}
     .wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
     @media(max-width:1024px){.wrap{grid-template-columns:1fr}}
     
@@ -123,6 +126,9 @@
 </style>
 </head><body>
   <header>
+    <div class="back-row">
+      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+    </div>
     <h1>The Definitive DAX Filter Context – Water Plant</h1>
     <p>Data flows from the <strong>Data Model</strong> through filters. <strong>Row-Level Security</strong> is a locked tap. <strong>CALCULATE()</strong> can rewrite filters (except RLS).</p>
   </header>

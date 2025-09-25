@@ -212,9 +212,38 @@
         border: 1px solid rgba(255,255,255,.08);
         border-radius: 18px;
     }
+    .top-bar {
+      max-width: 1400px;
+      margin: 16px auto 0;
+      padding: 0 16px;
+      display: flex;
+      justify-content: flex-start;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: 999px;
+      background: rgba(96, 165, 250, 0.15);
+      color: #dbeafe;
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      box-shadow: 0 10px 24px rgba(5, 15, 35, 0.35);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    .back-link:hover {
+      background: rgba(96, 165, 250, 0.25);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
+
+  <div class="top-bar">
+    <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+  </div>
 
   <div class="wrap">
     <div class="left-column">
