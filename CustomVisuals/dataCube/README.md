@@ -78,19 +78,7 @@ A high‑performance 3D “Data Cube” visual for Power BI that renders three c
 - All control panel buttons expose `title`/`aria-label` tooltips.
 - Configurable label colors for higher contrast.
 
-## Known Limits / Roadmap
 
-- Full depth occlusion of SVG labels by foreground cubes is not computed; back‑face hiding covers the common case.
-- Potential future additions: optional depth‑aware occlusion, per‑axis presets, keyboard navigation improvements.
-
-## Repository Structure
-
-- `src/visual.ts` – main visual implementation (three.js + SVG overlays)
-- `src/settings.ts` – formatting pane settings model
-- `style/visual.less` – minimal styles for overlays
-- `capabilities.json` – data roles, objects, tooltips capability
-
----
 
 For issues or feature requests, please open an issue with a clear description, data sample, and screenshot if possible.
 
