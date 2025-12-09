@@ -149,8 +149,7 @@
           <defs>
             <circle id="leftCircle" cx="130" cy="140" r="90"></circle>
             <circle id="rightCircle" cx="210" cy="140" r="90"></circle>
-            <clipPath id="intersectionClip">
-              <use href="#leftCircle" />
+            <clipPath id="rightClip">
               <use href="#rightCircle" />
             </clipPath>
             <mask id="leftAntiMask">
@@ -169,7 +168,7 @@
           <use href="#rightCircle" class="highlight right-fill" id="rightHighlight"></use>
           <rect x="0" y="0" width="340" height="260" class="highlight left-fill" id="leftOnlyHighlight" mask="url(#leftAntiMask)"></rect>
           <rect x="0" y="0" width="340" height="260" class="highlight right-fill" id="rightOnlyHighlight" mask="url(#rightAntiMask)"></rect>
-          <rect x="0" y="0" width="340" height="260" class="highlight intersection-fill" id="intersectionHighlight" clip-path="url(#intersectionClip)"></rect>
+          <use href="#leftCircle" class="highlight intersection-fill" id="intersectionHighlight" clip-path="url(#rightClip)"></use>
         </svg>
         <div class="legend">
           <span><span class="dot" style="background: rgba(37,99,235,0.6);"></span>Orders (Left)</span>
