@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power BI Chart Selection Guide</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js" referrerpolicy="no-referrer"></script>
+  <style>
+    :root {
+      --bg: linear-gradient(180deg, #f8fbff 0%, #eef2ff 100%);
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #4b5563;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --shadow: rgba(15, 23, 42, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 2.5rem 1.25rem 1rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2.4rem;
+      color: #0f172a;
+    }
+    .subtitle {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem 2.5rem;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 16px;
+      box-shadow: 0 16px 40px var(--shadow);
+      border: 1px solid rgba(37, 99, 235, 0.12);
+    }
+    .sidebar {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: sticky;
+      top: 1rem;
+      height: fit-content;
+    }
+    .sidebar h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      color: #0f172a;
+    }
+    .chart-btn {
+      background: rgba(37, 99, 235, 0.06);
+      border: 1px solid transparent;
+      color: #0f172a;
+      padding: 0.85rem 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s ease;
+      width: 100%;
+      font-size: 0.97rem;
+    }
+    .chart-btn:hover {
+      border-color: rgba(37, 99, 235, 0.22);
+      transform: translateX(4px);
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+    }
+    .chart-btn.active {
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.14), rgba(16, 185, 129, 0.14));
+      border-color: rgba(37, 99, 235, 0.4);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.18);
+    }
+    .main-panel {
+      padding: 1.5rem 1.75rem 2rem;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: 999px;
+      color: #065f46;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .chart-title {
+      margin: 0.65rem 0 0.2rem;
+      font-size: 1.75rem;
+    }
+    .purpose {
+      color: var(--muted);
+      margin: 0 0 1.1rem 0;
+      font-size: 1.02rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      padding: 1rem 1.1rem;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.04);
+    }
+    .card h4 { margin: 0 0 0.35rem; }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pill {
+      padding: 0.4rem 0.7rem;
+      background: rgba(37, 99, 235, 0.12);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: #1d4ed8;
+    }
+    #chart {
+      height: 420px;
+      width: 100%;
+      margin-top: 1.25rem;
+    }
+    .helper {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      background: rgba(37, 99, 235, 0.06);
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      color: #1f2937;
+    }
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Choose the Right Power BI Chart</h1>
+    <p class="subtitle">Pick a chart to see when to use it, common scenarios, and a live animated example powered by Apache ECharts.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="panel sidebar">
+      <h2>Chart Library</h2>
+      <div id="chartList"></div>
+    </aside>
+
+    <section class="panel main-panel">
+      <div class="tag" id="chartCategory"></div>
+      <h2 class="chart-title" id="chartTitle"></h2>
+      <p class="purpose" id="chartPurpose"></p>
+
+      <div class="grid">
+        <div class="card">
+          <h4>Best for</h4>
+          <div class="pill-list" id="chartBestFor"></div>
+        </div>
+        <div class="card">
+          <h4>Use in Power BI when you need to</h4>
+          <ul id="chartUseCases"></ul>
+        </div>
+        <div class="card">
+          <h4>Design tips</h4>
+          <ul id="chartTips"></ul>
+        </div>
+      </div>
+
+      <div id="chart"></div>
+      <div class="helper" id="chartHelper"></div>
+    </section>
+  </div>
+
+  <script>
+    const charts = [
+      {
+        key: 'bar',
+        title: 'Horizontal Bar (Top N)',
+        category: 'Comparison',
+        purpose: 'Rank items side-by-side and keep long labels readable. Perfect for Top/Bottom analyses.',
+        bestFor: ['Top/Bottom performers', 'Ranking with long labels', 'Variance across categories'],
+        useCases: [
+          'Top 5 customers by revenue with dynamic ranking',
+          'Compare performance by region where names are lengthy',
+          'Show variance bars with reference lines for targets'
+        ],
+        tips: [
+          'Sort bars descending and label values directly for clarity.',
+          'Limit to 8–12 categories or switch to a treemap/table.',
+          'Use divergent colors to highlight under/over performers.'
+        ],
+        helper: 'Use a horizontal bar when readability matters—especially for Top N or long category names.',
+        option: () => ({
+          animationDuration: 900,
+          grid: { left: 110, right: 40, top: 30, bottom: 40 },
+          xAxis: { type: 'value', axisLine: { lineStyle: { color: '#94a3b8' } }, splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          yAxis: {
+            type: 'category',
+            data: ['Contoso Retail', 'Northwind Stores', 'Adventure Co', 'City Markets', 'Market Hub'],
+            axisLine: { lineStyle: { color: '#94a3b8' } },
+            axisLabel: { interval: 0 }
+          },
+          series: [{
+            type: 'bar',
+            data: [820, 690, 580, 480, 430],
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                { offset: 0, color: '#2563eb' },
+                { offset: 1, color: '#60a5fa' }
+              ])
+            },
+            label: { show: true, position: 'right', formatter: '{c}K' }
+          }]
+        })
+      },
+      {
+        key: 'column',
+        title: 'Clustered Column',
+        category: 'Comparison',
+        purpose: 'Compare multiple series across the same categories—ideal for month-over-month or year-over-year.',
+        bestFor: ['Period-over-period comparisons', 'Small multiples across categories', 'Breakdown by business unit'],
+        useCases: [
+          'Sales vs. budget by month',
+          'YoY comparison for new vs. returning customers',
+          'Call center volume by channel (phone, chat, email)'
+        ],
+        tips: [
+          'Keep series to 3 or fewer; otherwise consider a combo chart.',
+          'Align the axis origin at zero to avoid visual bias.',
+          'Add data labels for presentations; hide for analytical views.'
+        ],
+        helper: 'Pair with a line (combo chart) when you need to show a total alongside categories.',
+        option: () => ({
+          animationDuration: 900,
+          tooltip: { trigger: 'axis' },
+          legend: { data: ['Actual', 'Budget'] },
+          grid: { left: 50, right: 20, top: 50, bottom: 40 },
+          xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] },
+          yAxis: { type: 'value', axisLine: { lineStyle: { color: '#94a3b8' } }, splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          series: [
+            { name: 'Actual', type: 'bar', data: [120, 132, 101, 134, 180, 190], itemStyle: { color: '#2563eb' } },
+            { name: 'Budget', type: 'bar', data: [110, 122, 120, 140, 160, 175], itemStyle: { color: '#10b981' } }
+          ]
+        })
+      },
+      {
+        key: 'line',
+        title: 'Line Chart',
+        category: 'Trend',
+        purpose: 'Show change over time and spot directional patterns, seasonality, and turning points.',
+        bestFor: ['Time series trends', 'Seasonality analysis', 'Volatility tracking'],
+        useCases: [
+          'Daily active users with a 7-day moving average',
+          'Monthly revenue with forecast overlay',
+          'Website sessions with weekend/weekday pattern'
+        ],
+        tips: [
+          'Use markers for significant events like launches or outages.',
+          'Avoid more than 4–5 series; use small multiples instead.',
+          'Use a subtle area gradient to indicate confidence or forecast.'
+        ],
+        helper: 'Perfect for trend detection—pair with slicers to isolate periods in Power BI.',
+        option: () => ({
+          animationDuration: 1000,
+          tooltip: { trigger: 'axis' },
+          grid: { left: 50, right: 20, top: 30, bottom: 40 },
+          xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'] },
+          yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          series: [{
+            type: 'line',
+            data: [320, 340, 360, 330, 370, 420, 440, 460],
+            smooth: true,
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(37, 99, 235, 0.35)' },
+                { offset: 1, color: 'rgba(37, 99, 235, 0.05)' }
+              ])
+            },
+            lineStyle: { width: 3, color: '#2563eb' },
+            symbolSize: 8
+          }]
+        })
+      },
+      {
+        key: 'area',
+        title: 'Area Chart',
+        category: 'Trend',
+        purpose: 'Emphasize cumulative change over time and highlight magnitude beneath the curve.',
+        bestFor: ['Cumulative totals', 'Contribution to total over time', 'Before/after launches'],
+        useCases: [
+          'Cumulative sign-ups after a campaign launch',
+          'Energy consumption during peak vs. off-peak hours',
+          'Support tickets opened vs. resolved over time'
+        ],
+        tips: [
+          'Use transparency so the grid remains readable.',
+          'Stack only when the series share the same unit of measure.',
+          'Annotate key inflection points for storytelling.'
+        ],
+        helper: 'Great for highlighting how much volume accumulates over time versus baseline.',
+        option: () => ({
+          animationDuration: 1000,
+          tooltip: { trigger: 'axis' },
+          grid: { left: 50, right: 30, top: 30, bottom: 40 },
+          xAxis: { type: 'category', data: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'] },
+          yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          series: [
+            {
+              name: 'Opened',
+              type: 'line',
+              stack: 'tickets',
+              areaStyle: {},
+              smooth: true,
+              symbol: 'circle',
+              data: [120, 160, 150, 180, 210, 230],
+              itemStyle: { color: '#2563eb' }
+            },
+            {
+              name: 'Resolved',
+              type: 'line',
+              stack: 'tickets',
+              areaStyle: {},
+              smooth: true,
+              symbol: 'circle',
+              data: [80, 120, 140, 150, 170, 190],
+              itemStyle: { color: '#10b981' }
+            }
+          ]
+        })
+      },
+      {
+        key: 'treemap',
+        title: 'Treemap',
+        category: 'Composition',
+        purpose: 'Display hierarchical breakdowns with relative sizes. Great for budget allocations or product hierarchies.',
+        bestFor: ['Hierarchical categories', 'Space-constrained dashboards', 'Contribution to total'],
+        useCases: [
+          'Product category → subcategory → brand contribution to revenue',
+          'Cost center breakdown for budgets',
+          'App feature usage distribution'
+        ],
+        tips: [
+          'Limit levels to 2–3 to keep rectangles readable.',
+          'Use labels on the highest level and tooltips for details.',
+          'Avoid treemaps when precise comparisons are required.'
+        ],
+        helper: 'Use treemaps when hierarchy matters and you need a compact view of proportion.',
+        option: () => ({
+          animationDuration: 800,
+          tooltip: { trigger: 'item', formatter: '{b}: {c}K' },
+          series: [{
+            type: 'treemap',
+            data: [
+              { name: 'Category A', value: 520, children: [ { name: 'Brand A1', value: 220 }, { name: 'Brand A2', value: 180 }, { name: 'Brand A3', value: 120 } ] },
+              { name: 'Category B', value: 360, children: [ { name: 'Brand B1', value: 150 }, { name: 'Brand B2', value: 130 }, { name: 'Brand B3', value: 80 } ] },
+              { name: 'Category C', value: 260, children: [ { name: 'Brand C1', value: 140 }, { name: 'Brand C2', value: 120 } ] }
+            ],
+            leafDepth: 2,
+            label: { formatter: '{b}', color: '#0f172a' },
+            breadcrumb: { show: false },
+            itemStyle: { borderColor: '#e2e8f0', borderWidth: 1 },
+          }]
+        })
+      },
+      {
+        key: 'pie',
+        title: 'Donut / Pie',
+        category: 'Composition',
+        purpose: 'Show proportional contribution to a whole. Best when limited to a few slices.',
+        bestFor: ['Share of total', 'Single point-in-time contribution', 'Simple categorical breakdown'],
+        useCases: [
+          'Channel mix share (web, store, partner)',
+          'Share of wallet for top 4 brands',
+          'Budget allocation by department'
+        ],
+        tips: [
+          'Keep slices to 5 or fewer; group the rest as “Other”.',
+          'Use data labels outside with leader lines for readability.',
+          'Avoid comparing multiple pies side-by-side; use stacked bars instead.'
+        ],
+        helper: 'Use a donut instead of a full pie to make room for a key KPI in the center.',
+        option: () => ({
+          animationDuration: 900,
+          tooltip: { trigger: 'item' },
+          legend: { top: '5%' },
+          series: [{
+            name: 'Channel Share',
+            type: 'pie',
+            radius: ['45%', '70%'],
+            avoidLabelOverlap: true,
+            itemStyle: { borderRadius: 8, borderColor: '#fff', borderWidth: 2 },
+            label: { formatter: '{b}: {d}%' },
+            data: [
+              { value: 520, name: 'Web' },
+              { value: 360, name: 'Store' },
+              { value: 220, name: 'Partner' },
+              { value: 120, name: 'Other' }
+            ]
+          }]
+        })
+      },
+      {
+        key: 'waterfall',
+        title: 'Waterfall',
+        category: 'Variance',
+        purpose: 'Explain step-by-step movement from a starting value to an ending value (bridges).',
+        bestFor: ['Financial bridges', 'Variance walk', 'Additive/subtractive components'],
+        useCases: [
+          'Profit bridge from revenue to net income',
+          'Headcount bridge (starting → hires → exits → ending)',
+          'Budget vs. actual variance breakdown'
+        ],
+        tips: [
+          'Order the steps logically (e.g., revenue → cost → margin).',
+          'Color positive vs. negative steps distinctly.',
+          'Use subtotals to anchor key checkpoints.'
+        ],
+        helper: 'Use waterfalls when explaining “how we got here” to executives.',
+        option: () => {
+          const steps = [
+            { label: 'Start', type: 'total', value: 1200 },
+            { label: 'Revenue', type: 'delta', value: 500 },
+            { label: 'COGS', type: 'delta', value: -420 },
+            { label: 'Operating', type: 'delta', value: -180 },
+            { label: 'Tax', type: 'delta', value: -80 },
+            { label: 'End', type: 'total' }
+          ];
+
+          let running = 0;
+          const baseSeries = [];
+          const valueSeries = [];
+          const labels = [];
+
+          steps.forEach((step, index) => {
+            if (index === steps.length - 1) {
+              labels.push(step.label);
+              baseSeries.push(0);
+              valueSeries.push(running);
+              return;
+            }
+
+            labels.push(step.label);
+            baseSeries.push(running);
+            running += step.value;
+            valueSeries.push(step.value);
+          });
+
+          return {
+            animationDuration: 900,
+            tooltip: { trigger: 'axis' },
+            grid: { left: 60, right: 20, top: 40, bottom: 40 },
+            xAxis: { type: 'category', data: labels },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+            series: [
+              {
+                name: 'Base',
+                type: 'bar',
+                stack: 'total',
+                itemStyle: { color: 'transparent' },
+                emphasis: { disabled: true },
+                data: baseSeries
+              },
+              {
+                name: 'Change',
+                type: 'bar',
+                stack: 'total',
+                data: valueSeries,
+                itemStyle: {
+                  color: params => params.value >= 0 ? '#10b981' : '#ef4444'
+                },
+                label: {
+                  show: true,
+                  position: 'inside',
+                  formatter: ({ dataIndex }) => baseSeries[dataIndex] + valueSeries[dataIndex]
+                }
+              }
+            ]
+          };
+        }
+      },
+      {
+        key: 'scatter',
+        title: 'Scatter / Bubble',
+        category: 'Relationship',
+        purpose: 'Reveal relationships, clusters, or outliers between two (scatter) or three (bubble) variables.',
+        bestFor: ['Correlations', 'Outlier detection', 'Segment clustering'],
+        useCases: [
+          'Marketing spend vs. revenue with bubble size as margin',
+          'Customer age vs. lifetime value clusters',
+          'Delivery time vs. satisfaction with outlier labeling'
+        ],
+        tips: [
+          'Limit bubbles to ~50 points; otherwise add jitter or filters.',
+          'Use color to encode segment and size for a third metric.',
+          'Add trendlines or reference bands for correlation.'
+        ],
+        helper: 'Use scatterplots to validate hypotheses about correlation before modeling.',
+        option: () => ({
+          animationDuration: 800,
+          tooltip: { trigger: 'item', formatter: ({ data }) => `Spend: $${data[0]}K\nRevenue: $${data[1]}K` },
+          grid: { left: 60, right: 30, top: 30, bottom: 50 },
+          xAxis: { name: 'Marketing Spend', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          yAxis: { name: 'Revenue', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          series: [{
+            type: 'scatter',
+            symbolSize: val => Math.sqrt(val[0] + val[1]),
+            itemStyle: { color: '#2563eb' },
+            data: [
+              [20, 35], [40, 55], [35, 60], [50, 78], [65, 82], [80, 88], [30, 40], [55, 64]
+            ]
+          }]
+        })
+      }
+    ];
+
+    const chartList = document.getElementById('chartList');
+    const chartCategory = document.getElementById('chartCategory');
+    const chartTitle = document.getElementById('chartTitle');
+    const chartPurpose = document.getElementById('chartPurpose');
+    const chartBestFor = document.getElementById('chartBestFor');
+    const chartUseCases = document.getElementById('chartUseCases');
+    const chartTips = document.getElementById('chartTips');
+    const chartHelper = document.getElementById('chartHelper');
+
+    const chartInstance = echarts.init(document.getElementById('chart'));
+
+    function renderPills(container, items) {
+      container.innerHTML = '';
+      items.forEach(item => {
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = item;
+        container.appendChild(pill);
+      });
+    }
+
+    function renderList(container, items) {
+      container.innerHTML = '';
+      items.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        container.appendChild(li);
+      });
+    }
+
+    function loadChart(chart) {
+      document.querySelectorAll('.chart-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`[data-key="${chart.key}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      chartCategory.textContent = chart.category;
+      chartTitle.textContent = chart.title;
+      chartPurpose.textContent = chart.purpose;
+      chartHelper.textContent = chart.helper;
+
+      renderPills(chartBestFor, chart.bestFor);
+      renderList(chartUseCases, chart.useCases);
+      renderList(chartTips, chart.tips);
+
+      chartInstance.clear();
+      chartInstance.setOption(chart.option());
+    }
+
+    function initSidebar() {
+      charts.forEach(chart => {
+        const button = document.createElement('button');
+        button.className = 'chart-btn';
+        button.dataset.key = chart.key;
+        button.innerHTML = `<strong>${chart.title}</strong><br><span style="color: var(--muted); font-size: 0.9rem;">${chart.category}</span>`;
+        button.addEventListener('click', () => loadChart(chart));
+        chartList.appendChild(button);
+      });
+    }
+
+    initSidebar();
+    loadChart(charts[0]);
+
+    window.addEventListener('resize', () => chartInstance.resize());
+  </script>
+</body>
+</html>
