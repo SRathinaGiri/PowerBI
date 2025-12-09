@@ -210,28 +210,72 @@
           'Use divergent colors to highlight under/over performers.'
         ],
         helper: 'Use a horizontal bar when readability matters—especially for Top N or long category names.',
-        option: () => ({
-          animationDuration: 900,
-          grid: { left: 110, right: 40, top: 30, bottom: 40 },
-          xAxis: { type: 'value', axisLine: { lineStyle: { color: '#94a3b8' } }, splitLine: { lineStyle: { color: '#e2e8f0' } } },
-          yAxis: {
-            type: 'category',
-            data: ['Contoso Retail', 'Northwind Stores', 'Adventure Co', 'City Markets', 'Market Hub'],
-            axisLine: { lineStyle: { color: '#94a3b8' } },
-            axisLabel: { interval: 0 }
-          },
-          series: [{
-            type: 'bar',
-            data: [820, 690, 580, 480, 430],
-            itemStyle: {
-              color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
-                { offset: 0, color: '#2563eb' },
-                { offset: 1, color: '#60a5fa' }
-              ])
+        option: () => {
+          const topCustomers = [
+            { name: 'Contoso Retail', revenue: 820, profit: -24 },
+            { name: 'Northwind Stores', revenue: 690, profit: 58 },
+            { name: 'Adventure Co', revenue: 580, profit: 42 },
+            { name: 'City Markets', revenue: 480, profit: 30 },
+            { name: 'Market Hub', revenue: 430, profit: 18 }
+          ];
+
+          const sorted = [...topCustomers].sort((a, b) => a.revenue - b.revenue);
+
+          return {
+            animationDuration: 900,
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: { type: 'shadow' },
+              formatter: ({ 0: revenuePoint, 1: profitPoint }) => {
+                const valueLabel = `${revenuePoint.name}: ${revenuePoint.value}K revenue`;
+                const profitLabel = `Profit: ${profitPoint.value}K`;
+                return `${valueLabel}<br/>${profitLabel}`;
+              }
             },
-            label: { show: true, position: 'right', formatter: '{c}K' }
-          }]
-        })
+            legend: { data: ['Revenue (Top N)', 'Profit (Top N)'] },
+            grid: { left: 120, right: 60, top: 50, bottom: 50 },
+            xAxis: {
+              type: 'value',
+              axisLine: { lineStyle: { color: '#94a3b8' } },
+              splitLine: { lineStyle: { color: '#e2e8f0' } }
+            },
+            yAxis: {
+              type: 'category',
+              data: sorted.map((d) => d.name),
+              inverse: true,
+              axisLine: { lineStyle: { color: '#94a3b8' } },
+              axisLabel: { interval: 0 }
+            },
+            series: [
+              {
+                name: 'Revenue (Top N)',
+                type: 'bar',
+                data: sorted.map((d) => d.revenue),
+                barGap: '20%',
+                itemStyle: {
+                  color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                    { offset: 0, color: '#2563eb' },
+                    { offset: 1, color: '#60a5fa' }
+                  ])
+                },
+                label: { show: true, position: 'right', formatter: '{c}K' }
+              },
+              {
+                name: 'Profit (Top N)',
+                type: 'bar',
+                data: sorted.map((d) => d.profit),
+                itemStyle: {
+                  color: (params) => (params.value < 0 ? '#ef4444' : '#10b981')
+                },
+                label: {
+                  show: true,
+                  position: (params) => (params.value < 0 ? 'left' : 'right'),
+                  formatter: '{c}K'
+                }
+              }
+            ]
+          };
+        }
       },
       {
         key: 'column',
