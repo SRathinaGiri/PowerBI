@@ -219,7 +219,7 @@
             { name: 'Market Hub', revenue: 430, profit: 18 }
           ];
 
-          const sorted = [...topCustomers].sort((a, b) => a.revenue - b.revenue);
+          const sorted = [...topCustomers].sort((a, b) => b.revenue - a.revenue);
 
           return {
             animationDuration: 900,
