@@ -3,462 +3,471 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Power Query Joins Playground</title>
+  <title>Purchases vs Payments Join Visualizer</title>
   <style>
     :root {
-      --bg: linear-gradient(180deg, #f4f7fb 0%, #eef2ff 100%);
+      --bg: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
       --panel: #ffffff;
       --ink: #0f172a;
-      --muted: #475569;
-      --accent: #2563eb;
-      --accent-2: #22c55e;
-      --shadow: rgba(15, 23, 42, 0.12);
+      --muted: #64748b;
+      --shadow: rgba(15, 23, 42, 0.08);
+      --border: #e2e8f0;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
       min-height: 100vh;
+      padding-bottom: 3rem;
     }
     header {
       text-align: center;
-      padding: 2.5rem 1rem 1rem;
+      padding: 2rem 1rem 1.5rem;
     }
-    h1 { margin: 0; font-size: 2.5rem; color: #0b1533; }
-    .subtitle { margin-top: 0.5rem; color: var(--muted); font-size: 1.05rem; }
+    h1 { margin: 0; font-size: 2.2rem; color: #1e293b; }
+    .subtitle { margin-top: 0.5rem; color: var(--muted); font-size: 1.1rem; }
+    
+    /* MAIN LAYOUT GRID */
     .layout {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 0 1.25rem 2.5rem;
+      padding: 0 1.5rem;
       display: grid;
-      gap: 1.25rem;
-      grid-template-columns: 360px 1fr;
+      /* Split top section into two equal halves */
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: stretch;
     }
+
     .panel {
       background: var(--panel);
       border-radius: 16px;
-      box-shadow: 0 16px 38px var(--shadow);
-      border: 1px solid rgba(37, 99, 235, 0.12);
+      box-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -1px var(--shadow);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      height: 100%;
     }
-    .controls { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
-    .controls h2 { margin: 0; font-size: 1.2rem; color: #0b1533; }
-    .field { display: flex; flex-direction: column; gap: 0.35rem; }
-    label { color: var(--muted); font-weight: 600; }
+
+    /* --- LEFT COLUMN: Controls + SQL --- */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.5rem; }
+    label { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    
     select {
-      padding: 0.75rem 0.85rem;
-      border-radius: 12px;
-      border: 1px solid rgba(37, 99, 235, 0.28);
-      font-size: 0.98rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 1rem;
       background: #f8fafc;
-      color: var(--ink);
-    }
-    .pill-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .pill {
-      background: rgba(37, 99, 235, 0.08);
-      border: 1px solid transparent;
-      color: #0b1533;
-      padding: 0.45rem 0.7rem;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      transition: all 0.18s ease;
+      color: #334155;
       cursor: pointer;
+      width: 100%;
     }
-    .pill.active { border-color: rgba(37, 99, 235, 0.55); box-shadow: 0 8px 18px rgba(37,99,235,0.18); background: rgba(37,99,235,0.14); }
-    .viz {
-      padding: 1.25rem 1.5rem;
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 1.25rem;
-      align-items: center;
-    }
-    .venn {
-      background: radial-gradient(circle at 30% 30%, rgba(37, 99, 235, 0.07), transparent 45%),
-                  radial-gradient(circle at 70% 70%, rgba(34, 197, 94, 0.07), transparent 50%);
-      border: 1px solid rgba(15, 23, 42, 0.06);
-      border-radius: 18px;
+    select:focus { outline: 2px solid #2563eb; border-color: transparent; }
+
+    /* Logic Box */
+    .question-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
       padding: 1rem;
+      border-radius: 0 8px 8px 0;
     }
-    svg { width: 100%; height: 280px; }
-    .base-circle { fill: none; stroke: rgba(15, 23, 42, 0.22); stroke-width: 2.5; }
-    .highlight { opacity: 0; transition: opacity 0.35s ease; }
-    .highlight.show { opacity: 0.78; }
-    .left-fill { fill: rgba(37, 99, 235, 0.5); }
-    .right-fill { fill: rgba(34, 197, 94, 0.5); }
-    .intersection-fill { fill: rgba(99, 102, 241, 0.75); }
-    .legend { display: flex; gap: 0.9rem; flex-wrap: wrap; margin-top: 0.75rem; color: var(--muted); font-weight: 600; }
-    .legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
-    .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-    .tables { padding: 1.25rem; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    table { width: 100%; border-collapse: collapse; background: #f8fafc; border-radius: 12px; overflow: hidden; }
-    th, td { padding: 0.65rem 0.7rem; text-align: left; border-bottom: 1px solid rgba(15,23,42,0.06); }
-    th { background: rgba(37, 99, 235, 0.08); color: #0b1533; font-size: 0.95rem; }
-    td { color: #0f172a; font-size: 0.93rem; }
-    .result-panel { padding: 1.25rem 1.5rem 1.5rem; }
-    .result-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-    .tag { background: rgba(16,185,129,0.14); color: #065f46; padding: 0.25rem 0.65rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem; }
-    .sql-block { background: #0b1533; color: #e2e8f0; padding: 1rem; border-radius: 12px; margin-top: 1rem; font-family: "Cascadia Code", Consolas, monospace; font-size: 0.92rem; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05); }
-    .note { margin-top: 0.75rem; color: var(--muted); }
-    @media (max-width: 1024px) {
+    .question-text { font-weight: 700; color: #1e3a8a; margin: 0 0 0.25rem 0; font-size: 1.1rem; }
+    .answer-text { color: #334155; line-height: 1.5; margin: 0; font-size: 0.95rem; }
+    
+    .pill {
+      display: inline-block;
+      background: #fff7ed;
+      color: #c2410c;
+      padding: 0.25rem 0.75rem;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 1px solid #ffedd5;
+      margin-top: 0.75rem;
+    }
+
+    /* SQL Box */
+    .sql-wrapper h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--muted); text-transform: uppercase; }
+    .sql-container {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: 'Cascadia Code', Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* --- RIGHT COLUMN: Venn Visual --- */
+    .viz-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #FFFDE7; 
+      border-color: rgba(0,0,0,0.05);
+    }
+
+    svg { 
+      width: 100%; 
+      height: 100%;
+      max-height: 400px;
+      display: block; 
+    }
+
+    /* SVG Styles */
+    .circle-base { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 6, 4; }
+    .svg-label { font-family: sans-serif; font-weight: 700; fill: #64748b; font-size: 16px; text-transform: uppercase; pointer-events: none; user-select: none; }
+    .highlight-shape { fill: rgba(249, 115, 22, 0.85); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
+    .highlight-shape.active { opacity: 1; }
+
+    .legend { margin-top: 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; color: #64748b; font-weight: 500; }
+    .legend-item { display: flex; align-items: center; gap: 0.5rem; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.white { background: #fff; border: 1px dashed #94a3b8; }
+    .dot.orange { background: rgba(249, 115, 22, 0.85); }
+
+
+    /* --- BOTTOM SECTION: TABLES --- */
+    .tables-row {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .table-card {
+      background: var(--panel);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    
+    .table-card h3 { margin: 0 0 1rem 0; font-size: 1.1rem; color: #334155; }
+
+    /* Result Table (Full Width) */
+    .result-row {
+      grid-column: 1 / -1;
+      margin-top: 1.5rem;
+    }
+    .result-card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #fed7aa;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
+    }
+    .result-card h3 { color: #c2410c; margin: 0 0 1rem 0; font-size: 1.25rem; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 0.75rem; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    tr:last-child td { border-bottom: none; }
+    
+    .result-table th { background: #ffedd5; color: #9a3412; border-bottom: 2px solid #fdba74; }
+
+    @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
-      .viz { grid-template-columns: 1fr; }
+      .tables-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Power Query Joins (Orders, Customers, Products)</h1>
-    <p class="subtitle">Toggle join types to see how Orders combine with Customers or Products, illustrated with Venn diagrams, live result tables, and matching SQL equivalents.</p>
-  </header>
-  <div class="layout">
-    <section class="panel controls">
-      <h2>Choose your scenario</h2>
-      <div class="field">
-        <label for="pairSelect">Tables to join</label>
-        <div class="pill-row" id="pairSelect">
-          <button class="pill active" data-pair="customers">Orders &amp; Customers</button>
-          <button class="pill" data-pair="products">Orders &amp; Products</button>
-        </div>
-      </div>
-      <div class="field">
-        <label for="joinSelect">Join type</label>
-        <select id="joinSelect">
-          <option value="inner">Inner Join (matching rows only)</option>
-          <option value="left">Left Outer Join (all Orders)</option>
-          <option value="right">Right Outer Join (all from paired table)</option>
-          <option value="full">Full Outer Join (everyone)</option>
-          <option value="leftAnti">Left Anti Join (Orders without a match)</option>
-          <option value="rightAnti">Right Anti Join (records in paired table without Orders)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Quick prompts</label>
-        <div class="pill-row">
-          <span class="pill">Inner &rarr; Customers who placed an order</span>
-          <span class="pill">Left Anti &rarr; Orders with missing Customer/Product</span>
-          <span class="pill">Right Anti &rarr; Customers/Products waiting for their first order</span>
-        </div>
-      </div>
-    </section>
 
-    <section class="panel viz">
-      <div class="venn">
-        <svg viewBox="0 0 340 260" aria-labelledby="vennTitle" role="img">
-          <title id="vennTitle">Venn diagram showing included regions of the join</title>
-          <defs>
-            <circle id="leftCircle" cx="130" cy="140" r="90"></circle>
-            <circle id="rightCircle" cx="210" cy="140" r="90"></circle>
-            <clipPath id="rightClip">
-              <use href="#rightCircle" />
-            </clipPath>
-            <mask id="leftAntiMask">
-              <rect width="100%" height="100%" fill="white" />
-              <use href="#rightCircle" fill="black" />
-            </mask>
-            <mask id="rightAntiMask">
-              <rect width="100%" height="100%" fill="white" />
-              <use href="#leftCircle" fill="black" />
-            </mask>
-          </defs>
-          <use href="#leftCircle" class="base-circle"></use>
-          <use href="#rightCircle" class="base-circle"></use>
+<header>
+  <h1>Purchases vs. Payments</h1>
+  <p class="subtitle">Visualizing accounting data relationships with Power Query Joins</p>
+</header>
 
-          <use href="#leftCircle" class="highlight left-fill" id="leftHighlight"></use>
-          <use href="#rightCircle" class="highlight right-fill" id="rightHighlight"></use>
-          <rect x="0" y="0" width="340" height="260" class="highlight left-fill" id="leftOnlyHighlight" mask="url(#leftAntiMask)"></rect>
-          <rect x="0" y="0" width="340" height="260" class="highlight right-fill" id="rightOnlyHighlight" mask="url(#rightAntiMask)"></rect>
-          <use href="#leftCircle" class="highlight intersection-fill" id="intersectionHighlight" clip-path="url(#rightClip)"></use>
-        </svg>
-        <div class="legend">
-          <span><span class="dot" style="background: rgba(37,99,235,0.6);"></span>Orders (Left)</span>
-          <span><span class="dot" style="background: rgba(34,197,94,0.6);"></span>Customers / Products (Right)</span>
-          <span><span class="dot" style="background: rgba(99,102,241,0.8);"></span>Included region</span>
-        </div>
-      </div>
-      <div>
-        <h2>Animated join story</h2>
-        <p class="subtitle" style="margin-top:0;">Watch which records flow into the result set.</p>
-        <div id="summaryCards" class="pill-row"></div>
-        <p class="note">Both source tables stay visible below, along with the resulting rows.</p>
-      </div>
-    </section>
+<div class="layout">
+  
+  <aside class="panel controls-panel">
+    
+    <div class="field">
+      <label for="scenarioSelect">Select a Business Question</label>
+      <select id="scenarioSelect">
+        <option value="inner">1. Purchases which are paid? (Inner Join)</option>
+        <option value="leftAnti">2. Unpaid Purchases? (Left Anti Join)</option>
+        <option value="rightAnti">3. Payments Unrelated to Purchases? (Right Anti)</option>
+        <option value="left">4. Purchases data with Payments? (Left Outer)</option>
+        <option value="right">5. Payments data with Purchases? (Right Outer)</option>
+        <option value="full">6. Everything (Full Outer Join)</option>
+      </select>
+    </div>
+
+    <div class="question-box">
+      <p class="question-text" id="qText">Which purchases have been paid?</p>
+      <p class="answer-text" id="aText">This join lists only the purchases that have a matching record in the Payments table.</p>
+      <span class="pill" id="rowCountPill">0 rows returned</span>
+    </div>
+
+    <div class="sql-wrapper">
+      <h3>SQL Equivalent</h3>
+      <div class="sql-container" id="sqlOutput"></div>
+    </div>
+
+  </aside>
+
+  <section class="panel viz-panel">
+    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <circle id="leftCircle" cx="140" cy="150" r="90" />
+        <circle id="rightCircle" cx="260" cy="150" r="90" />
+        
+        <mask id="maskLeftAnti">
+          <rect width="100%" height="100%" fill="white"/>
+          <use href="#rightCircle" fill="black"/>
+        </mask>
+
+        <mask id="maskRightAnti">
+          <rect width="100%" height="100%" fill="white"/>
+          <use href="#leftCircle" fill="black"/>
+        </mask>
+
+        <clipPath id="clipInteract">
+          <use href="#rightCircle"/>
+        </clipPath>
+      </defs>
+
+      <use href="#leftCircle" class="circle-base" />
+      <use href="#rightCircle" class="circle-base" />
+
+      <use href="#leftCircle" class="highlight-shape" id="hl-left" />
+      <use href="#rightCircle" class="highlight-shape" id="hl-right" />
+      <use href="#leftCircle" class="highlight-shape" id="hl-inner" clip-path="url(#clipInteract)" />
+      <use href="#leftCircle" class="highlight-shape" id="hl-leftAnti" mask="url(#maskLeftAnti)" />
+      <use href="#rightCircle" class="highlight-shape" id="hl-rightAnti" mask="url(#maskRightAnti)" />
+
+      <text x="80" y="155" class="svg-label">Purchases</text>
+      <text x="270" y="155" class="svg-label">Payments</text>
+    </svg>
+    
+    <div class="legend">
+      <span class="legend-item"><span class="dot white"></span> Data Table</span>
+      <span class="legend-item"><span class="dot orange"></span> Included in Result</span>
+    </div>
+  </section>
+
+  <div class="tables-row">
+    <div class="table-card">
+      <h3>Purchases (Left Table)</h3>
+      <div id="leftTableContainer"></div>
+    </div>
+    <div class="table-card">
+      <h3>Payments (Right Table)</h3>
+      <div id="rightTableContainer"></div>
+    </div>
+  </div>
+  
+  <div class="result-row">
+    <div class="result-card">
+      <h3 id="resultHeader">Result Table</h3>
+      <div id="resultTableContainer"></div>
+    </div>
   </div>
 
-  <section class="panel tables">
-    <div>
-      <h3>Orders (Left Table)</h3>
-      <div id="ordersTable"></div>
-    </div>
-    <div>
-      <h3 id="rightTitle">Customers (Right Table)</h3>
-      <div id="rightTable"></div>
-    </div>
-  </section>
+</div>
 
-  <section class="panel result-panel">
-    <div class="result-header">
-      <div>
-        <h2 id="resultTitle" style="margin:0;">Inner Join Result</h2>
-        <p class="subtitle" id="resultSubtitle" style="margin:0.25rem 0 0;">Customers who placed an order.</p>
-      </div>
-      <span class="tag" id="rowCount">0 rows</span>
-    </div>
-    <div id="resultTable" style="margin-top: 1rem;"></div>
-    <div class="sql-block" id="sqlBlock"></div>
-  </section>
+<script>
+  // --- DATA & LOGIC ---
+  
+  // UPDATED: 'ID' -> 'PurchaseID'
+  const purchases = [
+    { PurchaseID: 'PUR-001', Date: '2023-12-01', Vendor: 'ABC Corp', Amount: 1000 },
+    { PurchaseID: 'PUR-002', Date: '2023-12-05', Vendor: 'XYZ Ltd',  Amount: 500  },
+    { PurchaseID: 'PUR-003', Date: '2023-12-10', Vendor: 'ABC Corp', Amount: 2000 },
+    { PurchaseID: 'PUR-004', Date: '2023-12-12', Vendor: 'Tech Sol', Amount: 750  }
+  ];
 
-  <script>
-    const orders = [
-      { OrderID: 'O-9001', CustomerID: 'C001', ProductID: 'P100', Qty: 5 },
-      { OrderID: 'O-9002', CustomerID: 'C002', ProductID: 'P101', Qty: 2 },
-      { OrderID: 'O-9003', CustomerID: 'C003', ProductID: 'P103', Qty: 1 },
-      { OrderID: 'O-9004', CustomerID: 'C001', ProductID: 'P102', Qty: 3 },
-      { OrderID: 'O-9005', CustomerID: 'C002', ProductID: 'P105', Qty: 4 }
-    ];
+  // UPDATED: 'PurchaseID' -> 'DocID' (The foreign key)
+  const payments = [
+    { PayID: 'PAY-101', DocID: 'PUR-001', Date: '2023-12-15', Amount: 1000 },
+    { PayID: 'PAY-102', DocID: 'PUR-003', Date: '2023-12-20', Amount: 2000 },
+    { PayID: 'PAY-103', DocID: 'EXP-999', Date: '2023-12-25', Amount: 150  }
+  ];
 
-    const customers = [
-      { CustomerID: 'C001', Name: 'Acme Retail', GSTNo: 'GST-09A', City: 'Delhi' },
-      { CustomerID: 'C002', Name: 'North Star Traders', GSTNo: 'GST-22B', City: 'Mumbai' },
-      { CustomerID: 'C003', Name: 'Future Mart', GSTNo: 'GST-31C', City: 'Hyderabad' },
-      { CustomerID: 'C004', Name: 'First-Time Buyer Ltd.', GSTNo: 'GST-45D', City: 'Chennai' }
-    ];
-
-    const products = [
-      { ProductID: 'P100', Name: 'Laptop Sleeve', HSNCode: '4202', Price: 32.00 },
-      { ProductID: 'P101', Name: 'Mechanical Keyboard', HSNCode: '8471', Price: 95.00 },
-      { ProductID: 'P102', Name: 'USB-C Hub', HSNCode: '8517', Price: 48.00 },
-      { ProductID: 'P103', Name: '4K Monitor', HSNCode: '8528', Price: 280.00 },
-      { ProductID: 'P104', Name: 'Wireless Mouse', HSNCode: '8471', Price: 25.00 }
-    ];
-
-    const rightColumns = {
-      customers: [
-        { key: 'CustomerID', label: 'Customer ID' },
-        { key: 'Name', label: 'Customer Name' },
-        { key: 'GSTNo', label: 'GST No' },
-        { key: 'City', label: 'City' }
-      ],
-      products: [
-        { key: 'ProductID', label: 'Product ID' },
-        { key: 'Name', label: 'Product Name' },
-        { key: 'HSNCode', label: 'HSN Code' },
-        { key: 'Price', label: 'Price ($)' }
-      ]
-    };
-
-    const resultColumns = {
-      customers: [
-        { key: 'OrderID', label: 'Order ID' },
-        { key: 'CustomerID', label: 'Customer ID' },
-        { key: 'CustomerName', label: 'Customer Name' },
-        { key: 'GSTNo', label: 'GST No' },
-        { key: 'ProductID', label: 'Product ID' },
-        { key: 'Qty', label: 'Qty' }
-      ],
-      products: [
-        { key: 'OrderID', label: 'Order ID' },
-        { key: 'ProductID', label: 'Product ID' },
-        { key: 'ProductName', label: 'Product Name' },
-        { key: 'Price', label: 'Price ($)' },
-        { key: 'CustomerID', label: 'Customer ID' },
-        { key: 'Qty', label: 'Qty' }
-      ]
-    };
-
-    const vennLayers = {
-      left: document.getElementById('leftHighlight'),
-      right: document.getElementById('rightHighlight'),
-      leftOnly: document.getElementById('leftOnlyHighlight'),
-      rightOnly: document.getElementById('rightOnlyHighlight'),
-      intersection: document.getElementById('intersectionHighlight')
-    };
-
-    function buildTable(rows, columns) {
-      const header = columns.map(col => `<th>${col.label}</th>`).join('');
-      const body = rows.map(row => {
-        const cells = columns.map(col => `<td>${row[col.key] ?? '—'}</td>`).join('');
-        return `<tr>${cells}</tr>`;
-      }).join('');
-      return `<table><thead><tr>${header}</tr></thead><tbody>${body || '<tr><td colspan="'+columns.length+'">No rows</td></tr>'}</tbody></table>`;
+  const scenarios = {
+    inner: {
+      question: "1. Purchases which are paid?",
+      desc: "Inner Join: Returns records that have matching values in both tables.",
+      highlight: ['hl-inner']
+    },
+    leftAnti: {
+      question: "2. Unpaid Purchases?",
+      desc: "Left Anti Join: Returns rows from the Left table (Purchases) that have NO match in the Right table.",
+      highlight: ['hl-leftAnti']
+    },
+    rightAnti: {
+      question: "3. Payments Unrelated to Purchases?",
+      desc: "Right Anti Join: Returns rows from the Right table (Payments) that have NO match in the Left table.",
+      highlight: ['hl-rightAnti']
+    },
+    left: {
+      question: "4. Purchases data with Payments?",
+      desc: "Left Outer Join: Returns all rows from the Left table, and the matching rows from the Right table.",
+      highlight: ['hl-left']
+    },
+    right: {
+      question: "5. Payments data with Purchases?",
+      desc: "Right Outer Join: Returns all rows from the Right table, and the matching rows from the Left table.",
+      highlight: ['hl-right']
+    },
+    full: {
+      question: "6. Everything",
+      desc: "Full Outer Join: Returns all rows when there is a match in EITHER left or right table.",
+      highlight: ['hl-left', 'hl-rightAnti']
     }
+  };
 
-    function renderSourceTables(pair) {
-      document.getElementById('ordersTable').innerHTML = buildTable(orders, [
-        { key: 'OrderID', label: 'Order ID' },
-        { key: 'CustomerID', label: 'Customer ID' },
-        { key: 'ProductID', label: 'Product ID' },
-        { key: 'Qty', label: 'Qty' }
-      ]);
-      document.getElementById('rightTitle').innerText = pair === 'customers' ? 'Customers (Right Table)' : 'Products (Right Table)';
-      document.getElementById('rightTable').innerHTML = buildTable(pair === 'customers' ? customers : products, rightColumns[pair]);
-    }
+  function renderTable(data, containerId, columns, className='') {
+    const table = document.createElement('table');
+    if(className) table.classList.add(className);
+    
+    const thead = table.createTHead();
+    const row = thead.insertRow();
+    columns.forEach(col => {
+      const th = document.createElement('th');
+      th.textContent = col;
+      row.appendChild(th);
+    });
 
-    function combineRows(leftRow, rightRow, pair) {
-      const base = { OrderID: leftRow?.OrderID ?? '—', ProductID: leftRow?.ProductID ?? '—', CustomerID: leftRow?.CustomerID ?? '—', Qty: leftRow?.Qty ?? '—' };
-      if (pair === 'customers') {
-        return {
-          ...base,
-          CustomerName: rightRow?.Name ?? '—',
-          GSTNo: rightRow?.GSTNo ?? '—'
-        };
-      }
-      return {
-        ...base,
-        ProductName: rightRow?.Name ?? '—',
-        Price: rightRow?.Price?.toFixed(2) ?? '—'
-      };
-    }
-
-    function performJoin(joinType, pair) {
-      const rightData = pair === 'customers' ? customers : products;
-      const key = pair === 'customers' ? 'CustomerID' : 'ProductID';
-      const rightMap = new Map();
-      rightData.forEach(r => {
-        const k = r[key];
-        if (!rightMap.has(k)) rightMap.set(k, []);
-        rightMap.get(k).push(r);
+    const tbody = table.createTBody();
+    data.forEach(item => {
+      const r = tbody.insertRow();
+      columns.forEach(col => {
+        const cell = r.insertCell();
+        cell.textContent = item[col] !== undefined && item[col] !== null ? item[col] : '-';
       });
+    });
 
-      const results = [];
-      const matchedRight = new Set();
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    container.appendChild(table);
+  }
 
-      if (joinType === 'right' || joinType === 'rightAnti') {
-        rightData.forEach(r => {
-          const matches = orders.filter(o => o[key] === r[key]);
-          if (matches.length) {
-            matchedRight.add(r[key]);
-            if (joinType === 'right') {
-              matches.forEach(m => results.push(combineRows(m, r, pair)));
-            }
-          } else if (joinType === 'right' || joinType === 'rightAnti') {
-            results.push(combineRows(null, r, pair));
+  function getCombinedData(type) {
+    const results = [];
+    const usedPayIDs = new Set();
+    
+    purchases.forEach(pur => {
+      // UPDATED LOGIC: Join where payments.DocID == purchases.PurchaseID
+      const matches = payments.filter(pay => pay.DocID === pur.PurchaseID);
+      
+      if (matches.length > 0) {
+        // MATCH FOUND
+        matches.forEach(pay => {
+          usedPayIDs.add(pay.PayID);
+          if (['inner', 'left', 'right', 'full'].includes(type)) {
+            results.push({ 
+              PurchaseID: pur.PurchaseID, 
+              Date: pur.Date, 
+              Vendor: pur.Vendor, 
+              Amount: pur.Amount, 
+              PayID: pay.PayID, 
+              DocID: pay.DocID, // Include for clarity
+              PayDate: pay.Date, 
+              PayAmount: pay.Amount
+            });
           }
         });
-        return results;
-      }
-
-      orders.forEach(o => {
-        const matches = rightMap.get(o[key]) || [];
-        if (matches.length) {
-          matches.forEach(m => {
-            matchedRight.add(m[key]);
-            if (joinType !== 'leftAnti') results.push(combineRows(o, m, pair));
+      } else {
+        // NO MATCH FOUND
+        if (['left', 'leftAnti', 'full'].includes(type)) {
+          results.push({ 
+            PurchaseID: pur.PurchaseID, 
+            Date: pur.Date, 
+            Vendor: pur.Vendor, 
+            Amount: pur.Amount, 
+            PayID: null,
+            DocID: null, 
+            PayDate: null, 
+            PayAmount: null 
           });
-        } else {
-          if (joinType === 'left' || joinType === 'full' || joinType === 'leftAnti') {
-            results.push(combineRows(o, null, pair));
-          }
         }
-      });
-
-      if (joinType === 'full' || joinType === 'rightAnti') {
-        rightData.forEach(r => {
-          if (!matchedRight.has(r[key])) {
-            results.push(combineRows(null, r, pair));
-          }
-        });
-      }
-      return results;
-    }
-
-    function updateVenn(joinType) {
-      Object.values(vennLayers).forEach(layer => layer.classList.remove('show'));
-      switch (joinType) {
-        case 'inner':
-          vennLayers.intersection.classList.add('show');
-          break;
-        case 'left':
-          vennLayers.leftOnly.classList.add('show');
-          vennLayers.intersection.classList.add('show');
-          break;
-        case 'right':
-          vennLayers.rightOnly.classList.add('show');
-          vennLayers.intersection.classList.add('show');
-          break;
-        case 'full':
-          vennLayers.leftOnly.classList.add('show');
-          vennLayers.rightOnly.classList.add('show');
-          vennLayers.intersection.classList.add('show');
-          break;
-        case 'leftAnti':
-          vennLayers.leftOnly.classList.add('show');
-          break;
-        case 'rightAnti':
-          vennLayers.rightOnly.classList.add('show');
-          break;
-      }
-    }
-
-    function updateSummary(joinType, pair, rowCount) {
-      const summary = document.getElementById('summaryCards');
-      const phrases = {
-        inner: 'Only matching records from both tables',
-        left: 'All Orders plus any matching '+(pair==='customers'?'Customers':'Products'),
-        right: 'All '+(pair==='customers'?'Customers':'Products')+' plus matching Orders',
-        full: 'Everything from both sides with matches where possible',
-        leftAnti: 'Orders that failed to match the right table',
-        rightAnti: (pair==='customers'?'Customers':'Products')+' that have not appeared in Orders yet'
-      };
-      summary.innerHTML = [
-        `<span class="pill active">${phrases[joinType]}</span>`,
-        `<span class="pill">${rowCount} row(s) returned</span>`
-      ].join('');
-      document.getElementById('resultTitle').innerText = `${joinSelect.options[joinSelect.selectedIndex].text}`;
-      document.getElementById('resultSubtitle').innerText = phrases[joinType];
-      document.getElementById('rowCount').innerText = `${rowCount} row${rowCount === 1 ? '' : 's'}`;
-    }
-
-    function buildSql(joinType, pair) {
-      const rightName = pair === 'customers' ? 'Customers' : 'Products';
-      const key = pair === 'customers' ? 'CustomerID' : 'ProductID';
-      const selectCols = pair === 'customers'
-        ? 'o.OrderID, o.CustomerID, c.Name, c.GSTNo, o.ProductID, o.Qty'
-        : 'o.OrderID, o.ProductID, p.Name, p.Price, o.CustomerID, o.Qty';
-      const base = `SELECT ${selectCols}\nFROM Orders o`;
-      const joinKeyword = {
-        inner: 'INNER JOIN',
-        left: 'LEFT OUTER JOIN',
-        right: 'RIGHT OUTER JOIN',
-        full: 'FULL OUTER JOIN',
-        leftAnti: 'LEFT OUTER JOIN',
-        rightAnti: 'RIGHT OUTER JOIN'
-      }[joinType];
-      const alias = pair === 'customers' ? 'c' : 'p';
-      let sql = `${base}\n${joinKeyword} ${rightName} ${alias}\n  ON o.${key} = ${alias}.${key}`;
-      if (joinType === 'leftAnti') sql += `\nWHERE ${alias}.${key} IS NULL`;
-      if (joinType === 'rightAnti') sql += `\nWHERE o.${key} IS NULL`;
-      return sql;
-    }
-
-    function refresh() {
-      const pair = document.querySelector('#pairSelect .active').dataset.pair;
-      const joinType = document.getElementById('joinSelect').value;
-      renderSourceTables(pair);
-      const result = performJoin(joinType, pair);
-      updateVenn(joinType);
-      updateSummary(joinType, pair, result.length);
-      document.getElementById('resultTable').innerHTML = buildTable(result, resultColumns[pair]);
-      document.getElementById('sqlBlock').innerText = buildSql(joinType, pair);
-    }
-
-    document.getElementById('pairSelect').addEventListener('click', (e) => {
-      if (e.target.matches('button')) {
-        document.querySelectorAll('#pairSelect .pill').forEach(p => p.classList.remove('active'));
-        e.target.classList.add('active');
-        const joinSelect = document.getElementById('joinSelect');
-        if (e.target.dataset.pair === 'products' && joinSelect.value === 'rightAnti') {
-          joinSelect.value = 'inner';
-        }
-        refresh();
       }
     });
 
-    const joinSelect = document.getElementById('joinSelect');
-    joinSelect.addEventListener('change', refresh);
+    // Handle Orphans in Right Table
+    if (['right', 'rightAnti', 'full'].includes(type)) {
+      payments.forEach(pay => {
+        if (!usedPayIDs.has(pay.PayID)) {
+          results.push({ 
+            PurchaseID: null, 
+            Date: null, 
+            Vendor: null, 
+            Amount: null, 
+            PayID: pay.PayID,
+            DocID: pay.DocID, 
+            PayDate: pay.Date, 
+            PayAmount: pay.Amount 
+          });
+        }
+      });
+    }
 
-    // initial render
-    refresh();
-  </script>
+    return results;
+  }
+
+  function updateVisuals(type) {
+    document.querySelectorAll('.highlight-shape').forEach(el => el.classList.remove('active'));
+    
+    const config = scenarios[type];
+    config.highlight.forEach(id => document.getElementById(id).classList.add('active'));
+
+    document.getElementById('qText').textContent = config.question;
+    document.getElementById('aText').textContent = config.desc;
+    document.getElementById('resultHeader').textContent = "Result: " + config.question;
+
+    // UPDATED SQL TO REFLECT NEW COLUMN NAMES
+    let sql = "";
+    if(type === 'inner') sql = `SELECT *\nFROM Purchases A\nINNER JOIN Payments B\nON A.PurchaseID = B.DocID`;
+    else if(type === 'leftAnti') sql = `SELECT *\nFROM Purchases A\nLEFT JOIN Payments B\nON A.PurchaseID = B.DocID\nWHERE B.DocID IS NULL`;
+    else if(type === 'rightAnti') sql = `SELECT *\nFROM Purchases A\nRIGHT JOIN Payments B\nON A.PurchaseID = B.DocID\nWHERE A.PurchaseID IS NULL`;
+    else if(type === 'left') sql = `SELECT *\nFROM Purchases A\nLEFT OUTER JOIN Payments B\nON A.PurchaseID = B.DocID`;
+    else if(type === 'right') sql = `SELECT *\nFROM Purchases A\nRIGHT OUTER JOIN Payments B\nON A.PurchaseID = B.DocID`;
+    else if(type === 'full') sql = `SELECT *\nFROM Purchases A\nFULL OUTER JOIN Payments B\nON A.PurchaseID = B.DocID`;
+    
+    document.getElementById('sqlOutput').textContent = sql;
+
+    const resData = getCombinedData(type);
+    document.getElementById('rowCountPill').textContent = `${resData.length} row(s) returned`;
+
+    // Map result object to Table Headers
+    const resultDisplay = resData.map(r => ({
+      'Pur. ID': r.PurchaseID,
+      'Vendor': r.Vendor,
+      'Pur. Amt': r.Amount,
+      'Pay. ID': r.PayID,
+      'Doc ID': r.DocID, // Added this column so we can see the join key
+      'Pay. Amt': r.PayAmount
+    }));
+    
+    renderTable(resultDisplay, 'resultTableContainer', ['Pur. ID', 'Vendor', 'Pur. Amt', 'Pay. ID', 'Doc ID', 'Pay. Amt'], 'result-table');
+  }
+
+  // UPDATED RENDER CALLS
+  renderTable(purchases, 'leftTableContainer', ['PurchaseID', 'Date', 'Vendor', 'Amount']);
+  renderTable(payments, 'rightTableContainer', ['PayID', 'DocID', 'Date', 'Amount']);
+
+  document.getElementById('scenarioSelect').addEventListener('change', (e) => {
+    updateVisuals(e.target.value);
+  });
+
+  updateVisuals('inner');
+
+</script>
+
 </body>
 </html>
