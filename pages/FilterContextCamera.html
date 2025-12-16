@@ -99,6 +99,19 @@
       background: rgba(255,255,255,.02);
       box-shadow: 0 8px 18px rgba(0,0,0,.2);
       transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, filter .18s ease;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .avatar {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: grid; place-items: center;
+      font-size: 28px;
+      background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.2), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.1);
+      box-shadow: inset 0 6px 12px rgba(0,0,0,.35);
     }
     .person h3 { margin: 0 0 4px; font-size: 15px; }
     .person p { margin: 0; font-size: 12px; color: var(--muted); }
@@ -148,6 +161,39 @@
     .stat { flex: 1 1 140px; background: rgba(0,0,0,.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); }
     .stat label { display: block; font-size: 12px; color: var(--muted); }
     .stat span { display: block; font-size: 22px; font-weight: 800; }
+
+    .snapshot {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: inset 0 10px 22px rgba(0,0,0,.3);
+    }
+    .snapshot .title { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 13px; }
+    .snap-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .snap-chip {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(140deg, rgba(52,211,153,.15), rgba(96,165,250,.15));
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 24px;
+      position: relative;
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(0,0,0,.28);
+    }
+    .snap-chip small {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
 
     .legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 0; }
     .legend .item { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); font-size: 12px; color: var(--muted); }
@@ -226,6 +272,13 @@
             <div class="stat"><label>Filtered Sales</label><span id="filteredStat">$0</span></div>
             <div class="stat"><label>All Sales (hall)</label><span id="totalStat">$0</span></div>
           </div>
+          <div class="snapshot">
+            <div class="title">
+              <span>Instant photo</span>
+              <small>Who is lit up right now</small>
+            </div>
+            <div class="snap-grid" id="snapshot"></div>
+          </div>
         </div>
       </div>
 
@@ -238,18 +291,18 @@
 
   <script>
     const people = [
-      { name: 'Ava', region: 'East', product: 'Bikes', channel: 'Online', year: 2024, sales: 42000 },
-      { name: 'Noah', region: 'East', product: 'Helmets', channel: 'Retail', year: 2023, sales: 18000 },
-      { name: 'Mia', region: 'West', product: 'Bikes', channel: 'Wholesale', year: 2024, sales: 52000 },
-      { name: 'Liam', region: 'West', product: 'Gloves', channel: 'Online', year: 2024, sales: 15000 },
-      { name: 'Ethan', region: 'North', product: 'Helmets', channel: 'Retail', year: 2024, sales: 24000 },
-      { name: 'Emma', region: 'South', product: 'Bikes', channel: 'Online', year: 2025, sales: 36000 },
-      { name: 'Sophia', region: 'North', product: 'Gloves', channel: 'Wholesale', year: 2023, sales: 13000 },
-      { name: 'Oliver', region: 'East', product: 'Bikes', channel: 'Retail', year: 2024, sales: 31000 },
-      { name: 'Mason', region: 'West', product: 'Helmets', channel: 'Wholesale', year: 2023, sales: 17000 },
-      { name: 'Isabella', region: 'South', product: 'Gloves', channel: 'Retail', year: 2024, sales: 16000 },
-      { name: 'Lucas', region: 'East', product: 'Helmets', channel: 'Online', year: 2025, sales: 22000 },
-      { name: 'Charlotte', region: 'North', product: 'Bikes', channel: 'Online', year: 2024, sales: 47000 }
+      { name: 'Ava', icon: '🦊', region: 'East', product: 'Bikes', channel: 'Online', year: 2024, sales: 42000 },
+      { name: 'Noah', icon: '🐙', region: 'East', product: 'Helmets', channel: 'Retail', year: 2023, sales: 18000 },
+      { name: 'Mia', icon: '🦉', region: 'West', product: 'Bikes', channel: 'Wholesale', year: 2024, sales: 52000 },
+      { name: 'Liam', icon: '🦖', region: 'West', product: 'Gloves', channel: 'Online', year: 2024, sales: 15000 },
+      { name: 'Ethan', icon: '🛸', region: 'North', product: 'Helmets', channel: 'Retail', year: 2024, sales: 24000 },
+      { name: 'Emma', icon: '🐧', region: 'South', product: 'Bikes', channel: 'Online', year: 2025, sales: 36000 },
+      { name: 'Sophia', icon: '🐢', region: 'North', product: 'Gloves', channel: 'Wholesale', year: 2023, sales: 13000 },
+      { name: 'Oliver', icon: '🦄', region: 'East', product: 'Bikes', channel: 'Retail', year: 2024, sales: 31000 },
+      { name: 'Mason', icon: '🧊', region: 'West', product: 'Helmets', channel: 'Wholesale', year: 2023, sales: 17000 },
+      { name: 'Isabella', icon: '🍩', region: 'South', product: 'Gloves', channel: 'Retail', year: 2024, sales: 16000 },
+      { name: 'Lucas', icon: '🚀', region: 'East', product: 'Helmets', channel: 'Online', year: 2025, sales: 22000 },
+      { name: 'Charlotte', icon: '🎈', region: 'North', product: 'Bikes', channel: 'Online', year: 2024, sales: 47000 }
     ];
 
     const uniqueValues = (key) => ['All', ...Array.from(new Set(people.map(p => p[key])))];
@@ -289,17 +342,42 @@
       people.forEach(person => {
         const card = document.createElement('div');
         card.className = 'person';
+        card.dataset.name = person.name;
+        card.dataset.icon = person.icon;
         card.dataset.region = person.region;
         card.dataset.product = person.product;
         card.dataset.channel = person.channel;
         card.dataset.year = person.year;
         card.dataset.sales = person.sales;
         card.innerHTML = `
-          <h3>${person.name}</h3>
-          <p>${person.region} • ${person.product} • ${person.channel}</p>
-          <div class="tag">Year ${person.year} · $${person.sales.toLocaleString()}</div>
+          <div class="avatar">${person.icon}</div>
+          <div>
+            <h3>${person.name}</h3>
+            <p>${person.region} • ${person.product} • ${person.channel}</p>
+            <div class="tag">Year ${person.year} · $${person.sales.toLocaleString()}</div>
+          </div>
         `;
         container.appendChild(card);
+      });
+    }
+
+    function renderSnapshot(filteredCards) {
+      const snapshot = document.getElementById('snapshot');
+      snapshot.innerHTML = '';
+
+      if (!filteredCards.length) {
+        snapshot.innerHTML = '<span class="ghost">No one is in frame right now.</span>';
+        return;
+      }
+
+      filteredCards.forEach(card => {
+        const chip = document.createElement('div');
+        chip.className = 'snap-chip';
+        chip.textContent = card.dataset.icon;
+        const label = document.createElement('small');
+        label.textContent = card.dataset.name;
+        chip.appendChild(label);
+        snapshot.appendChild(chip);
       });
     }
 
@@ -336,6 +414,8 @@
       document.getElementById('totalStat').textContent = formatCurrency(totalSales);
 
       document.querySelector('.spotlight').style.opacity = filtered.length === cards.length ? .65 : .95;
+
+      renderSnapshot(filtered);
     }
 
     function wireScenarios() {
