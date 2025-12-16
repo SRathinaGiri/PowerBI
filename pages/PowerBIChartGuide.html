@@ -152,6 +152,16 @@
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; }
     }
+    .back-row { display: flex; justify-content: flex-start; margin-bottom: .4rem; }
+    .back-link { 
+      display: inline-flex; align-items: center; gap: .45rem; 
+      padding: .55rem 1.1rem; border-radius: 999px; 
+      background: rgba(96,165,250,.15); color: #dbeafe; 
+      text-decoration: none; font-weight: 700; letter-spacing: .01em;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .back-link:hover { background: rgba(96,165,250,.25); transform: translateY(-2px); }
+    
   </style>
 </head>
 <body>
@@ -159,6 +169,9 @@
     <h1>Choose the Right Power BI Chart</h1>
     <p class="subtitle">Pick a chart to see when to use it, common scenarios, and a live animated example powered by Apache ECharts.</p>
   </header>
+    <div class="back-row">
+      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+    </div>
 
   <div class="layout">
     <aside class="panel sidebar">
