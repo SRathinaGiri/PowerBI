@@ -38,17 +38,17 @@
     header h1 { margin: .2rem 0 .35rem; font-size: clamp(22px, 3vw, 34px); }
     header p { margin: 0; color: var(--muted); }
     .back-row { display: flex; justify-content: flex-start; margin-bottom: .4rem; }
-    .back-link {
-      display: inline-flex; align-items: center; gap: .45rem;
-      padding: .55rem 1.1rem; border-radius: 999px;
-      background: rgba(96,165,250,.15); color: #dbeafe;
+    .back-link { 
+      display: inline-flex; align-items: center; gap: .45rem; 
+      padding: .55rem 1.1rem; border-radius: 999px; 
+      background: rgba(96,165,250,.15); color: #dbeafe; 
       text-decoration: none; font-weight: 700; letter-spacing: .01em;
       transition: background .2s ease, transform .2s ease;
     }
     .back-link:hover { background: rgba(96,165,250,.25); transform: translateY(-2px); }
 
     .wrap {
-      max-width: 1300px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 16px;
       display: grid;
@@ -68,6 +68,7 @@
     .panel p { margin: 0 0 10px; color: var(--muted); }
     .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.12); background: rgba(96,165,250,.15); color: #dbeafe; font-weight: 700; }
     .control { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin: 8px 0; }
+    
     select, button {
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(255,255,255,.15);
@@ -75,8 +76,15 @@
       padding: 8px 10px;
       border-radius: 10px;
       font-weight: 600;
+      cursor: pointer;
     }
-    button { cursor: pointer; transition: transform .15s ease, background .15s ease; }
+    /* Dropdown Options Dark Theme Fix */
+    select option {
+      background-color: var(--panel);
+      color: var(--ink);
+    }
+
+    button { transition: transform .15s ease, background .15s ease; }
     button:hover { transform: translateY(-1px); background: rgba(96,165,250,.15); }
     .ghost { color: var(--muted); font-weight: 500; }
 
@@ -93,54 +101,53 @@
       flex-direction: column;
       gap: 14px;
     }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: auto; }
+
+    /* 4 columns grid */
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px; 
+      margin-top: auto; 
+    }
+
+    /* Responsive fallbacks */
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     .person {
       position: relative;
-      padding: 12px;
-      border-radius: 14px;
+      padding: 18px; 
+      border-radius: 16px;
       border: 1px solid rgba(255,255,255,.1);
       background: rgba(255,255,255,.02);
       box-shadow: 0 8px 18px rgba(0,0,0,.2);
       transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, filter .18s ease;
       display: grid;
       grid-template-columns: auto 1fr;
-      gap: 10px;
+      gap: 14px;
       align-items: center;
     }
     .avatar {
-      width: 52px; height: 52px;
-      border-radius: 14px;
+      width: 64px; height: 64px;
+      border-radius: 18px;
       display: grid; place-items: center;
-      font-size: 28px;
+      font-size: 32px;
       background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.2), rgba(255,255,255,.05));
       border: 1px solid rgba(255,255,255,.1);
       box-shadow: inset 0 6px 12px rgba(0,0,0,.35);
     }
-    .person h3 { margin: 0 0 4px; font-size: 15px; }
-    .person p { margin: 0; font-size: 12px; color: var(--muted); }
-    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 10px; font-size: 11px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); margin-top: 8px; }
+    .person h3 { margin: 0 0 4px; font-size: 17px; }
+    .person p { margin: 0; font-size: 13px; color: var(--muted); }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 10px; font-size: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); margin-top: 8px; }
+    
     .person.lit { box-shadow: 0 12px 28px rgba(52, 211, 153, .35); transform: translateY(-4px); border-color: rgba(52,211,153,.55); }
     .person.dim { opacity: .35; filter: grayscale(70%); }
 
-    .beam {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(40% 45% at 50% 18%, rgba(255,255,255,.18), rgba(255,255,255,0) 70%);
-      pointer-events: none;
-      mix-blend-mode: screen;
-    }
-    .spotlight {
-      position: absolute;
-      width: 480px; height: 480px;
-      background: radial-gradient(circle at 50% 45%, rgba(52,211,153,.45), rgba(52,211,153,0) 60%);
-      border-radius: 50%;
-      top: 120px; left: 50%;
-      transform: translateX(-50%);
-      filter: blur(1px);
-      pointer-events: none;
-      transition: opacity .2s ease;
-      opacity: .9;
-    }
+    /* .BEAM class REMOVED */
 
     .camera {
       position: absolute;
@@ -154,7 +161,7 @@
       grid-template-columns: auto 1fr;
       align-items: flex-start;
       gap: 12px;
-      max-width: 720px;
+      max-width: none; 
     }
     .camera .icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #60a5fa, #a78bfa); display: grid; place-items: center; font-size: 22px; color: #0b1220; font-weight: 900; }
     .camera p { margin: 0; font-size: 13px; color: var(--muted); }
@@ -174,7 +181,16 @@
       box-shadow: inset 0 10px 22px rgba(0,0,0,.3);
     }
     .snapshot .title { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 13px; }
-    .snap-grid { display: flex; gap: 8px; flex-wrap: nowrap; margin-top: 8px; overflow-x: auto; padding-bottom: 6px; }
+    
+    .snap-grid { 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: nowrap; 
+      margin-top: 8px; 
+      overflow-x: auto; 
+      padding-bottom: 24px; 
+    }
+    
     .snap-chip {
       display: grid;
       place-items: center;
@@ -187,10 +203,11 @@
       position: relative;
       color: #fff;
       box-shadow: 0 8px 18px rgba(0,0,0,.28);
+      flex-shrink: 0;
     }
     .snap-chip small {
       position: absolute;
-      bottom: -16px;
+      bottom: -18px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 10px;
@@ -285,9 +302,6 @@
         </div>
       </div>
 
-      <div class="beam"></div>
-      <div class="spotlight"></div>
-
       <div class="grid" id="people"></div>
     </div>
   </div>
@@ -367,7 +381,7 @@
     function renderSnapshot(filteredCards) {
       const snapshot = document.getElementById('snapshot');
       snapshot.innerHTML = '';
-
+      
       if (!filteredCards.length) {
         snapshot.innerHTML = '<span class="ghost">No one is in frame right now.</span>';
         return;
@@ -415,8 +429,6 @@
       document.getElementById('countStat').textContent = `${filtered.length} / ${cards.length}`;
       document.getElementById('filteredStat').textContent = formatCurrency(filteredSales);
       document.getElementById('totalStat').textContent = formatCurrency(totalSales);
-
-      document.querySelector('.spotlight').style.opacity = filtered.length === cards.length ? .65 : .95;
 
       renderSnapshot(filtered);
     }
