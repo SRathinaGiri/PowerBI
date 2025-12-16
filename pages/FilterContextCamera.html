@@ -206,21 +206,6 @@
     .scenario button { width: 100%; background: linear-gradient(180deg, rgba(96,165,250,.18), rgba(96,165,250,.05)); color: #dbeafe; }
     .scenario small { color: var(--muted); }
 
-    .strip {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: inset 0 8px 16px rgba(0,0,0,.25);
-    }
-    .strip .label { color: var(--muted); font-weight: 700; letter-spacing: .01em; }
-    .strip .snap-grid { flex: 1; margin: 0; }
-
     @media (max-width: 720px) {
       .stage { padding: 24px 12px 12px; }
       .camera { position: relative; top: 0; left: 0; right: 0; max-width: none; width: 100%; margin-bottom: 12px; }
@@ -303,11 +288,6 @@
       <div class="beam"></div>
       <div class="spotlight"></div>
 
-      <div class="strip" aria-live="polite">
-        <span class="label">In frame</span>
-        <div class="snap-grid" id="characterStrip"></div>
-      </div>
-
       <div class="grid" id="people"></div>
     </div>
   </div>
@@ -386,28 +366,21 @@
 
     function renderSnapshot(filteredCards) {
       const snapshot = document.getElementById('snapshot');
-      const strip = document.getElementById('characterStrip');
-      [snapshot, strip].forEach(container => container.innerHTML = '');
+      snapshot.innerHTML = '';
 
-      const containers = [snapshot, strip];
+      if (!filteredCards.length) {
+        snapshot.innerHTML = '<span class="ghost">No one is in frame right now.</span>';
+        return;
+      }
 
-      containers.forEach(container => {
-        if (!container) return;
-
-        if (!filteredCards.length) {
-          container.innerHTML = '<span class="ghost">No one is in frame right now.</span>';
-          return;
-        }
-
-        filteredCards.forEach(card => {
-          const chip = document.createElement('div');
-          chip.className = 'snap-chip';
-          chip.textContent = card.dataset.icon;
-          const label = document.createElement('small');
-          label.textContent = card.dataset.name;
-          chip.appendChild(label);
-          container.appendChild(chip);
-        });
+      filteredCards.forEach(card => {
+        const chip = document.createElement('div');
+        chip.className = 'snap-chip';
+        chip.textContent = card.dataset.icon;
+        const label = document.createElement('small');
+        label.textContent = card.dataset.name;
+        chip.appendChild(label);
+        snapshot.appendChild(chip);
       });
     }
 
