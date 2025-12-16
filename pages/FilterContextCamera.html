@@ -88,7 +88,7 @@
       background: radial-gradient(120% 80% at 50% 0%, rgba(96,165,250,.18), rgba(96,165,250,.04)), linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
       overflow: hidden;
       box-shadow: 0 14px 42px rgba(0,0,0,.4);
-      padding: 140px 16px 16px;
+      padding: 210px 16px 16px;
     }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 32px; }
     .person {
@@ -134,13 +134,17 @@
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
       box-shadow: 0 10px 22px rgba(0,0,0,.4);
-      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: flex-start;
+      gap: 12px;
       max-width: 720px;
     }
     .camera .icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #60a5fa, #a78bfa); display: grid; place-items: center; font-size: 22px; color: #0b1220; font-weight: 900; }
     .camera p { margin: 0; font-size: 13px; color: var(--muted); }
     .camera strong { color: var(--ink); }
-    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .camera .content { display: flex; flex-direction: column; gap: 6px; }
+    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: auto; }
     .stat { flex: 1 1 140px; background: rgba(0,0,0,.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); }
     .stat label { display: block; font-size: 12px; color: var(--muted); }
     .stat span { display: block; font-size: 22px; font-weight: 800; }
@@ -214,7 +218,7 @@
     <div class="stage" aria-live="polite">
       <div class="camera">
         <div class="icon">📸</div>
-        <div>
+        <div class="content">
           <strong>Total Sales</strong>
           <p>The camera sums <strong>Sales</strong> for all people caught in the spotlight created by Report, Page, Visual, and Slicer filters.</p>
           <div class="stat-row">
