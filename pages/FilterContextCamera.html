@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filter Context Spotlight – Camera Analogy</title>
+  <style>
+    :root {
+      --bg:#0b1220;
+      --panel:#0f172a;
+      --ink:#e5edff;
+      --muted:#9fb3c8;
+      --accent:#60a5fa;
+      --accent-2:#a78bfa;
+      --accent-3:#34d399;
+      --warn:#fbbf24;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 820px at 70% 15%, #1b2744 0%, #0b1220 55%, #050914 100%);
+      color: var(--ink);
+      font: 16px/1.4 "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 18px 20px 8px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(11,18,32,.92), rgba(11,18,32,.35) 70%, rgba(11,18,32,0));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    header h1 { margin: .2rem 0 .35rem; font-size: clamp(22px, 3vw, 34px); }
+    header p { margin: 0; color: var(--muted); }
+    .back-row { display: flex; justify-content: flex-start; margin-bottom: .4rem; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .55rem 1.1rem; border-radius: 999px;
+      background: rgba(96,165,250,.15); color: #dbeafe;
+      text-decoration: none; font-weight: 700; letter-spacing: .01em;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .back-link:hover { background: rgba(96,165,250,.25); transform: translateY(-2px); }
+
+    .wrap {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 1024px) { .wrap { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.35);
+    }
+    .panel h2 { margin: .2rem 0 8px; font-size: 18px; }
+    .panel p { margin: 0 0 10px; color: var(--muted); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.12); background: rgba(96,165,250,.15); color: #dbeafe; font-weight: 700; }
+    .control { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin: 8px 0; }
+    select, button {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.15);
+      color: var(--ink);
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    button { cursor: pointer; transition: transform .15s ease, background .15s ease; }
+    button:hover { transform: translateY(-1px); background: rgba(96,165,250,.15); }
+    .ghost { color: var(--muted); font-weight: 500; }
+
+    .stage {
+      position: relative;
+      min-height: 720px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: radial-gradient(120% 80% at 50% 0%, rgba(96,165,250,.18), rgba(96,165,250,.04)), linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      overflow: hidden;
+      box-shadow: 0 14px 42px rgba(0,0,0,.4);
+      padding: 16px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 80px; }
+    .person {
+      position: relative;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.02);
+      box-shadow: 0 8px 18px rgba(0,0,0,.2);
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, filter .18s ease;
+    }
+    .person h3 { margin: 0 0 4px; font-size: 15px; }
+    .person p { margin: 0; font-size: 12px; color: var(--muted); }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 10px; font-size: 11px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); margin-top: 8px; }
+    .person.lit { box-shadow: 0 12px 28px rgba(52, 211, 153, .35); transform: translateY(-4px); border-color: rgba(52,211,153,.55); }
+    .person.dim { opacity: .35; filter: grayscale(70%); }
+
+    .beam {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(40% 45% at 50% 18%, rgba(255,255,255,.18), rgba(255,255,255,0) 70%);
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    .spotlight {
+      position: absolute;
+      width: 480px; height: 480px;
+      background: radial-gradient(circle at 50% 45%, rgba(52,211,153,.45), rgba(52,211,153,0) 60%);
+      border-radius: 50%;
+      top: 120px; left: 50%;
+      transform: translateX(-50%);
+      filter: blur(1px);
+      pointer-events: none;
+      transition: opacity .2s ease;
+      opacity: .9;
+    }
+
+    .camera {
+      position: absolute;
+      top: 12px; left: 12px;
+      padding: 10px 12px;
+      background: rgba(15,23,42,.85);
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 22px rgba(0,0,0,.4);
+      display: flex; gap: 10px; align-items: center;
+      max-width: 520px;
+    }
+    .camera .icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #60a5fa, #a78bfa); display: grid; place-items: center; font-size: 22px; color: #0b1220; font-weight: 900; }
+    .camera p { margin: 0; font-size: 13px; color: var(--muted); }
+    .camera strong { color: var(--ink); }
+    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .stat { flex: 1 1 140px; background: rgba(0,0,0,.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); }
+    .stat label { display: block; font-size: 12px; color: var(--muted); }
+    .stat span { display: block; font-size: 22px; font-weight: 800; }
+
+    .legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 0; }
+    .legend .item { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); font-size: 12px; color: var(--muted); }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    .scenario { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px; border-radius: 12px; border: 1px dashed rgba(255,255,255,.15); margin: 10px 0; }
+    .scenario button { width: 100%; background: linear-gradient(180deg, rgba(96,165,250,.18), rgba(96,165,250,.05)); color: #dbeafe; }
+    .scenario small { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="back-row">
+      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+    </div>
+    <h1>Filter Context Spotlight – Camera Analogy</h1>
+    <p>Imagine <strong>Total Sales = SUM(SalesTable[Sales])</strong> as a camera. The filter context is the spotlight deciding which people step into frame.</p>
+  </header>
+
+  <div class="wrap">
+    <div class="panel">
+      <h2>How the spotlight works</h2>
+      <p>The measure (camera) is fixed. Whoever stands in the lit area is summed; everyone else fades into the dark. Combine filters to narrow the spotlight.</p>
+      <div class="legend">
+        <div class="item"><span class="dot" style="background:#34d399"></span>In the spotlight (visible to SUM)</div>
+        <div class="item"><span class="dot" style="background:#94a3b8"></span>Outside the spotlight</div>
+      </div>
+
+      <h2>Filter context controls</h2>
+      <div class="control"><label>Report filter (Region)</label><select id="reportFilter"></select></div>
+      <div class="control"><label>Page filter (Product)</label><select id="pageFilter"></select></div>
+      <div class="control"><label>Visual filter (Channel)</label><select id="visualFilter"></select></div>
+      <div class="control"><label>Slicer / Interaction (Year)</label><select id="slicerFilter"></select></div>
+
+      <div class="scenario">
+        <div>
+          <strong>Clear spotlight</strong>
+          <small class="ghost">Everything is lit: total context.</small>
+        </div>
+        <button data-scenario="all">No filters</button>
+      </div>
+      <div class="scenario">
+        <div>
+          <strong>Executive summary</strong>
+          <small class="ghost">Region = East, Product = Bikes</small>
+        </div>
+        <button data-scenario="east">Apply spotlight</button>
+      </div>
+      <div class="scenario">
+        <div>
+          <strong>Drill to channel</strong>
+          <small class="ghost">Region = West, Channel = Wholesale, Year = 2024</small>
+        </div>
+        <button data-scenario="west">Apply spotlight</button>
+      </div>
+
+      <h2>Reading the math</h2>
+      <p><span class="pill">Total Sales = SUM(SalesTable[Sales])</span></p>
+      <p>The formula never changes—only the rows that are lit by the filter context do.</p>
+    </div>
+
+    <div class="stage" aria-live="polite">
+      <div class="camera">
+        <div class="icon">📸</div>
+        <div>
+          <strong>Total Sales</strong>
+          <p>The camera sums <strong>Sales</strong> for all people caught in the spotlight created by Report, Page, Visual, and Slicer filters.</p>
+          <div class="stat-row">
+            <div class="stat"><label>Rows in frame</label><span id="countStat">0</span></div>
+            <div class="stat"><label>Filtered Sales</label><span id="filteredStat">$0</span></div>
+            <div class="stat"><label>All Sales (hall)</label><span id="totalStat">$0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="beam"></div>
+      <div class="spotlight"></div>
+
+      <div class="grid" id="people"></div>
+    </div>
+  </div>
+
+  <script>
+    const people = [
+      { name: 'Ava', region: 'East', product: 'Bikes', channel: 'Online', year: 2024, sales: 42000 },
+      { name: 'Noah', region: 'East', product: 'Helmets', channel: 'Retail', year: 2023, sales: 18000 },
+      { name: 'Mia', region: 'West', product: 'Bikes', channel: 'Wholesale', year: 2024, sales: 52000 },
+      { name: 'Liam', region: 'West', product: 'Gloves', channel: 'Online', year: 2024, sales: 15000 },
+      { name: 'Ethan', region: 'North', product: 'Helmets', channel: 'Retail', year: 2024, sales: 24000 },
+      { name: 'Emma', region: 'South', product: 'Bikes', channel: 'Online', year: 2025, sales: 36000 },
+      { name: 'Sophia', region: 'North', product: 'Gloves', channel: 'Wholesale', year: 2023, sales: 13000 },
+      { name: 'Oliver', region: 'East', product: 'Bikes', channel: 'Retail', year: 2024, sales: 31000 },
+      { name: 'Mason', region: 'West', product: 'Helmets', channel: 'Wholesale', year: 2023, sales: 17000 },
+      { name: 'Isabella', region: 'South', product: 'Gloves', channel: 'Retail', year: 2024, sales: 16000 },
+      { name: 'Lucas', region: 'East', product: 'Helmets', channel: 'Online', year: 2025, sales: 22000 },
+      { name: 'Charlotte', region: 'North', product: 'Bikes', channel: 'Online', year: 2024, sales: 47000 }
+    ];
+
+    const uniqueValues = (key) => ['All', ...Array.from(new Set(people.map(p => p[key])))];
+
+    const selects = {
+      report: document.getElementById('reportFilter'),
+      page: document.getElementById('pageFilter'),
+      visual: document.getElementById('visualFilter'),
+      slicer: document.getElementById('slicerFilter')
+    };
+
+    function populateFilters() {
+      const mappings = [
+        { el: selects.report, values: uniqueValues('region') },
+        { el: selects.page, values: uniqueValues('product') },
+        { el: selects.visual, values: uniqueValues('channel') },
+        { el: selects.slicer, values: uniqueValues('year').sort((a,b) => a === 'All' ? -1 : a - b) }
+      ];
+
+      mappings.forEach(({ el, values }) => {
+        values.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val === 'All' ? 'All' : val;
+          el.appendChild(opt);
+        });
+      });
+    }
+
+    function formatCurrency(num) {
+      return `$${num.toLocaleString()}`;
+    }
+
+    function renderPeople() {
+      const container = document.getElementById('people');
+      container.innerHTML = '';
+      people.forEach(person => {
+        const card = document.createElement('div');
+        card.className = 'person';
+        card.dataset.region = person.region;
+        card.dataset.product = person.product;
+        card.dataset.channel = person.channel;
+        card.dataset.year = person.year;
+        card.dataset.sales = person.sales;
+        card.innerHTML = `
+          <h3>${person.name}</h3>
+          <p>${person.region} • ${person.product} • ${person.channel}</p>
+          <div class="tag">Year ${person.year} · $${person.sales.toLocaleString()}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function applyFilterContext() {
+      const region = selects.report.value;
+      const product = selects.page.value;
+      const channel = selects.visual.value;
+      const year = selects.slicer.value;
+
+      const cards = Array.from(document.querySelectorAll('.person'));
+      const filtered = cards.filter(card => {
+        const matchesRegion = region === 'All' || card.dataset.region === region;
+        const matchesProduct = product === 'All' || card.dataset.product === product;
+        const matchesChannel = channel === 'All' || card.dataset.channel === channel;
+        const matchesYear = year === 'All' || card.dataset.year === year;
+        return matchesRegion && matchesProduct && matchesChannel && matchesYear;
+      });
+
+      cards.forEach(card => {
+        if (filtered.includes(card)) {
+          card.classList.add('lit');
+          card.classList.remove('dim');
+        } else {
+          card.classList.add('dim');
+          card.classList.remove('lit');
+        }
+      });
+
+      const filteredSales = filtered.reduce((sum, card) => sum + Number(card.dataset.sales), 0);
+      const totalSales = cards.reduce((sum, card) => sum + Number(card.dataset.sales), 0);
+
+      document.getElementById('countStat').textContent = `${filtered.length} / ${cards.length}`;
+      document.getElementById('filteredStat').textContent = formatCurrency(filteredSales);
+      document.getElementById('totalStat').textContent = formatCurrency(totalSales);
+
+      document.querySelector('.spotlight').style.opacity = filtered.length === cards.length ? .65 : .95;
+    }
+
+    function wireScenarios() {
+      document.querySelectorAll('.scenario button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.scenario;
+          if (mode === 'all') {
+            selects.report.value = 'All';
+            selects.page.value = 'All';
+            selects.visual.value = 'All';
+            selects.slicer.value = 'All';
+          }
+          if (mode === 'east') {
+            selects.report.value = 'East';
+            selects.page.value = 'Bikes';
+            selects.visual.value = 'All';
+            selects.slicer.value = 'All';
+          }
+          if (mode === 'west') {
+            selects.report.value = 'West';
+            selects.page.value = 'All';
+            selects.visual.value = 'Wholesale';
+            selects.slicer.value = '2024';
+          }
+          applyFilterContext();
+        });
+      });
+    }
+
+    populateFilters();
+    renderPeople();
+    Object.values(selects).forEach(sel => sel.addEventListener('change', applyFilterContext));
+    wireScenarios();
+    applyFilterContext();
+  </script>
+</body>
+</html>
