@@ -88,9 +88,9 @@
       background: radial-gradient(120% 80% at 50% 0%, rgba(96,165,250,.18), rgba(96,165,250,.04)), linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
       overflow: hidden;
       box-shadow: 0 14px 42px rgba(0,0,0,.4);
-      padding: 16px;
+      padding: 140px 16px 16px;
     }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 80px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 32px; }
     .person {
       position: relative;
       padding: 12px;
@@ -128,14 +128,14 @@
 
     .camera {
       position: absolute;
-      top: 12px; left: 12px;
+      top: 12px; left: 12px; right: 12px;
       padding: 10px 12px;
       background: rgba(15,23,42,.85);
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.12);
       box-shadow: 0 10px 22px rgba(0,0,0,.4);
-      display: flex; gap: 10px; align-items: center;
-      max-width: 520px;
+      display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+      max-width: 720px;
     }
     .camera .icon { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #60a5fa, #a78bfa); display: grid; place-items: center; font-size: 22px; color: #0b1220; font-weight: 900; }
     .camera p { margin: 0; font-size: 13px; color: var(--muted); }
@@ -152,6 +152,12 @@
     .scenario { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px; border-radius: 12px; border: 1px dashed rgba(255,255,255,.15); margin: 10px 0; }
     .scenario button { width: 100%; background: linear-gradient(180deg, rgba(96,165,250,.18), rgba(96,165,250,.05)); color: #dbeafe; }
     .scenario small { color: var(--muted); }
+
+    @media (max-width: 720px) {
+      .stage { padding: 24px 12px 12px; }
+      .camera { position: relative; top: 0; left: 0; right: 0; max-width: none; width: 100%; margin-bottom: 12px; }
+      .grid { margin-top: 16px; }
+    }
   </style>
 </head>
 <body>
