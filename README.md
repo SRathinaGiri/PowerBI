@@ -39,20 +39,15 @@ Two complementary diagrams that outline the iterative stages of an analytics pro
 
 🚀 How to Use
 
+Just Browse to this page: https://srathinagiri.github.io/PowerBI/index.html
+
+To get the Source COde:
+
 Simply clone this repository and open any of the HTML files in your browser. The animations are built with vanilla HTML, CSS, and JavaScript, so no special software or server is required.
 Bash
 
 # Clone the repository
 git clone https://github.com/SRathinagGiri/PowerBI.git
-
-# Navigate to the project folder
-cd PowerBI
-
-# Open an animation
-open pages/StarSchema.html
-
-# Explore the stages of data analysis page
-open pages/stages-of-data-analysis.html
 
 # Download the practice workbook (optional)
 open assets/resources/PBI.xlsx
