@@ -6,6 +6,7 @@
     { "displayName": "Value", "name": "value", "kind": "Measure" },
     { "displayName": "Tooltips", "name": "Tooltips", "kind": "Measure" }
   ],
+  "supportsLandingPage": true,
   "objects": {
     "cube": {
       "displayName": "Cube",

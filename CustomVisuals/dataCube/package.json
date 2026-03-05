@@ -17,7 +17,7 @@
     "@types/d3": "7.4.3",
     "@types/three": "^0.180.0",
     "d3": "7.9.0",
-    "powerbi-visuals-api": "5.11.0",
+    "powerbi-visuals-api": "~5.11.0",
     "powerbi-visuals-utils-formattingmodel": "6.0.4",
     "powerbi-visuals-utils-formattingutils": "^6.1.2",
     "three": "^0.180.0"

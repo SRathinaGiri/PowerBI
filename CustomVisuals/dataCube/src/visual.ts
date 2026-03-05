@@ -65,6 +65,7 @@ export class Visual implements IVisual {
     private container: HTMLElement;
     private formattingSettings: VisualFormattingSettingsModel;
     private formattingSettingsService: FormattingSettingsService;
+    private landingPage: HTMLElement;
 
     // three.js
     private renderer: THREE.WebGLRenderer;
@@ -180,6 +181,18 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions) {
         const dv = options.dataViews && options.dataViews[0];
+        const isDataPresent = !!(dv && dv.matrix && dv.matrix.rows && dv.matrix.rows.root && dv.matrix.rows.root.children && dv.matrix.rows.root.children.length > 0);
+
+         if (!isDataPresent) {
+            this.showLandingPage();
+            this.clearScene(); // Ensure the 3D canvas is empty
+            // Hide the controls panel if it exists so it doesn't overlap the landing page
+            if (this.controlsPanel) this.controlsPanel.style.display = 'none'; 
+            return; // Stop further execution
+         } else {
+            this.hideLandingPage();
+         }        
+     
         this.formattingSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualFormattingSettingsModel, dv);
         (this as any)._lastDataView = dv;
         // try reading persisted camera from metadata objects (for bookmarks)
@@ -943,6 +956,95 @@ export class Visual implements IVisual {
             this.updateCamera();
         }
     }
+    
+   private showLandingPage() {
+       if (this.landingPage) return; // Prevent duplicates
+
+       // Create main container
+       this.landingPage = document.createElement("div");
+       this.landingPage.className = "datacube-landing-page";
+       
+       // Style the container via style property (safer than innerHTML strings)
+      const s = this.landingPage.style;
+          s.position = "absolute";
+          s.top = "0";
+          s.left = "0";
+          s.width = "100%";
+          s.height = "100%";
+          s.backgroundColor = "white"; // Ensures it covers the empty black canvas
+          s.zIndex = "999";            // Ensures it stays on top of the renderer
+          s.display = "flex";
+          s.flexDirection = "column";
+          s.justifyContent = "center";
+          s.alignItems = "center";
+          s.overflowY = "auto";       
+       
+
+       // Create Title
+       const title = document.createElement("h2");
+       title.textContent = "DataCube 3D";
+       title.style.color = "#2b5797";
+       this.landingPage.appendChild(title);
+
+       // Create Developer Credit
+       const devInfo = document.createElement("p");
+       const devBold = document.createElement("strong");
+       devBold.textContent = "Developed by S. Rathinagiri";
+       devInfo.appendChild(devBold);
+       this.landingPage.appendChild(devInfo);
+
+       // Create Instructions Box
+       const box = document.createElement("div");
+       box.style.background = "#f9f9f9";
+       box.style.border = "1px solid #ddd";
+       box.style.padding = "15px";
+       box.style.borderRadius = "5px";
+       box.style.marginTop = "20px";
+       box.style.textAlign = "left";
+
+       const boxTitle = document.createElement("p");
+       const boxTitleBold = document.createElement("strong");
+       boxTitleBold.textContent = "To visualize your data:";
+       boxTitle.appendChild(boxTitleBold);
+       box.appendChild(boxTitle);
+
+       const list = document.createElement("ol");
+       const steps = [
+           "Add fields to Dimension 1, 2, and 3 (X, Y, Z).",
+           "Add a metric to the Value bucket.",
+           "Interact by dragging to rotate and scrolling to zoom."
+       ];
+
+       steps.forEach(stepText => {
+           const li = document.createElement("li");
+           li.textContent = stepText;
+           list.appendChild(li);
+       });
+
+       box.appendChild(list);
+       this.landingPage.appendChild(box);
+
+       // Create GitHub Link
+       const linkPara = document.createElement("p");
+       linkPara.style.marginTop = "20px";
+       linkPara.style.fontSize = "0.9em";
+
+       const link = document.createElement("a");
+       link.href = "https://github.com/SRathinaGiri/PowerBI";
+       link.target = "_blank";
+       link.textContent = "View Project on GitHub";
+       
+       linkPara.appendChild(link);
+       this.landingPage.appendChild(linkPara);
+
+       this.container.appendChild(this.landingPage);
+   }
+   private hideLandingPage() {
+       if (this.landingPage) {
+           this.container.removeChild(this.landingPage); // Remove from your container
+           this.landingPage = null;
+       }
+   }    
 
     private updateCamera() {
         const r = this.radius;
