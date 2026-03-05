@@ -1,0 +1,33 @@
+^Form 26AS^
+
+File Creation Date^Permanent Account Number (PAN)^Current Status of PAN^Financial Year^Assessment Year^Name of Assessee^Address Line 1^Address Line 2^Address Line 3^Address Line 4^Address Line 5^Statecode^Pin Code
+15-02-2022^AADCT6551B^ACTIVE^2021-2022^2022-2023^    CLIMAVENETA CLIMATE TECHNOLOGIES PRIVATE LIMITED^OLOGIES PVT LTD^NO 180 9TH CROSS 5TH MAIN^^INDIRA NAGAR^BANGALORE^KARNATAKA^560038
+
+^PART A - Details of Tax Deducted at Source^
+Sr. No.^Name of Deductor^TAN of Deductor^^^^^Total Amount Paid / Credited(Rs.)^Total Tax Deducted(Rs.)^Total TDS Deposited(Rs.)
+1^PIEM HOTELS LIMITED - UNIT HOTEL TAJ VIEW AGRA^AGRP10610F^^^^^108000.00^2160.00^2160.00^
+^Sr. No.^Section^Transaction Date^Status of Booking^Date of Booking^Remarks^Amount Paid / Credited(Rs.)^Tax Deducted(Rs.)^TDS Deposited(Rs.)
+^1^194C^06-Oct-2021^F^25-Jan-2022^-^36000.00^720.00^720.00^
+^2^194C^01-Aug-2021^F^22-Oct-2021^-^36000.00^720.00^720.00^
+^3^194C^10-May-2021^F^26-Jul-2021^-^36000.00^720.00^720.00^
+
+2^CYGNET INFOTECH PRIVATE LIMITED^AHMC01115C^^^^^135507.00^2710.00^2710.00^
+^Sr. No.^Section^Transaction Date^Status of Booking^Date of Booking^Remarks^Amount Paid / Credited(Rs.)^Tax Deducted(Rs.)^TDS Deposited(Rs.)
+^1^194C^19-Nov-2021^F^29-Jan-2022^-^55437.00^1109.00^1109.00^
+^2^194C^21-Jul-2021^F^04-Nov-2021^-^28500.00^570.00^570.00^
+^3^194C^11-May-2021^F^27-Jul-2021^-^51570.00^1031.00^1031.00^
+
+3^CRI LIMITED^AHMC01161G^^^^^36000.00^720.00^720.00^
+^Sr. No.^Section^Transaction Date^Status of Booking^Date of Booking^Remarks^Amount Paid / Credited(Rs.)^Tax Deducted(Rs.)^TDS Deposited(Rs.)
+^1^194C^30-Sep-2021^F^25-Oct-2021^-^36000.00^720.00^720.00^
+
+4^INTAS PHARMACEUTICALS LIMITED^AHMI00350A^^^^^20000.00^400.00^400.00^
+^Sr. No.^Section^Transaction Date^Status of Booking^Date of Booking^Remarks^Amount Paid / Credited(Rs.)^Tax Deducted(Rs.)^TDS Deposited(Rs.)
+^1^194C^15-Dec-2021^F^02-Feb-2022^-^20000.00^400.00^400.00^
+
+5^NARAYANI HOTELS AND RESORTS LIMITED^AHMN00487E^^^^^357447.00^7148.00^7148.00^
+^Sr. No.^Section^Transaction Date^Status of Booking^Date of Booking^Remarks^Amount Paid / Credited(Rs.)^Tax Deducted(Rs.)^TDS Deposited(Rs.)
+^1^194C^30-Sep-2021^F^07-Nov-2021^-^103469.00^2069.00^2069.00^
+^2^194C^11-Jun-2021^F^04-Aug-2021^-^103469.00^2069.00^2069.00^
+^3^194C^18-May-2021^F^04-Aug-2021^-^103469.00^2069.00^2069.00^
+^4^194C^18-May-2021^F^04-Aug-2021^-^47040.00^941.00^941.00^
