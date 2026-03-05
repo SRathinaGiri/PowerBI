@@ -1,8 +1,8 @@
 {"visual":{"name":"dataCube","displayName":"dataCube",
-"guid":"dataCube19740818","visualClassName":"Visual","version":"1.0.0.0",
+"guid":"dataCube19740818","visualClassName":"Visual","version":"1.0.0.1",
 "description":"OLAP dataCube","supportUrl":"https://www.rathinagiri.in",
 "gitHubUrl":"https://github.com/SRathinaGiri/PowerBI/tree/main"},
 "apiVersion":"5.11.0",
 "author":{"name":"Subbiah Rathinagiri","email":"srathinagiri@gmail.com"},
 "assets":{"icon":"assets/icon.png"},
-"externalJS":[],"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.0"}
+"externalJS":[],"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[],"version":"1.0.0.1"}
