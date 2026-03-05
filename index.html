@@ -3,16 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Power BI Infographics</title>
+  <title>Power BI Custom Visuals & Infographics | CA Rathinagiri</title>
   <style>
     :root {
       --bg: linear-gradient(180deg, #f8fbff 0%, #eef2ff 100%);
       --panel: #ffffff;
       --ink: #1f2933;
       --accent: #2563eb;
+      --accent-hover: #1d4ed8;
       --muted: #475569;
       --shadow: rgba(15, 23, 42, 0.1);
+      --border: rgba(37, 99, 235, 0.12);
     }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -20,119 +27,350 @@
       color: var(--ink);
       line-height: 1.6;
     }
+
     .container {
-      max-width: 900px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 2rem;
     }
+
     header {
       text-align: center;
       padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
     }
+
     h1 {
       font-size: 2.5rem;
       margin-bottom: 0.5rem;
+      color: var(--ink);
     }
-    p {
+
+    header p {
       color: var(--muted);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto;
     }
-    .infographic-list {
-      list-style-type: none;
-      padding: 0;
+
+    section {
+      margin-bottom: 4rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    .card-grid {
       display: grid;
       gap: 1.5rem;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
-    .infographic-item {
+
+    .card {
       background: var(--panel);
-      border: 1px solid rgba(37, 99, 235, 0.12);
+      border: 1px solid var(--border);
       border-radius: 14px;
       padding: 1.75rem;
       box-shadow: 0 12px 24px var(--shadow);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
     }
-    .infographic-item:hover {
+
+    .card:hover {
       transform: translateY(-6px);
       box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
     }
-    .infographic-item h3 {
+
+    .card-img-container {
+      width: 100%;
+      height: 200px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+      background-color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card h3 {
       font-size: 1.4rem;
       margin-top: 0;
-      color: var(--accent);
+      margin-bottom: 0.75rem;
+      color: var(--ink);
     }
-    .infographic-item a {
+
+    .card p {
+      color: var(--muted);
+      font-size: 1rem;
+      flex-grow: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background-color: #f8fafc;
+      border-radius: 6px;
+      border: 1px dashed var(--border);
+    }
+
+    .card-meta span {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-meta strong {
+      color: var(--ink);
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-hover);
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(37, 99, 235, 0.05);
+      text-decoration: none;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--muted);
+      border: 1px solid var(--muted);
+    }
+
+    .btn-outline:hover {
+      background-color: #f1f5f9;
+      color: var(--ink);
+    }
+
+    .card-link {
       display: inline-block;
       margin-top: 1rem;
       color: var(--accent);
       text-decoration: none;
       font-weight: bold;
     }
-    .infographic-item a:hover {
+
+    .card-link:hover {
       text-decoration: underline;
+    }
+
+    .download-section {
+      text-align: center;
+      padding: 3rem;
+      background: var(--panel);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 24px var(--shadow);
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .social-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .social-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Power BI Infographics</h1>
-      <p>A collection of interactive, animated infographics designed to demystify complex Power BI concepts and make them easy to learn.</p>
+      <h1>Power BI Projects by CA Rathinagiri</h1>
+      <p>Chartered Accountant, FinTech Professional, and Educator sharing open-source custom visuals and animated infographics to demystify complex Power BI concepts.</p>
     </header>
 
-    <ul class="infographic-list">
-      <li class="infographic-item">
-        <h3>OLAP vs OLTP</h3>
-        <p>An interactive infographic that visually demonstrates OLTP vs OLAP: at a Glance and why Columnstore databases are used in analytics.</p>
-        <a href="pages/OLAPConcept.html">View Infographic &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>OLAP - Data Cube Operations</h3>
-        <p>An interactive infographic that visually demonstrates OLAP data cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations linked with tabular data.</p>
-        <a href="pages/OLAPDataCube.html">View Infographic &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>Star Schema Filter Flow</h3>
-        <p>This visual demonstrates how filters cascade from dimension tables to the central fact table, including bidirectional relationships.</p>
-        <a href="pages/StarSchema.html">View Infographic &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>DAX Filter Context Water Plant</h3>
-        <p>An interactive model that explains the DAX filter context hierarchy and how CALCULATE() can modify the flow of filters.</p>
-        <a href="pages/DAXFilterHierarchy.html">View Infographic &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>Filter Context Camera</h3>
-        <p>See the SUM measure act like a camera while report, page, visual, and slicer filters choreograph who steps into the spotlight.</p>
-        <a href="pages/FilterContextCamera.html">Open the Camera Page &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>Date Filter Context Train</h3>
-        <p>Explore how DAX date intelligence functions stay on track using a train yard animation that demonstrates current, previous, and next period calculations.</p>
-        <a href="pages/DateFilterContextTrain.html">View Animation &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>Stages of Data Analysis</h3>
-        <p>Step through the iterative stages of data analysis with illustrated diagrams that connect business questions to measurable insights.</p>
-        <a href="pages/stages-of-data-analysis.html">Explore the Stages &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>Choose the Right Power BI Chart</h3>
-        <p>Browse chart types, learn when to use them, and generate animated ECharts previews for Power BI storytelling.</p>
-        <a href="pages/PowerBIChartGuide.html">Open the Chart Guide &rarr;</a>
-      </li>
-      <li class="infographic-item">
-        <h3>Power Query Joins Playground</h3>
-        <p>Experiment with Left/Right/Full, Inner, and Anti joins using Orders, Customers, and Products linked with live Venn diagrams.</p>
-        <a href="pages/PowerQueryJoins.html">Explore Joins &rarr;</a>
-      </li>
-    </ul>
+    <section id="custom-visuals">
+      <h2>Custom Visuals Gallery</h2>
+      <p style="margin-bottom: 2rem;">Explore my open-source custom visuals designed to extend Power BI's capabilities.</p>
 
-    <section class="infographic-item" style="margin-top: 2rem; list-style: none;">
+      <div class="card-grid">
+        <div class="card" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
+          <div class="card-img-container" style="height: auto; margin: 0; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <img src="CustomVisuals/dataCube/Screenshot01.png" alt="DataCube 3D Visual" class="card-img" style="object-fit: contain;">
+          </div>
+          <div>
+            <h3 style="font-size: 1.8rem; color: var(--accent);">DataCube 3D</h3>
+            <p style="font-size: 1.1rem;">An interactive, open-source 3D visual for Power BI that helps users visualize multidimensional data. Explore Data Cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations.</p>
+
+            <div class="card-meta">
+              <span><strong>Status:</strong> Free & Open Source</span>
+              <span><strong>Hosting:</strong> GitHub</span>
+              <span><strong>Source Code:</strong> Included in this repository</span>
+            </div>
+
+            <div class="card-actions" style="margin-top: 1.5rem;">
+              <a href="https://github.com/SRathinaGiri/PowerBI/tree/main/CustomVisuals/dataCube" class="btn btn-primary" target="_blank">View Source Code</a>
+              <a href="CustomVisuals/dataCube/PRIVACY.md" class="btn btn-secondary">Privacy Policy</a>
+              <a href="https://github.com/SRathinaGiri/PowerBI/issues" class="btn btn-outline" target="_blank">Support / Issues</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="infographics">
+      <h2>Infographics & Reports</h2>
+      <p style="margin-bottom: 2rem;">A collection of interactive, animated infographics designed to demystify complex concepts and make them easy to learn.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>OLAP vs OLTP</h3>
+          <p>An interactive infographic that visually demonstrates OLTP vs OLAP: at a Glance and why Columnstore databases are used in analytics.</p>
+          <a href="pages/OLAPConcept.html" class="card-link">View Infographic &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>OLAP - Data Cube Operations</h3>
+          <p>An interactive infographic that visually demonstrates OLAP data cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations linked with tabular data.</p>
+          <a href="pages/OLAPDataCube.html" class="card-link">View Infographic &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>Star Schema Filter Flow</h3>
+          <p>This visual demonstrates how filters cascade from dimension tables to the central fact table, including bidirectional relationships.</p>
+          <a href="pages/StarSchema.html" class="card-link">View Infographic &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>DAX Filter Context Water Plant</h3>
+          <p>An interactive model that explains the DAX filter context hierarchy and how CALCULATE() can modify the flow of filters.</p>
+          <a href="pages/DAXFilterHierarchy.html" class="card-link">View Infographic &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>Filter Context Camera</h3>
+          <p>See the SUM measure act like a camera while report, page, visual, and slicer filters choreograph who steps into the spotlight.</p>
+          <a href="pages/FilterContextCamera.html" class="card-link">Open the Camera Page &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>Date Filter Context Train</h3>
+          <p>Explore how DAX date intelligence functions stay on track using a train yard animation that demonstrates current, previous, and next period calculations.</p>
+          <a href="pages/DateFilterContextTrain.html" class="card-link">View Animation &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>Stages of Data Analysis</h3>
+          <p>Step through the iterative stages of data analysis with illustrated diagrams that connect business questions to measurable insights.</p>
+          <a href="pages/stages-of-data-analysis.html" class="card-link">Explore the Stages &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>Choose the Right Power BI Chart</h3>
+          <p>Browse chart types, learn when to use them, and generate animated ECharts previews for Power BI storytelling.</p>
+          <a href="pages/PowerBIChartGuide.html" class="card-link">Open the Chart Guide &rarr;</a>
+        </div>
+
+        <div class="card">
+          <h3>Power Query Joins Playground</h3>
+          <p>Experiment with Left/Right/Full, Inner, and Anti joins using Orders, Customers, and Products linked with live Venn diagrams.</p>
+          <a href="pages/PowerQueryJoins.html" class="card-link">Explore Joins &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="download-section">
       <h3>Power BI Practice Workbook</h3>
       <p>Download the companion Power BI workbook to experiment with the scenarios covered in these visuals.</p>
-      <a href="assets/resources/PBI.xlsx" download>Download PBI.xlsx &darr;</a>
+      <a href="assets/resources/PBI.xlsx" class="btn btn-primary" download style="margin-top: 1rem; font-size: 1.1rem; padding: 0.75rem 1.5rem;">Download PBI.xlsx &darr;</a>
     </section>
+
+    <footer>
+      <p>&copy; 2024 CA Rathinagiri. All rights reserved.</p>
+      <div class="social-links">
+        <a href="https://rathinagiri.in" target="_blank">rathinagiri.in</a>
+        <a href="https://www.linkedin.com/in/ca-rathinagiri-subbiah-2055042a" target="_blank">LinkedIn</a>
+        <a href="https://github.com/SRathinaGiri" target="_blank">GitHub</a>
+      </div>
+    </footer>
   </div>
+
+  <style>
+    /* Add specific media query for the DataCube featured card to ensure responsiveness */
+    @media (max-width: 900px) {
+      .card[style*="grid-column: 1 / -1"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  </style>
 </body>
 </html>
