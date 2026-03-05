@@ -1,17 +1,31 @@
 {
-		"version": "1.0.0.0",
-		"author": {"name":"Subbiah Rathinagiri","email":"srathinagiri@gmail.com"},
-		"resources": [
-			{
-				"resourceId": "rId0",
-				"sourceType": 5,
-				"file": "resources/dataCube19740818.pbiviz.json"
-			}
-		],
-		"visual": {"name":"dataCube","displayName":"dataCube","guid":"dataCube19740818","visualClassName":"Visual","version":"1.0.0.0","description":"OLAP dataCube","supportUrl":"https://www.rathinagiri.in","gitHubUrl":"https://github.com/SRathinaGiri/PowerBI/tree/main"},
-		"metadata": {
-			"pbivizjson": {
-				"resourceId": "rId0"
-			}
-		}
-	}
+  "name": "visual",
+  "description": "default_template_value",
+  "version": "1.0.0.0",
+  "repository": {
+    "type": "default_template_value",
+    "url": "default_template_value"
+  },
+  "license": "MIT",
+  "scripts": {
+    "pbiviz": "pbiviz",
+    "start": "pbiviz start",
+    "package": "pbiviz package",
+    "lint": "npx eslint ."
+  },
+  "dependencies": {
+    "@types/d3": "7.4.3",
+    "@types/three": "^0.180.0",
+    "d3": "7.9.0",
+    "powerbi-visuals-api": "5.11.0",
+    "powerbi-visuals-utils-formattingmodel": "6.0.4",
+    "powerbi-visuals-utils-formattingutils": "^6.1.2",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "eslint": "^9.11.1",
+    "eslint-plugin-powerbi-visuals": "^1.0.0",
+    "typescript": "5.5.4"
+  }
+}
