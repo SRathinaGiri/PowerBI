@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Cube 3D Custom Visual - Comprehensive Tutorial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #0078D4;
+            color: white;
+            padding: 30px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #0078D4;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            color: #333;
+            margin-top: 25px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .note {
+            background-color: #e7f4ff;
+            border-left: 4px solid #0078D4;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .control-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .control-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #0078D4;
+        }
+        .screenshot-placeholder {
+            width: 100%;
+            height: 300px;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px dashed #ccc;
+        }
+        .image-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .image-caption {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Data Cube 3D Custom Visual</h1>
+        <p>A high‑performance 3D visual for Microsoft Power BI</p>
+    </header>
+
+    <div class="section">
+        <h2>1. Introduction</h2>
+        <p>Welcome to the comprehensive tutorial for the <strong>Data Cube 3D</strong> Power BI Custom Visual. This visual is designed to render three categorical dimensions (X, Y, Z) as an interactive 3D grid of cubes. The magnitude of your measure is encoded by the height, volume, and color of each individual cube.</p>
+
+        <h3>Key Features:</h3>
+        <ul>
+            <li><strong>High Performance:</strong> Uses instanced rendering to efficiently draw thousands of cubes.</li>
+            <li><strong>Crisp SVG Labels:</strong> Axis badges and tick labels remain sharp at any zoom level, complete with back-face hiding to prevent rear labels from showing through.</li>
+            <li><strong>Interactive 3D Controls:</strong> Smooth rotation, panning, and zooming using either the mouse or the intuitive on-screen control panel.</li>
+            <li><strong>Rich Tooltips:</strong> Detailed tooltips displaying member totals (e.g., "Technology total") with support for Report Page Tooltips.</li>
+            <li><strong>Extensive Customization:</strong> Configure legends, color modes (sequential, diverging, categorical), cube borders, inner grids, and much more via the formatting pane.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>2. Getting Started</h2>
+
+        <h3>Data Roles Mapping</h3>
+        <p>To populate the Data Cube 3D visual, you need to map your dataset fields to the following data roles in the Visualizations pane:</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Data Role</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Dimension 1</strong> (X-axis)</td>
+                    <td>Grouping</td>
+                    <td>The first categorical dimension (e.g., Category).</td>
+                </tr>
+                <tr>
+                    <td><strong>Dimension 2</strong> (Y-axis)</td>
+                    <td>Grouping</td>
+                    <td>The second categorical dimension (e.g., Region).</td>
+                </tr>
+                <tr>
+                    <td><strong>Dimension 3</strong> (Z-axis)</td>
+                    <td>Grouping</td>
+                    <td>The third categorical dimension (e.g., Year).</td>
+                </tr>
+                <tr>
+                    <td><strong>Value</strong></td>
+                    <td>Measure</td>
+                    <td>The numeric value that determines the size/color of the cube (e.g., Total Sales).</td>
+                </tr>
+                <tr>
+                    <td><strong>Tooltips</strong></td>
+                    <td>Measure</td>
+                    <td>Additional data fields to display when hovering over a cube.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <strong>Note on Hierarchy:</strong> The visual supports drill-down capabilities. You can place multiple fields into Dim 1, Dim 2, or Dim 3 to enable hierarchical exploration (e.g., Category > Sub-Category).
+        </div>
+
+        <div class="image-container">
+            <img src="Screenshot01.png" alt="Data Cube 3D Visual showing Total Sales by Category, Region and Year" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="screenshot-placeholder" style="display:none;">
+                [Reference: Screenshot01.png - Showing the basic 3D cube structure mapping Category, Region, and Year to Total Sales]
+            </div>
+            <div class="image-caption">Figure 1: Data Cube 3D visual mapping three dimensions and a measure. Notice the on-screen control panel at the bottom right.</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. Interaction and Controls</h2>
+        <p>The Data Cube 3D visual offers rich interactive capabilities to help users explore multidimensional data effectively.</p>
+
+        <h3>Mouse Controls</h3>
+        <ul>
+            <li><strong>Rotate (Orbit):</strong> Left-click and drag anywhere on the visual background.</li>
+            <li><strong>Zoom:</strong> Use the mouse scroll wheel.</li>
+            <li><strong>Pan:</strong> Hold <code>Shift</code> + Left-click and drag.</li>
+            <li><strong>Select:</strong> Click on a specific cube to cross-filter other visuals on the report page.</li>
+            <li><strong>Multi-Select:</strong> Hold <code>Ctrl</code> (or <code>Cmd</code> on Mac) and click multiple cubes.</li>
+        </ul>
+
+        <h3>On-Screen Control Panel</h3>
+        <p>If enabled in the formatting settings, a control panel appears overlaying the visual. It includes buttons for precise camera control:</p>
+        <div class="controls-grid">
+            <div class="control-item"><strong>Rotation</strong>Yaw Left/Right, Roll Left/Right, Pitch Up/Down</div>
+            <div class="control-item"><strong>Panning</strong>Pan Up/Down/Left/Right</div>
+            <div class="control-item"><strong>Zoom & Reset</strong>Zoom In/Out, Center View</div>
+            <div class="control-item"><strong>Preset Views</strong>Front, Top, Left, Right, Preset 1, Preset 2</div>
+            <div class="control-item"><strong>Animation</strong>Start/Pause Auto Rotate</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. Formatting Options Deep-Dive</h2>
+        <p>The visual provides an extensive Formatting Pane to tailor the look and feel perfectly to your report's theme. Here is a detailed breakdown of the available settings cards:</p>
+
+        <h3>4.1 Cube Settings</h3>
+        <ul>
+            <li><strong>Scale Mode:</strong> Choose how values dictate cube size:
+                <ul>
+                    <li><em>Height bars (Default):</em> Cubes grow vertically based on value.</li>
+                    <li><em>Equal-sized cubes:</em> All cubes are the same size; value is only represented by color.</li>
+                    <li><em>Uniform 3D scaling:</em> Cubes scale proportionally in all 3 dimensions based on value.</li>
+                </ul>
+            </li>
+            <li><strong>Cell Size & Gap:</strong> Control the base footprint of the cubes and the spacing between them in the grid.</li>
+            <li><strong>Height Scale:</strong> A multiplier to exaggerate or reduce the vertical height of the bars.</li>
+            <li><strong>Opacity:</strong> Adjust the transparency of the cubes (0 to 1).</li>
+            <li><strong>Show Control Panel:</strong> Toggle the visibility of the on-screen camera controls.</li>
+        </ul>
+
+        <h3>4.2 Colors Settings</h3>
+        <p>Define how the data points are colored:</p>
+        <ul>
+            <li><strong>Color Mode:</strong>
+                <ul>
+                    <li><em>Sequential:</em> Interpolates between Min and Max colors based on the Value measure.</li>
+                    <li><em>Diverging:</em> Interpolates between Min, Mid, and Max colors.</li>
+                    <li><em>Categorical (by Z):</em> Assigns colors based on the categorical items in the Z-axis (Dimension 3).</li>
+                </ul>
+            </li>
+            <li><strong>Color by Z Index:</strong> If enabled, categorical coloring relies on the index of the Z dimension.</li>
+        </ul>
+
+        <h3>4.3 Labels & Axes Settings</h3>
+        <p>Crucial settings for readability and chart comprehension:</p>
+        <ul>
+            <li><strong>Render as SVG:</strong> Keeps text crisp regardless of how far you zoom in. Features back-face hiding to reduce visual clutter.</li>
+            <li><strong>Axis Label Options:</strong> Customize the font size, text color, background color, and background opacity of the X/Y/Z axis title badges.</li>
+            <li><strong>Show Inner Grids:</strong> Toggles the wireframe grid layers between the cubes to help visually align data points across dimensions.</li>
+            <li><strong>Show Orientation Gizmo:</strong> Displays a small XYZ axis indicator (usually in the top left) to help maintain spatial awareness while rotating.</li>
+        </ul>
+
+        <h3>4.4 Borders & Advanced Settings</h3>
+        <ul>
+            <li><strong>Show Cube Borders:</strong> Draws lines along the edges of the cubes. You can customize the border width, color, and opacity.</li>
+            <li><strong>Sort Order:</strong> Determines how items along the axes are sorted.
+                <ul>
+                    <li><em>By totals (desc):</em> Sorts categories based on their total aggregated value.</li>
+                    <li><em>By key (asc):</em> Sorts alphabetically or numerically based on the dimension names.</li>
+                </ul>
+            </li>
+            <li><strong>Top N Settings:</strong> To maintain performance and visual clarity with large datasets, you can limit the number of items rendered per dimension (Top Dim 1, Top Dim 2, Top Dim 3). Default is 10 per axis.</li>
+            <li><strong>Volume Linear (Cube-root):</strong> When enabled, the visual applies a cube-root scale to the values before sizing the cubes, ensuring that the <em>visual volume</em> accurately reflects the underlying data proportion.</li>
+        </ul>
+
+        <div class="image-container">
+            <img src="Screenshot02.png" alt="Data Cube 3D Visual showing rich tooltips with hierarchy" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="screenshot-placeholder" style="display:none;">
+                [Reference: Screenshot02.png - Showing the rich default tooltip displaying breakdown of hierarchical data (Category/Sub-Category) and totals]
+            </div>
+            <div class="image-caption">Figure 2: Rich tooltips displaying hierarchical paths and granular totals. Note the grid lines aiding spatial alignment.</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>5. Tooltips and Analysis</h2>
+        <p>Hovering over any cube reveals a detailed, natively styled Power BI tooltip.</p>
+
+        <h3>Default Tooltip Content</h3>
+        <p>By default, the tooltip provides immense context:</p>
+        <ul>
+            <li>The specific path for the X, Y, and Z dimensions (e.g., <code>Technology ▸ Phones</code>).</li>
+            <li>The explicit <strong>Value</strong> for that specific intersection.</li>
+            <li>The percentage that value represents of the Grand Total.</li>
+            <li><strong>Subtotals:</strong> The tooltip automatically calculates and displays the total values for each specific dimension member intersecting at that cube (e.g., "Technology total", "2016 total"). This can be toggled off in <em>Advanced → Show totals in tooltip</em>.</li>
+        </ul>
+
+        <h3>Report Page Tooltips</h3>
+        <p>The Data Cube 3D visual fully supports Power BI Report Page Tooltips. To enable this:</p>
+        <ol>
+            <li>Create a new tooltip report page in Power BI Desktop.</li>
+            <li>In the visual's Formatting Pane, navigate to the <strong>Tooltip</strong> card.</li>
+            <li>Toggle on <strong>Use report page tooltip</strong>. The visual will now delegate hovering events to the standard Power BI engine to render your custom page.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>6. Best Practices & Performance Notes</h2>
+        <ul>
+            <li><strong>Data Volume:</strong> While the visual uses high-performance instanced geometry, mapping thousands of distinct categories across all three axes will eventually impact rendering speed and readability. Utilize the <strong>Top N</strong> settings in the Advanced card to focus on the most important data.</li>
+            <li><strong>Color Contrast:</strong> When using the SVG Labels, ensure the <em>Axis label background</em> color contrasts well with the overall report background, and adjust the <em>Axis text color</em> accordingly.</li>
+            <li><strong>Drill-down:</strong> When using hierarchies (multiple fields in a single dimension), utilize the "Key separator" option in the Cube settings card (▸, /, or &gt;) to format how paths are displayed in tooltips and labels cleanly.</li>
+            <li><strong>Equal Cubes vs Height Bars:</strong> Use "Equal-sized cubes" combined with a Diverging color scale when you want to create a 3D Heatmap effect, emphasizing variance through color rather than physical size.</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin-top: 50px; color: #666; font-size: 0.9em;">
+        <p>Tutorial prepared for Microsoft Power BI Custom Visual Certification.</p>
+    </div>
+
+</body>
+</html>
