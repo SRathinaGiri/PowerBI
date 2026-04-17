@@ -203,7 +203,7 @@
       display: grid;
       gap: 18px;
     }
-    .grid-panel, .fact-panel, .compare-panel { padding: 18px; }
+    .grid-panel, .fact-panel, .compare-panel, .guide-panel { padding: 18px; }
     .panel-title-row {
       display: flex;
       justify-content: space-between;
@@ -366,13 +366,57 @@
       background: rgba(255,255,255,.03);
       border: 1px solid rgba(255,255,255,.08);
     }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .guide-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .guide-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .guide-card p,
+    .guide-card li {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .guide-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+    .code-block {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(4, 11, 22, 0.78);
+      border: 1px solid rgba(88,183,255,.16);
+      color: #f4f8ff;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .guide-note {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,184,77,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,184,77,.18);
+      color: var(--muted);
+      line-height: 1.7;
+    }
     @media (max-width: 1120px) {
       .layout { grid-template-columns: 1fr; }
       .control-panel { position: static; }
     }
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; }
-      .kpi-grid, .compare-boxes { grid-template-columns: 1fr; }
+      .kpi-grid, .compare-boxes, .guide-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 700px) {
       .layout, .hero { padding-left: 14px; padding-right: 14px; }
@@ -505,6 +549,91 @@
             <strong>Filter context</strong> determines which rows are visible to aggregation.
             <code>CALCULATE()</code> is the bridge between them.
           </p>
+        </div>
+      </section>
+
+      <section class="panel guide-panel">
+        <div class="panel-title-row">
+          <h2>When Should You Use Context Transition?</h2>
+          <span class="tiny-tag compare-tag">Practical DAX situations</span>
+        </div>
+
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h3>1. In a measure</h3>
+            <p>
+              In measures, you usually use context transition when an iterator creates row context and you need a measure
+              or aggregation to evaluate <strong>for the current iterated row</strong>.
+            </p>
+            <ul>
+              <li>Use it inside <code>SUMX</code>, <code>AVERAGEX</code>, <code>FILTER</code>, or similar iterators when each row must become a filter.</li>
+              <li>If you only need a plain aggregation over already filtered rows, context transition is not the point.</li>
+              <li>The usual tool is <code>CALCULATE()</code>, because it converts the current row context into filter context.</li>
+            </ul>
+            <div class="code-block"><code>High Value Customers :=
+COUNTROWS(
+    FILTER(
+        Customers,
+        CALCULATE( SUM(Orders[Amount]) ) > 30000
+    )
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>2. In a calculated column</h3>
+            <p>
+              A calculated column already has row context, but row context alone does <strong>not</strong> filter related fact rows.
+              Use context transition when the current row must drive an aggregation over another table.
+            </p>
+            <ul>
+              <li>Without <code>CALCULATE()</code>, <code>SUM(Orders[Amount])</code> will often see too many rows.</li>
+              <li>With <code>CALCULATE()</code>, the current dimension row is pushed into filter context.</li>
+              <li>This is common when building per-customer, per-product, or per-salesperson summary columns.</li>
+            </ul>
+            <div class="code-block"><code>Customer[Customer Sales] =
+CALCULATE(
+    SUM(Orders[Amount])
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>3. In a calculated column, when calling a measure</h3>
+            <p>
+              This is the subtle one. A measure always needs filter context to produce a value. If you call a measure inside a calculated column,
+              DAX wraps that measure call in an <strong>implicit CALCULATE</strong>. That means context transition happens automatically.
+            </p>
+            <ul>
+              <li>There is row context because the column is being computed row by row.</li>
+              <li>The measure call triggers implicit context transition.</li>
+              <li>So the current row can become filter context even though you did not type <code>CALCULATE()</code> yourself.</li>
+            </ul>
+            <div class="code-block"><code>[Total Sales] := SUM(Orders[Amount])
+
+Customer[Sales via Measure] =
+[Total Sales]</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>4. When not to use it</h3>
+            <p>
+              Do not force context transition if your business question is already answered by natural filter context from slicers,
+              relationships, or report filters.
+            </p>
+            <ul>
+              <li>A regular measure like <code>Total Sales := SUM(Orders[Amount])</code> already works in visuals.</li>
+              <li>If you create unnecessary calculated columns for dynamic logic, results can become static and misleading.</li>
+              <li>Prefer measures for report-time calculations; use calculated columns only when row-by-row stored results are truly needed.</li>
+            </ul>
+            <div class="code-block"><code>Total Sales :=
+SUM(Orders[Amount])</code></div>
+          </div>
+        </div>
+
+        <div class="guide-note">
+          <strong>Rule of thumb:</strong> if DAX is standing on one row but you want an aggregation to behave
+          <em>as if that row has filtered the model</em>, you need context transition. In explicit DAX this usually means
+          <code>CALCULATE()</code>. In a calculated column that calls a measure, the measure reference already brings an implicit
+          <code>CALCULATE()</code>, so the transition happens automatically.
         </div>
       </section>
     </section>
