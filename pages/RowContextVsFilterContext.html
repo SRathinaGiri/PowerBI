@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Row Context vs Filter Context | Power BI</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --panel: rgba(13, 24, 44, 0.9);
+      --panel-soft: rgba(255, 255, 255, 0.04);
+      --ink: #eef4ff;
+      --muted: #a6b8d1;
+      --accent: #64b5ff;
+      --accent-2: #ffd166;
+      --accent-3: #62e6b4;
+      --danger: #ff7b7b;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(100, 181, 255, 0.18), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(98, 230, 180, 0.12), transparent 22%),
+        linear-gradient(180deg, #06101c, #091526 42%, #030812);
+    }
+
+    code { font-family: Consolas, "Courier New", monospace; }
+    .hero, .layout { max-width: 1400px; margin: 0 auto; }
+    .hero {
+      padding: 22px 20px 14px;
+      display: grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .back-row { margin-bottom: 10px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #dcecff;
+      font-weight: 700;
+      background: rgba(100, 181, 255, 0.14);
+      border: 1px solid rgba(100, 181, 255, 0.2);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 3vw, 3.3rem);
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 70ch;
+      font-size: 1.03rem;
+    }
+    .hero-card, .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero-card {
+      padding: 18px 20px;
+      display: grid;
+      gap: 10px;
+      background:
+        linear-gradient(135deg, rgba(255, 209, 102, .18), rgba(98, 230, 180, .08)),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .hero-card h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent-3);
+    }
+    .hero-card code {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #fff;
+    }
+    .hero-card p { margin: 0; color: var(--muted); }
+
+    .layout {
+      padding: 0 20px 28px;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+    }
+    .panel { padding: 18px; }
+    .sidebar {
+      position: sticky;
+      top: 12px;
+      height: fit-content;
+      display: grid;
+      gap: 16px;
+    }
+    .panel h2, .panel h3 { margin: 0; }
+    .control-panel { display: grid; gap: 14px; }
+    .control-row {
+      display: grid;
+      gap: 8px;
+    }
+    label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    select, button {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--ink);
+      padding: 12px 14px;
+      font: inherit;
+    }
+    select option {
+      background: #0c1730;
+      color: #eef4ff;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .18s ease, filter .18s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .scenario-btn {
+      background: linear-gradient(135deg, rgba(100,181,255,.22), rgba(100,181,255,.07));
+    }
+    .reset-btn {
+      background: linear-gradient(135deg, rgba(255,209,102,.2), rgba(255,209,102,.08));
+      color: #fff0c6;
+    }
+    .mini-note {
+      padding: 14px;
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+    }
+    .mini-note ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .status-card {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(100,181,255,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(100,181,255,.14);
+    }
+    .status-card label {
+      display: block;
+      font-size: .78rem;
+      margin-bottom: 4px;
+    }
+    .status-card strong {
+      font-size: 1.08rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .badge.row { background: rgba(255,209,102,.16); color: #ffe7ab; }
+    .badge.filter { background: rgba(98,230,180,.16); color: #d6ffee; }
+    .badge.none { background: rgba(255,123,123,.14); color: #ffd4d4; }
+    .narration {
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .tiny-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      color: #dcecff;
+      background: rgba(100,181,255,.14);
+    }
+    .tiny-tag.alt {
+      background: rgba(98,230,180,.14);
+      color: #d6ffee;
+    }
+
+    .table-header, .sales-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1.1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .table-header {
+      padding: 0 12px 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .sales-body {
+      display: grid;
+      gap: 10px;
+    }
+    .sales-row {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .sales-row.active {
+      transform: translateX(6px);
+      border-color: rgba(255,209,102,.55);
+      box-shadow: 0 14px 28px rgba(255,209,102,.16);
+    }
+    .sales-row.dim {
+      opacity: .42;
+      filter: grayscale(.7);
+    }
+    .sales-row.visible-filter {
+      border-color: rgba(98,230,180,.45);
+      box-shadow: 0 14px 28px rgba(98,230,180,.14);
+    }
+    .sales-row strong { font-size: .98rem; }
+    .muted { color: var(--muted); }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .compare-card {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .compare-card.row-card {
+      background: linear-gradient(180deg, rgba(255,209,102,.11), rgba(255,255,255,.03));
+      border-color: rgba(255,209,102,.2);
+    }
+    .compare-card.filter-card {
+      background: linear-gradient(180deg, rgba(98,230,180,.11), rgba(255,255,255,.03));
+      border-color: rgba(98,230,180,.2);
+    }
+    .compare-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .compare-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .compare-card strong {
+      display: block;
+      margin: 10px 0;
+      font-size: 1.8rem;
+    }
+    .formula-strip {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .formula-strip code { color: #fff; }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .compare-grid, .status-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .hero, .layout { padding-left: 14px; padding-right: 14px; }
+      .table-header, .sales-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <div class="back-row">
+        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+      </div>
+      <p class="eyebrow">Foundations First</p>
+      <h1>What Is Row Context? How Is It Different From Filter Context?</h1>
+      <p class="subtitle">
+        Use the same sales table in two different ways. First, watch DAX focus on a single row.
+        Then apply filters and see how the visible rows change for aggregation.
+      </p>
+    </div>
+    <div class="hero-card">
+      <h2>Mental Model</h2>
+      <code>Row context = "Which single row am I currently evaluating?"</code>
+      <code>Filter context = "Which rows are visible to my calculation right now?"</code>
+      <p>Row context points to one row. Filter context shrinks or expands the set of rows a measure can see.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel control-panel">
+        <h2>Controls</h2>
+
+        <div class="control-row">
+          <label for="customerFilter">Filter Context: Customer</label>
+          <select id="customerFilter"></select>
+        </div>
+
+        <div class="control-row">
+          <label for="regionFilter">Filter Context: Region</label>
+          <select id="regionFilter"></select>
+        </div>
+
+        <div class="control-row">
+          <label for="categoryFilter">Filter Context: Category</label>
+          <select id="categoryFilter"></select>
+        </div>
+
+        <button id="scenarioBtn" class="scenario-btn" type="button">Apply Business Scenario</button>
+        <button id="resetBtn" class="reset-btn" type="button">Clear Filters</button>
+
+        <div class="mini-note">
+          <strong>How to read this page</strong>
+          <ul>
+            <li>The glowing gold row is the current <strong>row context</strong>.</li>
+            <li>The green rows are the rows visible in <strong>filter context</strong>.</li>
+            <li>The same row can be active even when many other rows remain visible.</li>
+          </ul>
+        </div>
+
+        <div class="status-grid">
+          <div class="status-card">
+            <label>Current row</label>
+            <strong id="activeRowValue">-</strong>
+          </div>
+          <div class="status-card">
+            <label>Rows visible</label>
+            <strong id="visibleRowsValue">0</strong>
+          </div>
+        </div>
+
+        <div class="mini-note">
+          <div><strong>Row Context</strong></div>
+          <div id="rowContextBadge" class="badge row">Waiting...</div>
+        </div>
+
+        <div class="mini-note">
+          <div><strong>Filter Context</strong></div>
+          <div id="filterContextBadge" class="badge none">No filters applied</div>
+        </div>
+
+        <p id="narration" class="narration">
+          Start by scanning the table. The highlighted row shows what row context means even before any filter exists.
+        </p>
+      </section>
+    </aside>
+
+    <section class="content">
+      <section class="panel">
+        <div class="section-title">
+          <h2>Sales Table</h2>
+          <span class="tiny-tag">Gold = row context, Green = filter context</span>
+        </div>
+
+        <div class="table-header">
+          <span>Order</span>
+          <span>Customer</span>
+          <span>Region</span>
+          <span>Category</span>
+          <span>Amount</span>
+        </div>
+
+        <div id="salesBody" class="sales-body"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Difference in plain words</h2>
+          <span class="tiny-tag alt">Foundation for context transition</span>
+        </div>
+
+        <div class="compare-grid">
+          <div class="compare-card row-card">
+            <h3>Row Context</h3>
+            <strong>One row at a time</strong>
+            <p>
+              Created by calculated columns and iterator functions like <code>SUMX</code>, <code>AVERAGEX</code>,
+              <code>FILTER</code>, and <code>ADDCOLUMNS</code>. It tells DAX which row it is currently standing on.
+            </p>
+          </div>
+
+          <div class="compare-card filter-card">
+            <h3>Filter Context</h3>
+            <strong>A set of visible rows</strong>
+            <p>
+              Created by slicers, filters, relationships, and <code>CALCULATE()</code>. It decides which rows a measure
+              can see when computing an aggregation like <code>SUM</code>.
+            </p>
+          </div>
+        </div>
+
+        <div class="formula-strip">
+          <div><strong>Example 1: Row context expression</strong></div>
+          <code>Line Value = Sales[Quantity] * Sales[Unit Price]</code>
+          <div>This works because DAX evaluates the current row.</div>
+          <br />
+          <div><strong>Example 2: Filter context measure</strong></div>
+          <code>Total Sales = SUM(Sales[Amount])</code>
+          <div>This measure changes only when the visible set of rows changes.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const sales = [
+      { order: "O-101", customer: "Metro Hospital", region: "East", category: "Medical", amount: 22000 },
+      { order: "O-102", customer: "City Mart", region: "East", category: "Retail", amount: 18000 },
+      { order: "O-103", customer: "Blue Farms", region: "West", category: "Agriculture", amount: 14000 },
+      { order: "O-104", customer: "West Fuel", region: "West", category: "Energy", amount: 16000 },
+      { order: "O-105", customer: "Sun Hotels", region: "South", category: "Hospitality", amount: 26000 },
+      { order: "O-106", customer: "School Board", region: "South", category: "Public", amount: 9000 },
+      { order: "O-107", customer: "Nova Labs", region: "North", category: "Research", amount: 12000 },
+      { order: "O-108", customer: "North Grid", region: "North", category: "Utilities", amount: 19000 }
+    ];
+
+    const state = {
+      activeIndex: 0,
+      filters: {
+        customer: "All",
+        region: "All",
+        category: "All"
+      }
+    };
+
+    const salesBody = document.getElementById("salesBody");
+    const customerFilter = document.getElementById("customerFilter");
+    const regionFilter = document.getElementById("regionFilter");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const scenarioBtn = document.getElementById("scenarioBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const activeRowValue = document.getElementById("activeRowValue");
+    const visibleRowsValue = document.getElementById("visibleRowsValue");
+    const rowContextBadge = document.getElementById("rowContextBadge");
+    const filterContextBadge = document.getElementById("filterContextBadge");
+    const narration = document.getElementById("narration");
+
+    function uniqueValues(key) {
+      return ["All", ...new Set(sales.map((row) => row[key]))];
+    }
+
+    function fillSelect(selectEl, values) {
+      selectEl.innerHTML = values.map((value) => `<option value="${value}">${value}</option>`).join("");
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function renderTable() {
+      salesBody.innerHTML = sales.map((row, index) => `
+        <div class="sales-row" id="row-${index}">
+          <span><strong>${row.order}</strong></span>
+          <span>${row.customer}</span>
+          <span class="muted">${row.region}</span>
+          <span class="muted">${row.category}</span>
+          <span>${formatCurrency(row.amount)}</span>
+        </div>
+      `).join("");
+
+      Array.from(document.querySelectorAll(".sales-row")).forEach((rowEl, index) => {
+        rowEl.addEventListener("mouseenter", () => {
+          state.activeIndex = index;
+          updateView();
+        });
+      });
+    }
+
+    function getVisibleRows() {
+      return sales.filter((row) => {
+        const customerOk = state.filters.customer === "All" || row.customer === state.filters.customer;
+        const regionOk = state.filters.region === "All" || row.region === state.filters.region;
+        const categoryOk = state.filters.category === "All" || row.category === state.filters.category;
+        return customerOk && regionOk && categoryOk;
+      });
+    }
+
+    function currentFilterLabel() {
+      const labels = [];
+      if (state.filters.customer !== "All") labels.push(`Customer = ${state.filters.customer}`);
+      if (state.filters.region !== "All") labels.push(`Region = ${state.filters.region}`);
+      if (state.filters.category !== "All") labels.push(`Category = ${state.filters.category}`);
+      return labels;
+    }
+
+    function updateView() {
+      const activeRow = sales[state.activeIndex];
+      const visibleRows = getVisibleRows();
+      const labels = currentFilterLabel();
+
+      sales.forEach((row, index) => {
+        const rowEl = document.getElementById(`row-${index}`);
+        const isVisible = visibleRows.includes(row);
+        rowEl.classList.toggle("active", index === state.activeIndex);
+        rowEl.classList.toggle("visible-filter", isVisible);
+        rowEl.classList.toggle("dim", !isVisible);
+      });
+
+      activeRowValue.textContent = activeRow.order;
+      visibleRowsValue.textContent = String(visibleRows.length);
+      rowContextBadge.textContent = `${activeRow.order} / ${activeRow.customer}`;
+
+      if (labels.length) {
+        filterContextBadge.textContent = labels.join(" | ");
+        filterContextBadge.className = "badge filter";
+      } else {
+        filterContextBadge.textContent = "No filters applied";
+        filterContextBadge.className = "badge none";
+      }
+
+      if (labels.length) {
+        narration.textContent =
+          `Row context is currently pointing to ${activeRow.order} for ${activeRow.customer}. ` +
+          `At the same time, filter context is controlling visibility for ${visibleRows.length} rows: ${labels.join(", ")}. ` +
+          `These are different ideas: one current row, many visible rows.`;
+      } else {
+        narration.textContent =
+          `Row context is currently pointing to ${activeRow.order} for ${activeRow.customer}. ` +
+          `There is no filter context restriction right now, so all ${visibleRows.length} rows stay visible.`;
+      }
+    }
+
+    function syncFiltersFromUi() {
+      state.filters.customer = customerFilter.value;
+      state.filters.region = regionFilter.value;
+      state.filters.category = categoryFilter.value;
+      updateView();
+    }
+
+    fillSelect(customerFilter, uniqueValues("customer"));
+    fillSelect(regionFilter, uniqueValues("region"));
+    fillSelect(categoryFilter, uniqueValues("category"));
+    renderTable();
+    updateView();
+
+    [customerFilter, regionFilter, categoryFilter].forEach((selectEl) => {
+      selectEl.addEventListener("change", syncFiltersFromUi);
+    });
+
+    scenarioBtn.addEventListener("click", () => {
+      customerFilter.value = "All";
+      regionFilter.value = "East";
+      categoryFilter.value = "Retail";
+      syncFiltersFromUi();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      customerFilter.value = "All";
+      regionFilter.value = "All";
+      categoryFilter.value = "All";
+      syncFiltersFromUi();
+    });
+  </script>
+</body>
+</html>
