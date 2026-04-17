@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ALL vs ALLEXCEPT vs ALLSELECTED | Power BI</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --panel: rgba(12, 24, 43, 0.9);
+      --panel-soft: rgba(255,255,255,.04);
+      --ink: #eef5ff;
+      --muted: #a8bad4;
+      --accent: #69b8ff;
+      --accent-2: #ffd166;
+      --accent-3: #66e6b3;
+      --accent-4: #ff9b8a;
+      --border: rgba(255,255,255,.1);
+      --shadow: 0 20px 48px rgba(0,0,0,.34);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 10%, rgba(105,184,255,.18), transparent 28%),
+        radial-gradient(circle at 88% 14%, rgba(102,230,179,.12), transparent 24%),
+        linear-gradient(180deg, #06101b, #091425 42%, #030812);
+    }
+
+    code { font-family: Consolas, "Courier New", monospace; }
+    .hero, .layout { max-width: 1460px; margin: 0 auto; }
+    .hero {
+      padding: 22px 20px 14px;
+      display: grid;
+      grid-template-columns: 1.45fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .back-row { margin-bottom: 10px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #dcecff;
+      font-weight: 700;
+      background: rgba(105,184,255,.14);
+      border: 1px solid rgba(105,184,255,.2);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 3vw, 3.2rem);
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 74ch;
+      font-size: 1.03rem;
+    }
+    .hero-card, .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero-card {
+      padding: 18px 20px;
+      display: grid;
+      gap: 10px;
+      background:
+        linear-gradient(135deg, rgba(105,184,255,.18), rgba(102,230,179,.08)),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .hero-card h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent-3);
+    }
+    .hero-card code {
+      color: #fff;
+      font-size: .98rem;
+      line-height: 1.6;
+    }
+    .hero-card p { margin: 0; color: var(--muted); }
+
+    .layout {
+      padding: 0 20px 28px;
+      display: grid;
+      grid-template-columns: 370px minmax(0,1fr);
+      gap: 18px;
+    }
+    .sidebar {
+      position: sticky;
+      top: 12px;
+      height: fit-content;
+      display: grid;
+      gap: 16px;
+    }
+    .panel { padding: 18px; }
+    .panel h2, .panel h3 { margin: 0; }
+    .control-grid { display: grid; gap: 12px; }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    select, button {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--ink);
+      padding: 12px 14px;
+      font: inherit;
+    }
+    select option {
+      background: #0c1730;
+      color: #eef4ff;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .18s ease, filter .18s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .scenario-btn { background: linear-gradient(135deg, rgba(105,184,255,.22), rgba(105,184,255,.08)); }
+    .reset-btn { background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(255,209,102,.08)); color: #fff0c5; }
+    .mini-note {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .mini-note ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .badge.all { background: rgba(105,184,255,.16); color: #d7ecff; }
+    .badge.allexcept { background: rgba(102,230,179,.16); color: #d7ffee; }
+    .badge.allselected { background: rgba(255,155,138,.16); color: #ffe0da; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 10px;
+    }
+    .kpi {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(105,184,255,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(105,184,255,.14);
+    }
+    .kpi label {
+      margin: 0 0 4px;
+      font-size: .78rem;
+    }
+    .kpi strong { font-size: 1.08rem; }
+
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .tiny-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      color: #dcecff;
+      background: rgba(105,184,255,.14);
+    }
+    .tiny-tag.alt {
+      background: rgba(102,230,179,.14);
+      color: #d7ffee;
+    }
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+    }
+    .market-card {
+      padding: 16px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    .market-card.active {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 26px rgba(105,184,255,.16);
+      border-color: rgba(105,184,255,.38);
+    }
+    .market-card.dim {
+      opacity: .32;
+      filter: grayscale(.78);
+    }
+    .market-card h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+    .market-meta {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.5;
+    }
+    .market-sales {
+      margin-top: 14px;
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .chip {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .8rem;
+      background: rgba(255,255,255,.06);
+      color: #e8f2ff;
+      border: 1px solid rgba(255,255,255,.09);
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+    }
+    .result-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .result-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .result-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .result-card strong {
+      display: block;
+      margin: 12px 0;
+      font-size: clamp(1.5rem, 2.7vw, 2.2rem);
+    }
+    .result-card.all-card {
+      background: linear-gradient(180deg, rgba(105,184,255,.11), rgba(255,255,255,.03));
+      border-color: rgba(105,184,255,.18);
+    }
+    .result-card.allexcept-card {
+      background: linear-gradient(180deg, rgba(102,230,179,.11), rgba(255,255,255,.03));
+      border-color: rgba(102,230,179,.18);
+    }
+    .result-card.allselected-card {
+      background: linear-gradient(180deg, rgba(255,155,138,.11), rgba(255,255,255,.03));
+      border-color: rgba(255,155,138,.18);
+    }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+    .guide-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .guide-card p, .guide-card li {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .guide-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+    .code-block {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(4,11,22,.78);
+      border: 1px solid rgba(105,184,255,.16);
+      color: #f4f8ff;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .rule-box {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,209,102,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,209,102,.18);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .market-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 960px) {
+      .hero, .results-grid, .guide-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .hero, .layout { padding-left: 14px; padding-right: 14px; }
+      .market-grid, .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <div class="back-row">
+        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+      </div>
+      <p class="eyebrow">Filter Context Shaping</p>
+      <h1>ALL vs ALLEXCEPT vs ALLSELECTED</h1>
+      <p class="subtitle">
+        See how each function changes the denominator in percentage-of-total calculations.
+        This is where many Power BI reports go wrong: the numerator is fine, but the denominator is using the wrong filter universe.
+      </p>
+    </div>
+    <div class="hero-card">
+      <h2>Core Difference</h2>
+      <code>% of Grand Total = DIVIDE([Sales], CALCULATE([Sales], ALL(Market[Country], Market[Category])))</code>
+      <p><strong>ALL</strong> removes the specified filters and goes back to the full universe.</p>
+      <code>% Within Category = DIVIDE([Sales], CALCULATE([Sales], ALLEXCEPT(Market, Market[Category])))</code>
+      <p><strong>ALLEXCEPT</strong> clears many filters but preserves one grouping.</p>
+      <code>% of Selected Total = DIVIDE([Sales], CALCULATE([Sales], ALLSELECTED(Market[Country])))</code>
+      <p><strong>ALLSELECTED</strong> respects the outer selection but ignores the inner visual grain.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Controls</h2>
+        <div class="control-grid">
+          <div>
+            <label for="categoryFilter">Outer Slicer: Category</label>
+            <select id="categoryFilter"></select>
+          </div>
+          <div>
+            <label for="yearFilter">Outer Slicer: Year</label>
+            <select id="yearFilter"></select>
+          </div>
+          <div>
+            <label for="countryFocus">Inner Visual Row Focus</label>
+            <select id="countryFocus"></select>
+          </div>
+          <button id="scenarioBtn" class="scenario-btn" type="button">Apply Bikes + 2024 Scenario</button>
+          <button id="resetBtn" class="reset-btn" type="button">Clear Outer Selection</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="mini-note">
+          <strong>How to read this page</strong>
+          <ul>
+            <li><strong>Outer slicers</strong> simulate page/report selections.</li>
+            <li><strong>Inner visual row focus</strong> simulates the row currently being evaluated in a matrix or chart.</li>
+            <li><strong>ALLSELECTED</strong> keeps the outer slicer choices but ignores the current row grain.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="kpi-grid">
+          <div class="kpi">
+            <label>Visible countries</label>
+            <strong id="visibleCount">0</strong>
+          </div>
+          <div class="kpi">
+            <label>Current row</label>
+            <strong id="focusValue">-</strong>
+          </div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>ALL</strong></div>
+          <div class="badge all">Grand-total denominator</div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>ALLEXCEPT</strong></div>
+          <div class="badge allexcept">Keep category, remove row grain</div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>ALLSELECTED</strong></div>
+          <div class="badge allselected">Respect outer slicers, ignore row focus</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <p id="narration" class="mini-note" style="margin:0">
+          Pick a country row to simulate a matrix row. Then compare how each function chooses a different denominator for the same sales value.
+        </p>
+      </section>
+    </aside>
+
+    <section class="content">
+      <section class="panel">
+        <div class="section-title">
+          <h2>Visual Rows</h2>
+          <span class="tiny-tag">Bright card = current matrix row</span>
+        </div>
+        <div id="marketGrid" class="market-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Percentage Denominators</h2>
+          <span class="tiny-tag alt">Same numerator, different total universe</span>
+        </div>
+        <div class="results-grid">
+          <div class="result-card all-card">
+            <h3>ALL</h3>
+            <strong id="allValue">0%</strong>
+            <p>Removes the row-level country and the selected category/year filters in this demo, returning to the full grand total.</p>
+            <div class="chip-row" id="allChips"></div>
+          </div>
+          <div class="result-card allexcept-card">
+            <h3>ALLEXCEPT</h3>
+            <strong id="allexceptValue">0%</strong>
+            <p>Keeps the category grouping, but removes year and country focus, so the denominator becomes total sales within the current category.</p>
+            <div class="chip-row" id="allexceptChips"></div>
+          </div>
+          <div class="result-card allselected-card">
+            <h3>ALLSELECTED</h3>
+            <strong id="allselectedValue">0%</strong>
+            <p>Respects outer slicers like category and year, but removes the current row grain. This is often what you want for visual totals.</p>
+            <div class="chip-row" id="allselectedChips"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>When to use which</h2>
+          <span class="tiny-tag alt">Practical report patterns</span>
+        </div>
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h3>Use ALL when</h3>
+            <ul>
+              <li>You need a true grand-total baseline.</li>
+              <li>You want to ignore some or all filters on a table/column.</li>
+              <li>Typical use: percent of grand total, benchmark against full universe.</li>
+            </ul>
+            <div class="code-block"><code>% of Grand Total :=
+DIVIDE(
+    [Sales],
+    CALCULATE([Sales], ALL(Market))
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Use ALLEXCEPT when</h3>
+            <ul>
+              <li>You want totals within one grouping, but not within lower-grain filters.</li>
+              <li>You want to preserve one key like Category, Year, or Customer Segment.</li>
+              <li>Typical use: percent within category, percent within year.</li>
+            </ul>
+            <div class="code-block"><code>% Within Category :=
+DIVIDE(
+    [Sales],
+    CALCULATE([Sales], ALLEXCEPT(Market, Market[Category]))
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Use ALLSELECTED when</h3>
+            <ul>
+              <li>You want the denominator to respect outer report/slicer selection.</li>
+              <li>You want matrix or chart rows to compare against the visible selected total.</li>
+              <li>Typical use: visual totals and percent of currently selected total.</li>
+            </ul>
+            <div class="code-block"><code>% of Selected Total :=
+DIVIDE(
+    [Sales],
+    CALCULATE([Sales], ALLSELECTED(Market[Country]))
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Common confusion</h3>
+            <ul>
+              <li><strong>ALL</strong> can blow away slicer intent if used too broadly.</li>
+              <li><strong>ALLEXCEPT</strong> preserves listed columns only, so be precise about the grouping you keep.</li>
+              <li><strong>ALLSELECTED</strong> depends on outer selection context, so it is especially useful in visuals but can surprise people if they expect a true grand total.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="rule-box">
+          <strong>Rule of thumb:</strong> use <strong>ALL</strong> for grand total, <strong>ALLEXCEPT</strong> for subtotal within one grouping, and <strong>ALLSELECTED</strong> for “percent of what the user currently selected”.
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const rows = [
+      { country: "USA", category: "Bikes", year: 2024, sales: 120000 },
+      { country: "Canada", category: "Bikes", year: 2024, sales: 90000 },
+      { country: "Germany", category: "Bikes", year: 2024, sales: 100000 },
+      { country: "India", category: "Bikes", year: 2024, sales: 80000 },
+      { country: "USA", category: "Accessories", year: 2024, sales: 70000 },
+      { country: "Canada", category: "Accessories", year: 2024, sales: 42000 },
+      { country: "Germany", category: "Accessories", year: 2024, sales: 58000 },
+      { country: "India", category: "Accessories", year: 2024, sales: 46000 },
+      { country: "USA", category: "Bikes", year: 2025, sales: 132000 },
+      { country: "Canada", category: "Bikes", year: 2025, sales: 94000 },
+      { country: "Germany", category: "Bikes", year: 2025, sales: 108000 },
+      { country: "India", category: "Bikes", year: 2025, sales: 86000 },
+      { country: "USA", category: "Accessories", year: 2025, sales: 76000 },
+      { country: "Canada", category: "Accessories", year: 2025, sales: 47000 },
+      { country: "Germany", category: "Accessories", year: 2025, sales: 61000 },
+      { country: "India", category: "Accessories", year: 2025, sales: 50000 }
+    ];
+
+    const state = {
+      category: "All",
+      year: "All",
+      country: "USA"
+    };
+
+    const categoryFilter = document.getElementById("categoryFilter");
+    const yearFilter = document.getElementById("yearFilter");
+    const countryFocus = document.getElementById("countryFocus");
+    const scenarioBtn = document.getElementById("scenarioBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const marketGrid = document.getElementById("marketGrid");
+    const visibleCount = document.getElementById("visibleCount");
+    const focusValue = document.getElementById("focusValue");
+    const allValue = document.getElementById("allValue");
+    const allexceptValue = document.getElementById("allexceptValue");
+    const allselectedValue = document.getElementById("allselectedValue");
+    const allChips = document.getElementById("allChips");
+    const allexceptChips = document.getElementById("allexceptChips");
+    const allselectedChips = document.getElementById("allselectedChips");
+    const narration = document.getElementById("narration");
+
+    function uniqueValues(key) {
+      return ["All", ...new Set(rows.map((row) => String(row[key])))];
+    }
+
+    function fillSelect(selectEl, values) {
+      selectEl.innerHTML = values.map((value) => `<option value="${value}">${value}</option>`).join("");
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatPercent(value) {
+      return `${(value * 100).toFixed(1)}%`;
+    }
+
+    function outerSelectedRows() {
+      return rows.filter((row) => {
+        const categoryOk = state.category === "All" || row.category === state.category;
+        const yearOk = state.year === "All" || String(row.year) === state.year;
+        return categoryOk && yearOk;
+      });
+    }
+
+    function currentRowData() {
+      const visible = outerSelectedRows();
+      return visible.find((row) => row.country === state.country) || visible[0] || null;
+    }
+
+    function renderCards() {
+      const visible = outerSelectedRows();
+      const countries = [...new Set(visible.map((row) => row.country))];
+
+      marketGrid.innerHTML = countries.map((country) => {
+        const row = visible.find((item) => item.country === country);
+        const active = country === state.country;
+        return `
+          <article class="market-card ${active ? "active" : ""}" data-country="${country}">
+            <h3>${country}</h3>
+            <div class="market-meta">Category: ${row.category}<br />Year: ${row.year}</div>
+            <div class="market-sales">${formatCurrency(row.sales)}</div>
+          </article>
+        `;
+      }).join("");
+
+      const currentCountries = new Set(countries);
+      countryFocus.innerHTML = [...currentCountries].map((country) => `<option value="${country}">${country}</option>`).join("");
+      if (!currentCountries.has(state.country)) {
+        state.country = countries[0] || "USA";
+      }
+      countryFocus.value = state.country;
+
+      marketGrid.querySelectorAll(".market-card").forEach((card) => {
+        card.addEventListener("mouseenter", () => {
+          state.country = card.dataset.country;
+          updateView();
+        });
+      });
+    }
+
+    function updateView() {
+      const visible = outerSelectedRows();
+      renderCards();
+      const current = currentRowData();
+      const grandTotal = rows.reduce((sum, row) => sum + row.sales, 0);
+      const categoryTotal = rows
+        .filter((row) => current && row.category === current.category)
+        .reduce((sum, row) => sum + row.sales, 0);
+      const selectedTotal = visible.reduce((sum, row) => sum + row.sales, 0);
+
+      if (!current) {
+        visibleCount.textContent = "0";
+        focusValue.textContent = "-";
+        allValue.textContent = "0%";
+        allexceptValue.textContent = "0%";
+        allselectedValue.textContent = "0%";
+        narration.innerHTML = "No rows are visible under the current selection.";
+        return;
+      }
+
+      visibleCount.textContent = String(visible.length);
+      focusValue.textContent = current.country;
+
+      const pctAll = current.sales / grandTotal;
+      const pctAllexcept = current.sales / categoryTotal;
+      const pctAllselected = current.sales / selectedTotal;
+
+      allValue.textContent = formatPercent(pctAll);
+      allexceptValue.textContent = formatPercent(pctAllexcept);
+      allselectedValue.textContent = formatPercent(pctAllselected);
+
+      allChips.innerHTML = `
+        <span class="chip">Numerator = ${formatCurrency(current.sales)}</span>
+        <span class="chip">Grand Total = ${formatCurrency(grandTotal)}</span>
+      `;
+      allexceptChips.innerHTML = `
+        <span class="chip">Numerator = ${formatCurrency(current.sales)}</span>
+        <span class="chip">${current.category} Total = ${formatCurrency(categoryTotal)}</span>
+      `;
+      allselectedChips.innerHTML = `
+        <span class="chip">Numerator = ${formatCurrency(current.sales)}</span>
+        <span class="chip">Selected Total = ${formatCurrency(selectedTotal)}</span>
+      `;
+
+      narration.innerHTML =
+        `Current visual row is <strong>${current.country}</strong>. With outer slicers set to Category = <strong>${state.category}</strong> and Year = <strong>${state.year}</strong>, ` +
+        `<code>ALL</code> goes back to the grand total, <code>ALLEXCEPT</code> keeps only the category grouping, and <code>ALLSELECTED</code> keeps the outer slicer choices but removes the current row grain.`;
+    }
+
+    fillSelect(categoryFilter, uniqueValues("category"));
+    fillSelect(yearFilter, uniqueValues("year"));
+    fillSelect(countryFocus, [...new Set(rows.map((row) => row.country))]);
+
+    categoryFilter.addEventListener("change", () => {
+      state.category = categoryFilter.value;
+      updateView();
+    });
+    yearFilter.addEventListener("change", () => {
+      state.year = yearFilter.value;
+      updateView();
+    });
+    countryFocus.addEventListener("change", () => {
+      state.country = countryFocus.value;
+      updateView();
+    });
+
+    scenarioBtn.addEventListener("click", () => {
+      state.category = "Bikes";
+      state.year = "2024";
+      state.country = "Germany";
+      categoryFilter.value = state.category;
+      yearFilter.value = state.year;
+      updateView();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      state.category = "All";
+      state.year = "All";
+      state.country = "USA";
+      categoryFilter.value = state.category;
+      yearFilter.value = state.year;
+      updateView();
+    });
+
+    updateView();
+  </script>
+</body>
+</html>

@@ -49,7 +49,11 @@ A real-world order-lines demo showing when a simple `SUM` is enough, when `SUMX`
 
 A business-target simulation that shows why calculated columns are stored row by row in the model, while measures recalculate dynamically for the current filter context.
 
-**10. Stages of Data Analysis**
+**10. ALL vs ALLEXCEPT vs ALLSELECTED**
+
+An animated percentage-of-total lab that shows how each function chooses a different denominator: full grand total, subtotal within a grouping, or total within the current outer selection.
+
+**11. Stages of Data Analysis**
 
 Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
 
