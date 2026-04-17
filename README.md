@@ -41,7 +41,11 @@ A foundational visual that separates “the current row being evaluated” from 
 
 A salesperson commission simulation showing how row context by itself does not filter a fact table, while `CALCULATE()` performs context transition and turns the current row into filter context.
 
-**8. Stages of Data Analysis**
+**8. SUM vs SUMX Lab**
+
+A real-world order-lines demo showing when a simple `SUM` is enough, when `SUMX` must iterate row by row, and why shortcut aggregations can produce the wrong answer.
+
+**9. Stages of Data Analysis**
 
 Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
 

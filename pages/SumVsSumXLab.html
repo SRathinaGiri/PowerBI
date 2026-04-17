@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SUM vs SUMX Lab | Power BI</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --panel: rgba(12, 24, 43, 0.88);
+      --panel-soft: rgba(255, 255, 255, 0.04);
+      --ink: #eef5ff;
+      --muted: #a6b9d3;
+      --accent: #67b7ff;
+      --accent-2: #ffd166;
+      --accent-3: #60e6b2;
+      --danger: #ff7a7a;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(103, 183, 255, 0.18), transparent 28%),
+        radial-gradient(circle at 90% 16%, rgba(96, 230, 178, 0.12), transparent 24%),
+        linear-gradient(180deg, #06101b, #091425 42%, #030812);
+    }
+
+    code { font-family: Consolas, "Courier New", monospace; }
+    .hero, .layout { max-width: 1440px; margin: 0 auto; }
+    .hero {
+      padding: 22px 20px 14px;
+      display: grid;
+      grid-template-columns: 1.4fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .back-row { margin-bottom: 10px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #dcecff;
+      font-weight: 700;
+      background: rgba(103, 183, 255, 0.14);
+      border: 1px solid rgba(103, 183, 255, 0.2);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 3vw, 3.25rem);
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 72ch;
+      font-size: 1.03rem;
+    }
+    .hero-card, .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero-card {
+      padding: 18px 20px;
+      display: grid;
+      gap: 10px;
+      background:
+        linear-gradient(135deg, rgba(103,183,255,.18), rgba(96,230,178,.08)),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .hero-card h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent-3);
+    }
+    .hero-card code {
+      color: #fff;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .hero-card p { margin: 0; color: var(--muted); }
+
+    .layout {
+      padding: 0 20px 28px;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+    }
+    .sidebar {
+      position: sticky;
+      top: 12px;
+      height: fit-content;
+      display: grid;
+      gap: 16px;
+    }
+    .panel { padding: 18px; }
+    .panel h2, .panel h3 { margin: 0; }
+    .control-grid {
+      display: grid;
+      gap: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    select, button {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--ink);
+      padding: 12px 14px;
+      font: inherit;
+    }
+    select option {
+      background: #0c1730;
+      color: #eef4ff;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .18s ease, filter .18s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .scenario-btn {
+      background: linear-gradient(135deg, rgba(103,183,255,.22), rgba(103,183,255,.08));
+    }
+    .play-btn {
+      background: linear-gradient(135deg, rgba(96,230,178,.2), rgba(96,230,178,.08));
+    }
+    .reset-btn {
+      background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(255,209,102,.08));
+      color: #fff0c5;
+    }
+    .mini-note {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .mini-note ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .kpi {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(103,183,255,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(103,183,255,.14);
+    }
+    .kpi label {
+      margin: 0 0 4px;
+      font-size: .78rem;
+    }
+    .kpi strong {
+      font-size: 1.08rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .badge.sum { background: rgba(103,183,255,.15); color: #d7ecff; }
+    .badge.sumx { background: rgba(96,230,178,.16); color: #d7ffee; }
+    .badge.warn { background: rgba(255,122,122,.16); color: #ffd6d6; }
+
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .tiny-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      color: #dcecff;
+      background: rgba(103,183,255,.14);
+    }
+    .tiny-tag.alt {
+      background: rgba(96,230,178,.14);
+      color: #d7ffee;
+    }
+
+    .table-header, .line-row {
+      display: grid;
+      grid-template-columns: .9fr 1.2fr .75fr .95fr .85fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .table-header {
+      padding: 0 12px 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .table-body {
+      display: grid;
+      gap: 10px;
+    }
+    .line-row {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease;
+    }
+    .line-row.active {
+      transform: translateX(6px);
+      border-color: rgba(96,230,178,.56);
+      box-shadow: 0 14px 28px rgba(96,230,178,.18);
+    }
+    .line-row.dim {
+      opacity: .42;
+      filter: grayscale(.75);
+    }
+    .line-row strong { font-size: .97rem; }
+    .muted { color: var(--muted); }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .result-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .result-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .result-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .result-card strong {
+      display: block;
+      margin: 12px 0;
+      font-size: clamp(1.55rem, 2.8vw, 2.2rem);
+    }
+    .result-card.sum-card {
+      background: linear-gradient(180deg, rgba(103,183,255,.11), rgba(255,255,255,.03));
+      border-color: rgba(103,183,255,.18);
+    }
+    .result-card.sumx-card {
+      background: linear-gradient(180deg, rgba(96,230,178,.11), rgba(255,255,255,.03));
+      border-color: rgba(96,230,178,.18);
+    }
+    .result-card.wrong-card {
+      background: linear-gradient(180deg, rgba(255,122,122,.10), rgba(255,255,255,.03));
+      border-color: rgba(255,122,122,.16);
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .chip {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .8rem;
+      background: rgba(255,255,255,.06);
+      color: #e8f2ff;
+      border: 1px solid rgba(255,255,255,.09);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .guide-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .guide-card p, .guide-card li {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .guide-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+    .code-block {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(4, 11, 22, 0.78);
+      border: 1px solid rgba(103,183,255,.16);
+      color: #f4f8ff;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .rule-box {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,209,102,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,209,102,.18);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+    @media (max-width: 960px) {
+      .hero, .results-grid, .guide-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .hero, .layout { padding-left: 14px; padding-right: 14px; }
+      .table-header, .line-row { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <div class="back-row">
+        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+      </div>
+      <p class="eyebrow">Iterator Functions</p>
+      <h1>SUM vs SUMX</h1>
+      <p class="subtitle">
+        Use a real order-lines scenario to see the difference between adding an existing column
+        and iterating row by row to calculate an expression. This is the gateway to understanding
+        all the DAX <code>X</code> functions.
+      </p>
+    </div>
+    <div class="hero-card">
+      <h2>Core Difference</h2>
+      <code>SUM(OrderLines[NetAmount])</code>
+      <p>Use <strong>SUM</strong> when the value already exists as a column.</p>
+      <code>SUMX(OrderLines, OrderLines[Qty] * OrderLines[UnitPrice] * (1 - OrderLines[DiscountPct]))</code>
+      <p>Use <strong>SUMX</strong> when DAX must compute something for each row before adding it up.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Controls</h2>
+        <div class="control-grid">
+          <div>
+            <label for="channelFilter">Filter Context: Channel</label>
+            <select id="channelFilter"></select>
+          </div>
+
+          <div>
+            <label for="segmentFilter">Filter Context: Segment</label>
+            <select id="segmentFilter"></select>
+          </div>
+
+          <button id="scenarioBtn" class="scenario-btn" type="button">Apply Discounted Online Scenario</button>
+          <button id="playBtn" class="play-btn" type="button">Play SUMX Iteration</button>
+          <button id="resetBtn" class="reset-btn" type="button">Clear Filters</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="mini-note">
+          <strong>What to observe</strong>
+          <ul>
+            <li><strong>SUM</strong> just adds an existing column like <code>NetAmount</code>.</li>
+            <li><strong>SUMX</strong> creates row context and evaluates the expression one line at a time.</li>
+            <li>When prices or discounts vary across rows, a shortcut like total quantity times average price can be wrong.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="kpi-grid">
+          <div class="kpi">
+            <label>Visible rows</label>
+            <strong id="visibleRowsValue">0</strong>
+          </div>
+          <div class="kpi">
+            <label>Current SUMX row</label>
+            <strong id="activeRowValue">-</strong>
+          </div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>SUM</strong></div>
+          <div id="sumBadge" class="badge sum">Adds visible NetAmount values</div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>SUMX</strong></div>
+          <div id="sumxBadge" class="badge sumx">Iterates visible rows</div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>Wrong shortcut</strong></div>
+          <div id="wrongBadge" class="badge warn">Looks simple, but can distort totals</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <p id="narration" class="mini-note" style="margin:0">
+          Start the iteration to watch <code>SUMX</code> compute each visible order line separately before aggregating.
+        </p>
+      </section>
+    </aside>
+
+    <section class="content">
+      <section class="panel">
+        <div class="section-title">
+          <h2>Order Lines</h2>
+          <span class="tiny-tag">Green row = current SUMX iteration</span>
+        </div>
+
+        <div class="table-header">
+          <span>Order</span>
+          <span>Product</span>
+          <span>Qty</span>
+          <span>Unit Price</span>
+          <span>Discount</span>
+          <span>Net Amount</span>
+        </div>
+
+        <div id="tableBody" class="table-body"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Result Comparison</h2>
+          <span class="tiny-tag alt">Same filter context, different logic</span>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-card sum-card">
+            <h3>SUM of existing column</h3>
+            <strong id="sumValue">$0</strong>
+            <p>Best when the table already stores a reusable numeric column like <code>NetAmount</code>.</p>
+            <div class="chip-row" id="sumChips"></div>
+          </div>
+
+          <div class="result-card sumx-card">
+            <h3>SUMX of row expression</h3>
+            <strong id="sumxValue">$0</strong>
+            <p>Best when the amount must be computed per row using quantity, price, discount, tax, margin, or exchange rate.</p>
+            <div class="chip-row" id="sumxChips"></div>
+          </div>
+
+          <div class="result-card wrong-card">
+            <h3>Common wrong shortcut</h3>
+            <strong id="wrongValue">$0</strong>
+            <p><code>SUM(Qty) * AVERAGE(UnitPrice) * (1 - AVERAGE(Discount))</code> can look convenient but often gives the wrong business result.</p>
+            <div class="chip-row" id="wrongChips"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>When to use which</h2>
+          <span class="tiny-tag alt">And why X functions matter</span>
+        </div>
+
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h3>Use SUM when</h3>
+            <ul>
+              <li>The value you want to add already exists in one physical column.</li>
+              <li>You want the simplest and fastest expression.</li>
+              <li>Examples: <code>Sales[Amount]</code>, <code>GL[Debit]</code>, <code>Inventory[OnHandQty]</code>.</li>
+            </ul>
+            <div class="code-block"><code>Total Net Amount :=
+SUM(OrderLines[NetAmount])</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Use SUMX when</h3>
+            <ul>
+              <li>The amount must be calculated row by row first.</li>
+              <li>The expression uses more than one column from the same row.</li>
+              <li>Examples: quantity × price, amount × exchange rate, revenue - cost, weighted scoring.</li>
+            </ul>
+            <div class="code-block"><code>Total Net Amount :=
+SUMX(
+    OrderLines,
+    OrderLines[Qty] * OrderLines[UnitPrice] * (1 - OrderLines[DiscountPct])
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Real-life examples of X functions</h3>
+            <ul>
+              <li><code>SUMX</code>: invoice lines, variable pricing, tax, margin, freight.</li>
+              <li><code>AVERAGEX</code>: average customer profitability per customer.</li>
+              <li><code>MAXX</code>/<code>MINX</code>: highest or lowest row-based computed value.</li>
+              <li><code>CONCATENATEX</code>: combine text from visible rows in a report.</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <h3>Important nuance</h3>
+            <ul>
+              <li><strong>SUM is not “bad”</strong>. If the correct result already exists as a column, SUM is the right tool.</li>
+              <li><strong>SUMX is not automatically better</strong>. It is needed only when the calculation must be evaluated for each row.</li>
+              <li>If you can model a reusable helper column correctly, sometimes <code>SUM</code> becomes enough.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="rule-box">
+          <strong>Rule of thumb:</strong> if your business question sounds like
+          <em>“for each row, calculate something, then total it”</em>, you probably need an <code>X</code> function.
+          If it sounds like <em>“just add the values already stored in this column”</em>, plain <code>SUM</code> is enough.
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const orderLines = [
+      { order: "SO-101", product: "Laptop", qty: 2, unitPrice: 1200, discountPct: 0.05, channel: "Online", segment: "Enterprise" },
+      { order: "SO-102", product: "Mouse", qty: 10, unitPrice: 25, discountPct: 0.00, channel: "Retail", segment: "SMB" },
+      { order: "SO-103", product: "Monitor", qty: 3, unitPrice: 300, discountPct: 0.10, channel: "Online", segment: "Enterprise" },
+      { order: "SO-104", product: "Keyboard", qty: 6, unitPrice: 70, discountPct: 0.08, channel: "Distributor", segment: "SMB" },
+      { order: "SO-105", product: "Dock", qty: 4, unitPrice: 180, discountPct: 0.12, channel: "Online", segment: "Corporate" },
+      { order: "SO-106", product: "Headset", qty: 8, unitPrice: 95, discountPct: 0.03, channel: "Retail", segment: "Corporate" }
+    ].map((row) => ({
+      ...row,
+      netAmount: row.qty * row.unitPrice * (1 - row.discountPct)
+    }));
+
+    const state = {
+      filters: {
+        channel: "All",
+        segment: "All"
+      },
+      activeIndex: -1,
+      isPlaying: false,
+      timer: null,
+      chips: []
+    };
+
+    const tableBody = document.getElementById("tableBody");
+    const channelFilter = document.getElementById("channelFilter");
+    const segmentFilter = document.getElementById("segmentFilter");
+    const scenarioBtn = document.getElementById("scenarioBtn");
+    const playBtn = document.getElementById("playBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const visibleRowsValue = document.getElementById("visibleRowsValue");
+    const activeRowValue = document.getElementById("activeRowValue");
+    const sumValue = document.getElementById("sumValue");
+    const sumxValue = document.getElementById("sumxValue");
+    const wrongValue = document.getElementById("wrongValue");
+    const sumChips = document.getElementById("sumChips");
+    const sumxChips = document.getElementById("sumxChips");
+    const wrongChips = document.getElementById("wrongChips");
+    const narration = document.getElementById("narration");
+
+    function uniqueValues(key) {
+      return ["All", ...new Set(orderLines.map((row) => row[key]))];
+    }
+
+    function fillSelect(selectEl, values) {
+      selectEl.innerHTML = values.map((value) => `<option value="${value}">${value}</option>`).join("");
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function getVisibleRows() {
+      return orderLines.filter((row) => {
+        const channelOk = state.filters.channel === "All" || row.channel === state.filters.channel;
+        const segmentOk = state.filters.segment === "All" || row.segment === state.filters.segment;
+        return channelOk && segmentOk;
+      });
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = orderLines.map((row, index) => `
+        <div class="line-row" id="row-${index}">
+          <span><strong>${row.order}</strong></span>
+          <span>${row.product}</span>
+          <span>${row.qty}</span>
+          <span>${formatCurrency(row.unitPrice)}</span>
+          <span class="muted">${(row.discountPct * 100).toFixed(0)}%</span>
+          <span>${formatCurrency(row.netAmount)}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderChips(visibleRows, wrongShortcut) {
+      sumChips.innerHTML = visibleRows.map((row) => `<span class="chip">${row.order}: ${formatCurrency(row.netAmount)}</span>`).join("");
+
+      sumxChips.innerHTML = state.chips.length
+        ? state.chips.map((chip) => `<span class="chip">${chip}</span>`).join("")
+        : '<span class="chip">Press "Play SUMX Iteration"</span>';
+
+      const qtySum = visibleRows.reduce((sum, row) => sum + row.qty, 0);
+      const avgPrice = visibleRows.length ? visibleRows.reduce((sum, row) => sum + row.unitPrice, 0) / visibleRows.length : 0;
+      const avgDiscount = visibleRows.length ? visibleRows.reduce((sum, row) => sum + row.discountPct, 0) / visibleRows.length : 0;
+      wrongChips.innerHTML = `
+        <span class="chip">SUM(Qty) = ${qtySum}</span>
+        <span class="chip">AVG(Price) = ${formatCurrency(avgPrice)}</span>
+        <span class="chip">AVG(Discount) = ${(avgDiscount * 100).toFixed(1)}%</span>
+        <span class="chip">Result = ${formatCurrency(wrongShortcut)}</span>
+      `;
+    }
+
+    function updateResults() {
+      const visibleRows = getVisibleRows();
+      const sumResult = visibleRows.reduce((sum, row) => sum + row.netAmount, 0);
+      const sumxResult = visibleRows.reduce((sum, row) => sum + (row.qty * row.unitPrice * (1 - row.discountPct)), 0);
+      const qtySum = visibleRows.reduce((sum, row) => sum + row.qty, 0);
+      const avgPrice = visibleRows.length ? visibleRows.reduce((sum, row) => sum + row.unitPrice, 0) / visibleRows.length : 0;
+      const avgDiscount = visibleRows.length ? visibleRows.reduce((sum, row) => sum + row.discountPct, 0) / visibleRows.length : 0;
+      const wrongShortcut = qtySum * avgPrice * (1 - avgDiscount);
+
+      visibleRowsValue.textContent = String(visibleRows.length);
+      sumValue.textContent = formatCurrency(sumResult);
+      sumxValue.textContent = formatCurrency(sumxResult);
+      wrongValue.textContent = formatCurrency(wrongShortcut);
+
+      renderChips(visibleRows, wrongShortcut);
+    }
+
+    function updateRowHighlight() {
+      const visibleRows = getVisibleRows();
+      orderLines.forEach((row, index) => {
+        const rowEl = document.getElementById(`row-${index}`);
+        const isVisible = visibleRows.includes(row);
+        const isActive = state.activeIndex === index && isVisible;
+        rowEl.classList.toggle("active", isActive);
+        rowEl.classList.toggle("dim", !isVisible);
+      });
+    }
+
+    function clearPlayback() {
+      if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+      }
+      state.isPlaying = false;
+      state.activeIndex = -1;
+      state.chips = [];
+      playBtn.textContent = "Play SUMX Iteration";
+      activeRowValue.textContent = "-";
+      updateRowHighlight();
+      updateResults();
+    }
+
+    function startPlayback() {
+      const visibleRows = getVisibleRows();
+      if (!visibleRows.length) {
+        narration.innerHTML = 'No rows are visible. Clear or change the filters before running <code>SUMX</code>.';
+        return;
+      }
+
+      if (state.isPlaying) {
+        clearPlayback();
+        narration.innerHTML = 'Iteration paused. <code>SUMX</code> will continue row by row when you play again.';
+        return;
+      }
+
+      state.isPlaying = true;
+      state.chips = [];
+      playBtn.textContent = "Pause Iteration";
+
+      const visibleIndexes = orderLines
+        .map((row, index) => ({ row, index }))
+        .filter((entry) => visibleRows.includes(entry.row));
+
+      let cursor = 0;
+      state.timer = setInterval(() => {
+        if (cursor >= visibleIndexes.length) {
+          clearPlayback();
+          narration.innerHTML =
+            `SUMX finished iterating ${visibleRows.length} visible rows. It computed each row expression separately and then added the results together.`;
+          return;
+        }
+
+        const current = visibleIndexes[cursor];
+        state.activeIndex = current.index;
+        activeRowValue.textContent = current.row.order;
+        const computed = current.row.qty * current.row.unitPrice * (1 - current.row.discountPct);
+        state.chips.push(`${current.row.order}: ${current.row.qty} × ${formatCurrency(current.row.unitPrice)} × (1 - ${(current.row.discountPct * 100).toFixed(0)}%) = ${formatCurrency(computed)}`);
+        narration.innerHTML =
+          `<code>SUMX</code> is currently on ${current.row.order}. It creates row context, evaluates the expression for this row, stores the value, and then moves to the next visible row.`;
+        updateRowHighlight();
+        updateResults();
+        cursor += 1;
+      }, 1350);
+    }
+
+    function syncFilters() {
+      state.filters.channel = channelFilter.value;
+      state.filters.segment = segmentFilter.value;
+      clearPlayback();
+      const labels = [];
+      if (state.filters.channel !== "All") labels.push(`Channel = ${state.filters.channel}`);
+      if (state.filters.segment !== "All") labels.push(`Segment = ${state.filters.segment}`);
+      narration.innerHTML = labels.length
+        ? `Current filter context: ${labels.join(", ")}. Now compare how <code>SUM</code>, <code>SUMX</code>, and the shortcut behave on the same visible rows.`
+        : 'No extra filters are applied. Compare how <code>SUM</code>, <code>SUMX</code>, and the shortcut behave across all rows.';
+    }
+
+    fillSelect(channelFilter, uniqueValues("channel"));
+    fillSelect(segmentFilter, uniqueValues("segment"));
+    renderTable();
+    updateResults();
+    updateRowHighlight();
+
+    [channelFilter, segmentFilter].forEach((selectEl) => {
+      selectEl.addEventListener("change", syncFilters);
+    });
+
+    scenarioBtn.addEventListener("click", () => {
+      channelFilter.value = "Online";
+      segmentFilter.value = "Enterprise";
+      syncFilters();
+    });
+
+    playBtn.addEventListener("click", startPlayback);
+
+    resetBtn.addEventListener("click", () => {
+      channelFilter.value = "All";
+      segmentFilter.value = "All";
+      syncFilters();
+    });
+  </script>
+</body>
+</html>
