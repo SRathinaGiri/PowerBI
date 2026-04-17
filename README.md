@@ -45,7 +45,11 @@ A salesperson commission simulation showing how row context by itself does not f
 
 A real-world order-lines demo showing when a simple `SUM` is enough, when `SUMX` must iterate row by row, and why shortcut aggregations can produce the wrong answer.
 
-**9. Stages of Data Analysis**
+**9. Calculated Column vs Measure**
+
+A business-target simulation that shows why calculated columns are stored row by row in the model, while measures recalculate dynamically for the current filter context.
+
+**10. Stages of Data Analysis**
 
 Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
 

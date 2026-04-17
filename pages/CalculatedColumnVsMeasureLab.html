@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculated Column vs Measure | Power BI</title>
+  <style>
+    :root {
+      --bg: #07111d;
+      --panel: rgba(12, 24, 43, 0.9);
+      --panel-soft: rgba(255, 255, 255, 0.04);
+      --ink: #eef5ff;
+      --muted: #a8bad4;
+      --accent: #69b8ff;
+      --accent-2: #ffd166;
+      --accent-3: #66e6b3;
+      --danger: #ff7b7b;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 14% 10%, rgba(105,184,255,.18), transparent 28%),
+        radial-gradient(circle at 88% 14%, rgba(102,230,179,.12), transparent 24%),
+        linear-gradient(180deg, #06101b, #091425 42%, #030812);
+    }
+
+    code { font-family: Consolas, "Courier New", monospace; }
+    .hero, .layout { max-width: 1440px; margin: 0 auto; }
+    .hero {
+      padding: 22px 20px 14px;
+      display: grid;
+      grid-template-columns: 1.4fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .back-row { margin-bottom: 10px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: #dcecff;
+      font-weight: 700;
+      background: rgba(105,184,255,.14);
+      border: 1px solid rgba(105,184,255,.2);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent-2);
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 3vw, 3.25rem);
+    }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 72ch;
+      font-size: 1.03rem;
+    }
+    .hero-card, .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .hero-card {
+      padding: 18px 20px;
+      display: grid;
+      gap: 10px;
+      background:
+        linear-gradient(135deg, rgba(105,184,255,.18), rgba(102,230,179,.08)),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .hero-card h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--accent-3);
+    }
+    .hero-card code {
+      color: #fff;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    .hero-card p { margin: 0; color: var(--muted); }
+
+    .layout {
+      padding: 0 20px 28px;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+    }
+    .sidebar {
+      position: sticky;
+      top: 12px;
+      height: fit-content;
+      display: grid;
+      gap: 16px;
+    }
+    .panel { padding: 18px; }
+    .panel h2, .panel h3 { margin: 0; }
+    .control-grid {
+      display: grid;
+      gap: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    select, button {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--ink);
+      padding: 12px 14px;
+      font: inherit;
+    }
+    select option {
+      background: #0c1730;
+      color: #eef4ff;
+    }
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform .18s ease, filter .18s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    .scenario-btn {
+      background: linear-gradient(135deg, rgba(105,184,255,.22), rgba(105,184,255,.08));
+    }
+    .reset-btn {
+      background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(255,209,102,.08));
+      color: #fff0c5;
+    }
+    .mini-note {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--panel-soft);
+      border: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .mini-note ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .kpi {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(105,184,255,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(105,184,255,.14);
+    }
+    .kpi label {
+      margin: 0 0 4px;
+      font-size: .78rem;
+    }
+    .kpi strong { font-size: 1.08rem; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .badge.column { background: rgba(255,209,102,.16); color: #ffe7ab; }
+    .badge.measure { background: rgba(102,230,179,.16); color: #d7ffee; }
+    .badge.warn { background: rgba(255,123,123,.16); color: #ffd6d6; }
+
+    .content {
+      display: grid;
+      gap: 18px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .tiny-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      color: #dcecff;
+      background: rgba(105,184,255,.14);
+    }
+    .tiny-tag.alt {
+      background: rgba(102,230,179,.14);
+      color: #d7ffee;
+    }
+
+    .table-header, .row-card {
+      display: grid;
+      grid-template-columns: .95fr 1.15fr .85fr .85fr 1fr 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .table-header {
+      padding: 0 12px 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .table-body {
+      display: grid;
+      gap: 10px;
+    }
+    .row-card {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease;
+    }
+    .row-card.active {
+      transform: translateX(6px);
+      border-color: rgba(255,209,102,.56);
+      box-shadow: 0 14px 28px rgba(255,209,102,.16);
+    }
+    .row-card.dim {
+      opacity: .38;
+      filter: grayscale(.72);
+    }
+    .row-card strong { font-size: .97rem; }
+    .muted { color: var(--muted); }
+    .column-pill {
+      display: inline-flex;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .84rem;
+      background: rgba(255,209,102,.12);
+      color: #ffeabc;
+      border: 1px solid rgba(255,209,102,.16);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .result-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .result-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .result-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .result-card strong {
+      display: block;
+      margin: 12px 0;
+      font-size: clamp(1.55rem, 2.8vw, 2.2rem);
+    }
+    .result-card.column-card {
+      background: linear-gradient(180deg, rgba(255,209,102,.11), rgba(255,255,255,.03));
+      border-color: rgba(255,209,102,.18);
+    }
+    .result-card.measure-card {
+      background: linear-gradient(180deg, rgba(102,230,179,.11), rgba(255,255,255,.03));
+      border-color: rgba(102,230,179,.18);
+    }
+    .result-card.warn-card {
+      background: linear-gradient(180deg, rgba(255,123,123,.10), rgba(255,255,255,.03));
+      border-color: rgba(255,123,123,.16);
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .chip {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .8rem;
+      background: rgba(255,255,255,.06);
+      color: #e8f2ff;
+      border: 1px solid rgba(255,255,255,.09);
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .guide-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .guide-card p, .guide-card li {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .guide-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+    .code-block {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(4, 11, 22, 0.78);
+      border: 1px solid rgba(105,184,255,.16);
+      color: #f4f8ff;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .rule-box {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,209,102,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,209,102,.18);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+    }
+    @media (max-width: 960px) {
+      .hero, .results-grid, .guide-grid { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .hero, .layout { padding-left: 14px; padding-right: 14px; }
+      .table-header, .row-card { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <div class="back-row">
+        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+      </div>
+      <p class="eyebrow">Modeling vs Report Logic</p>
+      <h1>Calculated Column vs Measure</h1>
+      <p class="subtitle">
+        Use a sales target scenario to see the core difference: a calculated column stores a value
+        row by row inside the model, while a measure recalculates dynamically based on filter context.
+      </p>
+    </div>
+    <div class="hero-card">
+      <h2>Core Difference</h2>
+      <code>Sales[Margin % Band] = IF(Sales[Margin %] &gt; 0.3, "High", "Normal")</code>
+      <p>A <strong>calculated column</strong> is computed row by row and stored in the model.</p>
+      <code>Target Achievement % = DIVIDE([Total Sales], [Target Sales])</code>
+      <p>A <strong>measure</strong> is computed at query time and changes with slicers, filters, and visuals.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Controls</h2>
+        <div class="control-grid">
+          <div>
+            <label for="regionFilter">Filter Context: Region</label>
+            <select id="regionFilter"></select>
+          </div>
+
+          <div>
+            <label for="channelFilter">Filter Context: Channel</label>
+            <select id="channelFilter"></select>
+          </div>
+
+          <button id="scenarioBtn" class="scenario-btn" type="button">Apply East + Online Scenario</button>
+          <button id="resetBtn" class="reset-btn" type="button">Clear Filters</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="mini-note">
+          <strong>What to observe</strong>
+          <ul>
+            <li>The highlighted row is just for learning the row-by-row nature of a calculated column.</li>
+            <li>The <strong>Performance Band</strong> column never changes when filters change.</li>
+            <li>The <strong>measure cards</strong> change immediately because measures respond to filter context.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="kpi-grid">
+          <div class="kpi">
+            <label>Visible rows</label>
+            <strong id="visibleRowsValue">0</strong>
+          </div>
+          <div class="kpi">
+            <label>Active row</label>
+            <strong id="activeRowValue">-</strong>
+          </div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>Calculated Column</strong></div>
+          <div id="columnBadge" class="badge column">Stored once per row</div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>Measure</strong></div>
+          <div id="measureBadge" class="badge measure">Recomputed for current filter context</div>
+        </div>
+        <div class="mini-note" style="margin-top:12px">
+          <div><strong>Common mistake</strong></div>
+          <div id="warnBadge" class="badge warn">Trying to use columns for dynamic report logic</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <p id="narration" class="mini-note" style="margin:0">
+          Start by filtering the page. The row-level calculated column will stay fixed, but the measures will recalculate for the visible rows.
+        </p>
+      </section>
+    </aside>
+
+    <section class="content">
+      <section class="panel">
+        <div class="section-title">
+          <h2>Salesperson Snapshot</h2>
+          <span class="tiny-tag">Gold row = one stored row in the model</span>
+        </div>
+
+        <div class="table-header">
+          <span>Rep</span>
+          <span>Region</span>
+          <span>Channel</span>
+          <span>Sales</span>
+          <span>Target</span>
+          <span>Calculated Column</span>
+        </div>
+
+        <div id="tableBody" class="table-body"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>Dynamic Measure Results</h2>
+          <span class="tiny-tag alt">Same data, filter-responsive answers</span>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-card column-card">
+            <h3>Stored classification</h3>
+            <strong id="columnSummaryValue">0</strong>
+            <p>Count of visible rows that already carry the stored calculated-column label <code>Above Target</code>.</p>
+            <div class="chip-row" id="columnChips"></div>
+          </div>
+
+          <div class="result-card measure-card">
+            <h3>Dynamic target achievement</h3>
+            <strong id="measureValue">0%</strong>
+            <p>A measure that recalculates using only the currently visible rows in the report.</p>
+            <div class="chip-row" id="measureChips"></div>
+          </div>
+
+          <div class="result-card warn-card">
+            <h3>What would go wrong?</h3>
+            <strong id="wrongValue">Static</strong>
+            <p>If you expected a stored column to behave like a report-time KPI, it would not recalculate with slicers.</p>
+            <div class="chip-row" id="wrongChips"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <h2>When to use which</h2>
+          <span class="tiny-tag alt">Practical guidance</span>
+        </div>
+
+        <div class="guide-grid">
+          <div class="guide-card">
+            <h3>Use a calculated column when</h3>
+            <ul>
+              <li>You need a row-level value stored in the model.</li>
+              <li>You want to slice, group, sort, or relate data using that result.</li>
+              <li>Examples: banding, flags, concatenated keys, date parts, static classifications.</li>
+            </ul>
+            <div class="code-block"><code>Sales[Performance Band] =
+IF(
+    Sales[SalesAmount] &gt;= Sales[TargetAmount],
+    "Above Target",
+    "Below Target"
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Use a measure when</h3>
+            <ul>
+              <li>You need the result to change with filters, slicers, or visual context.</li>
+              <li>You want aggregated report logic rather than stored row logic.</li>
+              <li>Examples: total sales, achievement %, YTD, rankings, dynamic comparisons.</li>
+            </ul>
+            <div class="code-block"><code>Target Achievement % :=
+DIVIDE(
+    SUM(Sales[SalesAmount]),
+    SUM(Sales[TargetAmount])
+)</code></div>
+          </div>
+
+          <div class="guide-card">
+            <h3>Real-life difference</h3>
+            <p>
+              A calculated column is prepared during model refresh, then saved. A measure is computed only when the report asks for it.
+            </p>
+            <ul>
+              <li>Calculated column: increases model size, but useful for slicing and row-based attributes.</li>
+              <li>Measure: does not store row results, but gives dynamic answers for reports.</li>
+            </ul>
+          </div>
+
+          <div class="guide-card">
+            <h3>Common mistakes</h3>
+            <ul>
+              <li>Creating a calculated column for something that should react to slicers.</li>
+              <li>Trying to put a measure on an axis or use it directly as a relationship key.</li>
+              <li>Using calculated columns for every report KPI and bloating the model.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="rule-box">
+          <strong>Rule of thumb:</strong> if the answer should be stored per row and reused as a category,
+          use a <strong>calculated column</strong>. If the answer should change based on filters, visuals,
+          or report selections, use a <strong>measure</strong>.
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const reps = [
+      { rep: "Anita", region: "East", channel: "Online", sales: 92000, target: 85000 },
+      { rep: "Bharath", region: "West", channel: "Retail", sales: 76000, target: 80000 },
+      { rep: "Chloe", region: "South", channel: "Online", sales: 88000, target: 82000 },
+      { rep: "Deepak", region: "North", channel: "Distributor", sales: 69000, target: 70000 },
+      { rep: "Elena", region: "East", channel: "Retail", sales: 81000, target: 79000 },
+      { rep: "Farhan", region: "West", channel: "Online", sales: 97000, target: 90000 }
+    ].map((row) => ({
+      ...row,
+      performanceBand: row.sales >= row.target ? "Above Target" : "Below Target"
+    }));
+
+    const state = {
+      filters: {
+        region: "All",
+        channel: "All"
+      },
+      activeIndex: 0
+    };
+
+    const tableBody = document.getElementById("tableBody");
+    const regionFilter = document.getElementById("regionFilter");
+    const channelFilter = document.getElementById("channelFilter");
+    const scenarioBtn = document.getElementById("scenarioBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const visibleRowsValue = document.getElementById("visibleRowsValue");
+    const activeRowValue = document.getElementById("activeRowValue");
+    const columnSummaryValue = document.getElementById("columnSummaryValue");
+    const measureValue = document.getElementById("measureValue");
+    const wrongValue = document.getElementById("wrongValue");
+    const columnChips = document.getElementById("columnChips");
+    const measureChips = document.getElementById("measureChips");
+    const wrongChips = document.getElementById("wrongChips");
+    const narration = document.getElementById("narration");
+
+    function uniqueValues(key) {
+      return ["All", ...new Set(reps.map((row) => row[key]))];
+    }
+
+    function fillSelect(selectEl, values) {
+      selectEl.innerHTML = values.map((value) => `<option value="${value}">${value}</option>`).join("");
+    }
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatPercent(value) {
+      return `${(value * 100).toFixed(1)}%`;
+    }
+
+    function getVisibleRows() {
+      return reps.filter((row) => {
+        const regionOk = state.filters.region === "All" || row.region === state.filters.region;
+        const channelOk = state.filters.channel === "All" || row.channel === state.filters.channel;
+        return regionOk && channelOk;
+      });
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = reps.map((row, index) => `
+        <div class="row-card" id="row-${index}">
+          <span><strong>${row.rep}</strong></span>
+          <span>${row.region}</span>
+          <span class="muted">${row.channel}</span>
+          <span>${formatCurrency(row.sales)}</span>
+          <span>${formatCurrency(row.target)}</span>
+          <span><span class="column-pill">${row.performanceBand}</span></span>
+        </div>
+      `).join("");
+
+      Array.from(document.querySelectorAll(".row-card")).forEach((rowEl, index) => {
+        rowEl.addEventListener("mouseenter", () => {
+          state.activeIndex = index;
+          updateView();
+        });
+      });
+    }
+
+    function updateView() {
+      const visibleRows = getVisibleRows();
+      const activeRow = reps[state.activeIndex];
+      const totalSales = visibleRows.reduce((sum, row) => sum + row.sales, 0);
+      const totalTarget = visibleRows.reduce((sum, row) => sum + row.target, 0);
+      const achievement = totalTarget ? totalSales / totalTarget : 0;
+      const aboveTargetCount = visibleRows.filter((row) => row.performanceBand === "Above Target").length;
+
+      reps.forEach((row, index) => {
+        const rowEl = document.getElementById(`row-${index}`);
+        const isVisible = visibleRows.includes(row);
+        rowEl.classList.toggle("active", index === state.activeIndex);
+        rowEl.classList.toggle("dim", !isVisible);
+      });
+
+      visibleRowsValue.textContent = String(visibleRows.length);
+      activeRowValue.textContent = activeRow.rep;
+      columnSummaryValue.textContent = String(aboveTargetCount);
+      measureValue.textContent = formatPercent(achievement);
+      wrongValue.textContent = activeRow.performanceBand;
+
+      columnChips.innerHTML = visibleRows.map((row) => `<span class="chip">${row.rep}: ${row.performanceBand}</span>`).join("");
+      measureChips.innerHTML = `
+        <span class="chip">SUM(Sales) = ${formatCurrency(totalSales)}</span>
+        <span class="chip">SUM(Target) = ${formatCurrency(totalTarget)}</span>
+        <span class="chip">Achievement = ${formatPercent(achievement)}</span>
+      `;
+      wrongChips.innerHTML = `
+        <span class="chip">Active row band = ${activeRow.performanceBand}</span>
+        <span class="chip">This label does not recalculate for the whole filtered set</span>
+      `;
+
+      const labels = [];
+      if (state.filters.region !== "All") labels.push(`Region = ${state.filters.region}`);
+      if (state.filters.channel !== "All") labels.push(`Channel = ${state.filters.channel}`);
+
+      narration.innerHTML = labels.length
+        ? `Current filter context: ${labels.join(", ")}. The visible measure result changes to ${formatPercent(achievement)}, but each row's stored <code>Performance Band</code> remains exactly the same as it was during model calculation.`
+        : `No filters are applied. The measure is aggregating over all visible rows, while the calculated column values stay fixed on each row regardless of the report state.`;
+    }
+
+    function syncFilters() {
+      state.filters.region = regionFilter.value;
+      state.filters.channel = channelFilter.value;
+      updateView();
+    }
+
+    fillSelect(regionFilter, uniqueValues("region"));
+    fillSelect(channelFilter, uniqueValues("channel"));
+    renderTable();
+    updateView();
+
+    [regionFilter, channelFilter].forEach((selectEl) => {
+      selectEl.addEventListener("change", syncFilters);
+    });
+
+    scenarioBtn.addEventListener("click", () => {
+      regionFilter.value = "East";
+      channelFilter.value = "Online";
+      syncFilters();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      regionFilter.value = "All";
+      channelFilter.value = "All";
+      syncFilters();
+    });
+  </script>
+</body>
+</html>
