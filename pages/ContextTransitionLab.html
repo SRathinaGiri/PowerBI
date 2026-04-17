@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Context Transition Lab | Power BI</title>
+  <style>
+    :root {
+      --bg: #08111f;
+      --panel: rgba(10, 20, 38, 0.82);
+      --border: rgba(255, 255, 255, 0.1);
+      --ink: #eef4ff;
+      --muted: #9eb1c9;
+      --accent: #58b7ff;
+      --accent-2: #ffb84d;
+      --accent-3: #58e5ae;
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(88, 183, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 85% 15%, rgba(88, 229, 174, 0.14), transparent 24%),
+        linear-gradient(180deg, #07101d, #091526 35%, #040912);
+    }
+
+    code { font-family: Consolas, "Courier New", monospace; }
+    .hero, .layout { max-width: 1400px; margin: 0 auto; }
+    .hero {
+      padding: 22px 20px 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(320px, 460px);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .back-row { margin-bottom: 10px; }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: #d9ecff;
+      text-decoration: none;
+      font-weight: 700;
+      background: rgba(88, 183, 255, 0.14);
+      border: 1px solid rgba(88, 183, 255, 0.18);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent-2);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 3vw, 3.4rem);
+    }
+    .subtitle {
+      margin: 0;
+      max-width: 68ch;
+      color: var(--muted);
+      font-size: 1.03rem;
+    }
+    .formula-card, .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .formula-card {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      background:
+        linear-gradient(135deg, rgba(88,183,255,.18), rgba(88,183,255,.05)),
+        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    }
+    .formula-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-3);
+      font-weight: 700;
+    }
+    .formula-card code {
+      font-size: 1.05rem;
+      line-height: 1.5;
+      color: #ffffff;
+    }
+    .formula-card p { margin: 0; color: var(--muted); }
+
+    .layout {
+      padding: 0 20px 28px;
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+    }
+    .control-panel {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 12px;
+      height: fit-content;
+    }
+    .control-panel h2, .panel h2, .panel h3 { margin: 0; }
+    .primary-btn, .transport button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease, background .18s ease;
+    }
+    .primary-btn {
+      background: linear-gradient(135deg, #ffb84d, #ff8b55);
+      color: #241505;
+    }
+    .primary-btn.active {
+      background: linear-gradient(135deg, #58e5ae, #58b7ff);
+      color: #03131e;
+    }
+    .transport {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .transport button {
+      background: rgba(255,255,255,.06);
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    .note-card, .filter-card, .story-card {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .note-card ul {
+      padding-left: 18px;
+      margin: 10px 0 0;
+      color: var(--muted);
+    }
+    .note-card li + li { margin-top: 10px; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .kpi {
+      padding: 14px 12px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(88,183,255,.12), rgba(255,255,255,.03));
+      border: 1px solid rgba(88,183,255,.14);
+    }
+    .kpi-label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .kpi strong { font-size: 1.05rem; }
+    .context-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .context-row + .context-row { margin-top: 10px; }
+    .context-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    .badge.neutral { background: rgba(88,183,255,.14); color: #cfeaff; }
+    .badge.warning { background: rgba(255,184,77,.16); color: #ffe3b7; }
+    .badge.success { background: rgba(88,229,174,.16); color: #d6ffee; }
+    .story-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .stage {
+      display: grid;
+      gap: 18px;
+    }
+    .grid-panel, .fact-panel, .compare-panel { padding: 18px; }
+    .panel-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .tiny-tag {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      background: rgba(88,183,255,.14);
+      color: #d7ecff;
+    }
+    .tiny-tag.alt { background: rgba(255,184,77,.14); color: #ffe6bc; }
+    .tiny-tag.compare-tag { background: rgba(88,229,174,.14); color: #d7ffee; }
+    .table-header, .rep-row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr 0.9fr 1.1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .table-header {
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 0 14px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .table-body { display: grid; gap: 10px; }
+    .rep-row {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.06);
+      transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+    }
+    .rep-row.active {
+      transform: translateX(6px);
+      border-color: rgba(88,183,255,.5);
+      box-shadow: 0 14px 30px rgba(88,183,255,.18);
+    }
+    .rep-row.done { border-color: rgba(88,229,174,.25); }
+    .rep-name {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .rep-name strong { font-size: 1rem; }
+    .rep-name span, .rep-row .muted {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .calc-result {
+      font-weight: 800;
+      font-size: 1rem;
+    }
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+    .order-card {
+      position: relative;
+      overflow: hidden;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.08);
+      background:
+        radial-gradient(circle at top right, rgba(88,183,255,.12), transparent 40%),
+        rgba(255,255,255,.03);
+      min-height: 136px;
+      transition: transform .24s ease, opacity .24s ease, border-color .24s ease, box-shadow .24s ease;
+    }
+    .order-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -45% -20%;
+      height: 80px;
+      background: radial-gradient(circle, rgba(88,183,255,.22), transparent 70%);
+      opacity: 0;
+      transition: opacity .24s ease;
+    }
+    .order-card.visible {
+      transform: translateY(-4px);
+      border-color: rgba(88,183,255,.48);
+      box-shadow: 0 16px 32px rgba(88,183,255,.18);
+    }
+    .order-card.visible.filtered {
+      border-color: rgba(88,229,174,.56);
+      box-shadow: 0 16px 32px rgba(88,229,174,.22);
+    }
+    .order-card.visible::after { opacity: 1; }
+    .order-card.hidden {
+      opacity: .34;
+      filter: grayscale(.7);
+    }
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .order-chip {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      background: rgba(255,255,255,.08);
+      color: #dce9ff;
+    }
+    .order-meta {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+    .order-amount {
+      margin-top: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .compare-boxes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .compare-box {
+      padding: 18px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,184,77,.11), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,184,77,.2);
+    }
+    .compare-box.success {
+      background: linear-gradient(180deg, rgba(88,229,174,.12), rgba(255,255,255,.03));
+      border-color: rgba(88,229,174,.2);
+    }
+    .compare-label {
+      color: var(--muted);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.78rem;
+    }
+    .compare-box strong {
+      display: block;
+      font-size: clamp(1.6rem, 3vw, 2.5rem);
+      margin-bottom: 10px;
+    }
+    .compare-box p, .mini-lesson p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .mini-lesson {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    @media (max-width: 1120px) {
+      .layout { grid-template-columns: 1fr; }
+      .control-panel { position: static; }
+    }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .kpi-grid, .compare-boxes { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .layout, .hero { padding-left: 14px; padding-right: 14px; }
+      .table-header, .rep-row { grid-template-columns: 1fr; }
+      .context-row { grid-template-columns: 1fr; }
+      .transport { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-copy">
+      <div class="back-row">
+        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
+      </div>
+      <p class="eyebrow">Power BI Learning Lab</p>
+      <h1>Context Transition and Row Evaluation Context</h1>
+      <p class="subtitle">
+        A real-life commission example. Watch each salesperson row create a row context, then see
+        <code>CALCULATE()</code> convert it into filter context on the Orders table.
+      </p>
+    </div>
+    <div class="formula-card">
+      <div class="formula-label">Calculated Column</div>
+      <code id="formulaText">Rep Sales = SUM(Orders[Amount])</code>
+      <p id="formulaHint">Without CALCULATE, the current row does not filter the Orders table.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="control-panel panel">
+      <h2>Controls</h2>
+      <button id="toggleMode" class="primary-btn" type="button">CALCULATE() OFF</button>
+      <div class="transport">
+        <button id="playBtn" type="button">Pause</button>
+        <button id="stepBtn" type="button">Step</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+
+      <div class="note-card">
+        <h3>What to observe</h3>
+        <ul>
+          <li><strong>Row evaluation context:</strong> one salesperson row is active at a time.</li>
+          <li><strong>No transition:</strong> <code>SUM(Orders[Amount])</code> sees all order rows.</li>
+          <li><strong>With transition:</strong> <code>CALCULATE()</code> turns the current salesperson row into a filter.</li>
+        </ul>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <span class="kpi-label">Current rep</span>
+          <strong id="currentRep">-</strong>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Orders visible</span>
+          <strong id="visibleOrders">0</strong>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Returned value</span>
+          <strong id="resultValue">$0</strong>
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <h3>Active evaluation context</h3>
+        <div class="context-row">
+          <span class="context-label">Row context</span>
+          <span id="rowContextBadge" class="badge neutral">Waiting...</span>
+        </div>
+        <div class="context-row">
+          <span class="context-label">Filter context</span>
+          <span id="filterContextBadge" class="badge warning">Orders = all rows</span>
+        </div>
+      </div>
+
+      <div class="story-card">
+        <h3>Explanation</h3>
+        <p id="narration">
+          The animation is about to start. Each loop evaluates the calculated column for one salesperson.
+        </p>
+      </div>
+    </aside>
+
+    <section class="stage">
+      <section class="panel grid-panel">
+        <div class="panel-title-row">
+          <h2>Salesperson Dimension</h2>
+          <span class="tiny-tag">Current row highlighted</span>
+        </div>
+        <div class="table-header">
+          <span>Rep</span>
+          <span>Region</span>
+          <span>Commission %</span>
+          <span>Calculated Column</span>
+        </div>
+        <div id="repTable" class="table-body"></div>
+      </section>
+
+      <section class="panel fact-panel">
+        <div class="panel-title-row">
+          <h2>Orders Fact Table</h2>
+          <span class="tiny-tag alt">Rows lit = visible to the expression</span>
+        </div>
+        <div id="ordersGrid" class="orders-grid"></div>
+      </section>
+
+      <section class="panel compare-panel">
+        <div class="panel-title-row">
+          <h2>Why context transition matters</h2>
+          <span class="tiny-tag compare-tag">Same row context, different result</span>
+        </div>
+
+        <div class="compare-boxes">
+          <div class="compare-box">
+            <div class="compare-label">Without CALCULATE()</div>
+            <strong id="withoutValue">$0</strong>
+            <p>The Orders table is not filtered by the active salesperson row.</p>
+          </div>
+          <div class="compare-box success">
+            <div class="compare-label">With CALCULATE()</div>
+            <strong id="withValue">$0</strong>
+            <p>The current salesperson row becomes a filter on <code>Orders[RepID]</code>.</p>
+          </div>
+        </div>
+
+        <div class="mini-lesson">
+          <h3>Mental model</h3>
+          <p>
+            <strong>Row context</strong> tells DAX which row it is currently evaluating.
+            <strong>Filter context</strong> determines which rows are visible to aggregation.
+            <code>CALCULATE()</code> is the bridge between them.
+          </p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const reps = [
+      { id: "R1", name: "Anita", region: "East", commission: 0.08 },
+      { id: "R2", name: "Bharath", region: "West", commission: 0.06 },
+      { id: "R3", name: "Chloe", region: "South", commission: 0.10 },
+      { id: "R4", name: "Deepak", region: "North", commission: 0.07 }
+    ];
+
+    const orders = [
+      { id: "O-101", repId: "R1", customer: "Metro Hospital", category: "Medical", amount: 22000 },
+      { id: "O-102", repId: "R1", customer: "City Mart", category: "Retail", amount: 18000 },
+      { id: "O-103", repId: "R2", customer: "Blue Farms", category: "Agriculture", amount: 14000 },
+      { id: "O-104", repId: "R2", customer: "West Fuel", category: "Energy", amount: 16000 },
+      { id: "O-105", repId: "R3", customer: "Sun Hotels", category: "Hospitality", amount: 26000 },
+      { id: "O-106", repId: "R3", customer: "School Board", category: "Public", amount: 9000 },
+      { id: "O-107", repId: "R4", customer: "Nova Labs", category: "Research", amount: 12000 },
+      { id: "O-108", repId: "R4", customer: "North Grid", category: "Utilities", amount: 19000 },
+      { id: "O-109", repId: "R1", customer: "Prime Foods", category: "Distribution", amount: 11000 },
+      { id: "O-110", repId: "R2", customer: "Zen Logistics", category: "Transport", amount: 13000 }
+    ];
+
+    const grandTotal = orders.reduce((sum, order) => sum + order.amount, 0);
+    const totalsByRep = reps.reduce((acc, rep) => {
+      acc[rep.id] = orders
+        .filter((order) => order.repId === rep.id)
+        .reduce((sum, order) => sum + order.amount, 0);
+      return acc;
+    }, {});
+
+    const state = {
+      useCalculate: false,
+      currentIndex: -1,
+      isPlaying: true,
+      timer: null,
+      cycleMs: 2400
+    };
+
+    const repTable = document.getElementById("repTable");
+    const ordersGrid = document.getElementById("ordersGrid");
+    const toggleModeBtn = document.getElementById("toggleMode");
+    const playBtn = document.getElementById("playBtn");
+    const stepBtn = document.getElementById("stepBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const currentRepEl = document.getElementById("currentRep");
+    const visibleOrdersEl = document.getElementById("visibleOrders");
+    const resultValueEl = document.getElementById("resultValue");
+    const rowContextBadgeEl = document.getElementById("rowContextBadge");
+    const filterContextBadgeEl = document.getElementById("filterContextBadge");
+    const narrationEl = document.getElementById("narration");
+    const formulaTextEl = document.getElementById("formulaText");
+    const formulaHintEl = document.getElementById("formulaHint");
+    const withoutValueEl = document.getElementById("withoutValue");
+    const withValueEl = document.getElementById("withValue");
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function renderRepTable() {
+      repTable.innerHTML = reps.map((rep) => `
+        <div class="rep-row" id="rep-${rep.id}">
+          <div class="rep-name">
+            <strong>${rep.name}</strong>
+            <span>RepID = ${rep.id}</span>
+          </div>
+          <div class="muted">${rep.region}</div>
+          <div>${(rep.commission * 100).toFixed(0)}%</div>
+          <div class="calc-result" id="result-${rep.id}">...</div>
+        </div>
+      `).join("");
+    }
+
+    function renderOrders() {
+      ordersGrid.innerHTML = orders.map((order) => `
+        <article class="order-card" id="order-${order.id}">
+          <div class="order-top">
+            <span class="order-chip">${order.id}</span>
+            <span class="order-chip">Rep ${order.repId}</span>
+          </div>
+          <div class="order-meta">
+            <div><strong>${order.customer}</strong></div>
+            <div>${order.category}</div>
+          </div>
+          <div class="order-amount">${formatCurrency(order.amount)}</div>
+        </article>
+      `).join("");
+    }
+
+    function updateFormulaCard() {
+      if (state.useCalculate) {
+        formulaTextEl.textContent = "Rep Sales = CALCULATE(SUM(Orders[Amount]))";
+        formulaHintEl.textContent = "CALCULATE performs context transition: the current salesperson row filters Orders.";
+        toggleModeBtn.textContent = "CALCULATE() ON";
+        toggleModeBtn.classList.add("active");
+      } else {
+        formulaTextEl.textContent = "Rep Sales = SUM(Orders[Amount])";
+        formulaHintEl.textContent = "Without CALCULATE, the current row does not filter the Orders table.";
+        toggleModeBtn.textContent = "CALCULATE() OFF";
+        toggleModeBtn.classList.remove("active");
+      }
+    }
+
+    function clearComputedResults() {
+      reps.forEach((rep) => {
+        document.getElementById(`result-${rep.id}`).textContent = "...";
+        document.getElementById(`rep-${rep.id}`).classList.remove("active", "done");
+      });
+    }
+
+    function setOrderVisibility(activeRepId) {
+      const visibleOrders = state.useCalculate ? orders.filter((order) => order.repId === activeRepId) : orders;
+      orders.forEach((order) => {
+        const card = document.getElementById(`order-${order.id}`);
+        const isVisible = visibleOrders.some((visible) => visible.id === order.id);
+        card.classList.toggle("visible", isVisible);
+        card.classList.toggle("hidden", !isVisible);
+        card.classList.toggle("filtered", state.useCalculate && order.repId === activeRepId);
+      });
+      return visibleOrders;
+    }
+
+    function updateCompareValues(rep) {
+      withoutValueEl.textContent = formatCurrency(grandTotal);
+      withValueEl.textContent = formatCurrency(totalsByRep[rep.id]);
+    }
+
+    function describeNarration(rep, visibleOrders, result) {
+      if (state.useCalculate) {
+        narrationEl.textContent =
+          `Row context is on ${rep.name}. CALCULATE converts ${rep.name}'s row into filter context, so only ${visibleOrders.length} order rows for ${rep.id} remain visible. SUM now returns ${formatCurrency(result)}.`;
+        filterContextBadgeEl.textContent = `Orders[RepID] = ${rep.id}`;
+        filterContextBadgeEl.className = "badge success";
+      } else {
+        narrationEl.textContent =
+          `Row context is on ${rep.name}, but no context transition happens. The Orders table still exposes all ${visibleOrders.length} rows, so SUM returns the same grand total for every salesperson.`;
+        filterContextBadgeEl.textContent = "Orders = all rows";
+        filterContextBadgeEl.className = "badge warning";
+      }
+    }
+
+    function evaluateCurrentRep() {
+      const rep = reps[state.currentIndex];
+      const visibleOrders = setOrderVisibility(rep.id);
+      const result = state.useCalculate ? totalsByRep[rep.id] : grandTotal;
+
+      reps.forEach((currentRep, index) => {
+        const rowEl = document.getElementById(`rep-${currentRep.id}`);
+        rowEl.classList.toggle("active", index === state.currentIndex);
+        rowEl.classList.toggle("done", index < state.currentIndex);
+      });
+
+      document.getElementById(`result-${rep.id}`).textContent = formatCurrency(result);
+      currentRepEl.textContent = rep.name;
+      visibleOrdersEl.textContent = String(visibleOrders.length);
+      resultValueEl.textContent = formatCurrency(result);
+      rowContextBadgeEl.textContent = `${rep.name} (${rep.id})`;
+      rowContextBadgeEl.className = "badge neutral";
+
+      updateCompareValues(rep);
+      describeNarration(rep, visibleOrders, result);
+    }
+
+    function nextStep() {
+      state.currentIndex = (state.currentIndex + 1) % reps.length;
+      if (state.currentIndex === 0) {
+        clearComputedResults();
+      }
+      evaluateCurrentRep();
+    }
+
+    function stopLoop() {
+      if (state.timer) {
+        window.clearInterval(state.timer);
+        state.timer = null;
+      }
+    }
+
+    function startLoop() {
+      stopLoop();
+      if (!state.isPlaying) {
+        return;
+      }
+      state.timer = window.setInterval(nextStep, state.cycleMs);
+    }
+
+    function resetDemo() {
+      stopLoop();
+      state.currentIndex = -1;
+      clearComputedResults();
+      orders.forEach((order) => {
+        document.getElementById(`order-${order.id}`).classList.remove("visible", "hidden", "filtered");
+      });
+      currentRepEl.textContent = "-";
+      visibleOrdersEl.textContent = "0";
+      resultValueEl.textContent = formatCurrency(0);
+      rowContextBadgeEl.textContent = "Waiting...";
+      rowContextBadgeEl.className = "badge neutral";
+      filterContextBadgeEl.textContent = "Orders = all rows";
+      filterContextBadgeEl.className = state.useCalculate ? "badge success" : "badge warning";
+      narrationEl.textContent = "The animation is about to start. Each loop evaluates the calculated column for one salesperson.";
+      withoutValueEl.textContent = formatCurrency(grandTotal);
+      withValueEl.textContent = formatCurrency(0);
+      nextStep();
+      startLoop();
+    }
+
+    toggleModeBtn.addEventListener("click", () => {
+      state.useCalculate = !state.useCalculate;
+      updateFormulaCard();
+      resetDemo();
+    });
+
+    playBtn.addEventListener("click", () => {
+      state.isPlaying = !state.isPlaying;
+      playBtn.textContent = state.isPlaying ? "Pause" : "Play";
+      if (state.isPlaying) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    });
+
+    stepBtn.addEventListener("click", () => {
+      stopLoop();
+      state.isPlaying = false;
+      playBtn.textContent = "Play";
+      nextStep();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      resetDemo();
+    });
+
+    renderRepTable();
+    renderOrders();
+    updateFormulaCard();
+    resetDemo();
+  </script>
+</body>
+</html>
