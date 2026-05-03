@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>5D Sales Datacube</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="stage" aria-label="Animated 5D sales datacube">
+        <canvas id="cubeCanvas"></canvas>
+
+        <div class="topbar">
+          <div>
+            <h1>5D Sales Datacube</h1>
+            <p>Fact: Sales. Dimensions: Customer, Product, Place, Time, Logistics.</p>
+            <div id="dimensionButtons" class="dimension-buttons" aria-label="Dimension level selector"></div>
+          </div>
+          <button id="pauseButton" class="icon-button" type="button" aria-label="Pause animation" title="Pause animation">
+            <span id="pauseIcon">II</span>
+          </button>
+        </div>
+
+        <div id="dimensionView" class="dimension-view" aria-live="polite"></div>
+
+        <aside class="panel">
+          <div class="panel-section">
+            <h2>Encoding</h2>
+            <dl class="encoding-list">
+              <div><dt>X</dt><dd>Customer segment</dd></div>
+              <div><dt>Y</dt><dd>Product category</dd></div>
+              <div><dt>Z</dt><dd>Place / region</dd></div>
+              <div><dt>Motion</dt><dd>Month on timeline</dd></div>
+              <div><dt>Color</dt><dd>Logistics mode</dd></div>
+              <div><dt>Size</dt><dd>Sales amount</dd></div>
+            </dl>
+          </div>
+
+          <div class="panel-section">
+            <h2>Timeline</h2>
+            <div id="timePills" class="pills" aria-label="Time period selector"></div>
+            <button id="resumeButton" class="resume-button" type="button">Resume timeline</button>
+          </div>
+
+          <div class="panel-section">
+            <h2>Logistics</h2>
+            <div class="legend">
+              <span><i class="swatch air"></i>Air</span>
+              <span><i class="swatch rail"></i>Rail</span>
+              <span><i class="swatch road"></i>Road</span>
+            </div>
+          </div>
+        </aside>
+
+        <div id="factCard" class="fact-card" aria-live="polite">
+          <span class="label">Current fact cell</span>
+          <strong>Loading sales cube...</strong>
+          <span>Sales measure appears as glowing volume across the year.</span>
+        </div>
+
+        <div id="summaryCard" class="summary-card" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="bundle.js"></script>
+  </body>
+</html>

@@ -21,39 +21,43 @@ An interactive infographic that visually demonstrates OLTP vs OLAP: at a Glance 
 
 An interactive infographic that visually demonstrates OLAP data cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations linked with tabular data.
 
-**3. The Star Schema Filter Flow**
+**3. 5D Sales Datacube**
+
+An interactive teaching page that builds dimensional thinking from 0D to 5D: one total sales point, a monthly timeline, a Time x Customer matrix, a 3D cube, logistics colors, and a full interactive slicable/diceable sales datacube.
+
+**4. The Star Schema Filter Flow**
 
 An interactive visual that demonstrates how filters cascade from dimension tables to the central fact table in a star schema. It highlights the standard unidirectional relationships and the special bidirectional relationship used for the customer dimension.
 
-**4. The DAX Filter Context Water Plant**
+**5. The DAX Filter Context Water Plant**
 
 This infographic visualizes the DAX filter context hierarchy as a water filtration plant. It shows how filters from different levels (Report, Page, Visual, etc.) are applied sequentially and how the powerful CALCULATE() function can override these filters, with the exception of Row-Level Security (RLS).
 
-**5. Date Filter Context Train**
+**6. Date Filter Context Train**
 
 An animation that uses a train yard metaphor to explain how time-intelligence calculations move between current, previous, and next date periods in DAX.
 
-**6. Row Context vs Filter Context**
+**7. Row Context vs Filter Context**
 
 A foundational visual that separates “the current row being evaluated” from “the rows visible to a calculation”, preparing the learner for iterators and context transition.
 
-**7. Context Transition Lab**
+**8. Context Transition Lab**
 
 A salesperson commission simulation showing how row context by itself does not filter a fact table, while `CALCULATE()` performs context transition and turns the current row into filter context.
 
-**8. SUM vs SUMX Lab**
+**9. SUM vs SUMX Lab**
 
 A real-world order-lines demo showing when a simple `SUM` is enough, when `SUMX` must iterate row by row, and why shortcut aggregations can produce the wrong answer.
 
-**9. Calculated Column vs Measure**
+**10. Calculated Column vs Measure**
 
 A business-target simulation that shows why calculated columns are stored row by row in the model, while measures recalculate dynamically for the current filter context.
 
-**10. ALL vs ALLEXCEPT vs ALLSELECTED**
+**11. ALL vs ALLEXCEPT vs ALLSELECTED**
 
 An animated percentage-of-total lab that shows how each function chooses a different denominator: full grand total, subtotal within a grouping, or total within the current outer selection.
 
-**11. Stages of Data Analysis**
+**12. Stages of Data Analysis**
 
 Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
 
