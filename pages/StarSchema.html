@@ -249,7 +249,11 @@
     .cell .dot.on { opacity: 1; }
     .cell:not(.off) rect { filter: drop-shadow(0 0 2px rgb(var(--accent-rgb) / .35)); }
     .dim-label { font-size: 15px; }
-    .chip rect { fill: var(--cc); stroke: var(--cc); stroke-width: 1.5; transition: fill .3s ease, opacity .3s ease; }
+    .chip { cursor: pointer; outline: none; }
+    .chip rect { fill: var(--cc); stroke: var(--cc); stroke-width: 1.5; transition: fill .3s ease, opacity .3s ease, filter .2s ease; }
+    .chip:hover rect { filter: brightness(1.12); }
+    .chip:focus-visible rect { stroke: var(--ink); stroke-width: 3; }
+    .chip:active rect { filter: brightness(.9); }
     .chip text { font: 700 11px var(--font); fill: #fff; paint-order: stroke; stroke: rgb(0 0 0 / .35); stroke-width: 2px; }
     .chip.off rect { fill: transparent; opacity: .45; stroke-dasharray: 0; }
     .chip.off text { fill: var(--muted); stroke: none; }
@@ -275,7 +279,7 @@
     <div class="left-column">
       <section class="panel">
         <h2>Filters</h2>
-        <p class="slider-hint">Each dimension has 10 members. A slider keeps that <strong>% of members</strong> (100% = no filter). Each member owns 10 of the 100 fact rows.</p>
+        <p class="slider-hint"><strong>Click the coloured chips</strong> in the diagram to select or deselect members, just like a slicer; the sliders follow (or drag a slider to select the first N). Each member owns 10 of the 100 fact rows. <strong>Nothing selected = no filter</strong>, as in Power BI.</p>
         <div class="grp">
           <div class="row">
             <label>
@@ -477,8 +481,19 @@
     const rowMember = Array.from({ length: ROWS }, (_, r) => Object.fromEntries(DIMS.map(d => [d, deal[d][r]])));
 
     const slider = (d) => document.getElementById(`filter-${d}`);
-    const kept = (d) => Math.round(Number(slider(d).value) / 10); // members kept (first k)
-    const applied = Object.fromEntries(DIMS.map(d => [d, 10]));   // what the fact table has received
+    const ALL = () => new Set(Array.from({ length: 10 }, (_, i) => i));
+    // What each slicer has selected, and what the fact table has received so far.
+    // An empty selection means "no filter", exactly like a Power BI slicer.
+    const selected = Object.fromEntries(DIMS.map(d => [d, ALL()]));
+    const applied = Object.fromEntries(DIMS.map(d => [d, ALL()]));
+    const isAll = (set) => set.size === 0 || set.size === 10;
+    const sameSet = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+    const firstK = (k) => new Set(Array.from({ length: k }, (_, i) => i));
+    function syncSlider(d) {
+      const n = selected[d].size;
+      slider(d).value = n === 0 ? 100 : n * 10;
+      document.getElementById(`${d}Out`).textContent = n === 0 ? 'none selected = all' : `${n * 10}% kept`;
+    }
     let customerBack = new Set(Array.from({ length: 10 }, (_, i) => i)); // customers with visible rows
 
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -557,7 +572,7 @@
     }
 
     // ---- State → visuals ----
-    const passes = (r, d) => rowMember[r][d] < applied[d];
+    const passes = (r, d) => applied[d].size === 0 || applied[d].has(rowMember[r][d]);
     const visibleRows = () => rowMember.map((_, r) => DIMS.every(d => passes(r, d)));
 
     function paintFact() {
@@ -574,15 +589,17 @@
 
     function paintChips() {
       DIMS.forEach(d => chips[d].forEach((g, i) => {
-        const own = i < kept(d);
+        const own = selected[d].size === 0 || selected[d].has(i);
         g.classList.toggle('off', !own);
+        g.setAttribute('aria-pressed', String(own && selected[d].size !== 0));
+        g.setAttribute('aria-label', `${LABEL[d]} ${MEMBERS[d][i]}: ${own ? 'selected' : 'not selected'}`);
         g.classList.toggle('back-off', d === 'customer' && own && !customerBack.has(i));
       }));
     }
 
     function paintTubes() {
-      DIMS.forEach(d => document.getElementById(`flow-${d}-fact`).classList.toggle('active-flow', applied[d] < 10));
-      const others = DIMS.some(d => d !== 'customer' && applied[d] < 10);
+      DIMS.forEach(d => document.getElementById(`flow-${d}-fact`).classList.toggle('active-flow', !isAll(applied[d])));
+      const others = DIMS.some(d => d !== 'customer' && !isAll(applied[d]));
       document.getElementById('flow-fact-customer').classList.toggle('active-flow', others);
     }
 
@@ -605,32 +622,54 @@
     function dispatch(d) {
       paintChips(); // the dimension's own selection changes immediately
       if (inFlight[d]) return;
-      if (applied[d] === kept(d)) return;
+      if (sameSet(applied[d], selected[d])) return;
       inFlight[d] = true;
       pulse(document.getElementById(`flow-${d}-fact`), `var(--c-${d})`, false, () => {
         inFlight[d] = false;
-        applied[d] = kept(d);
+        applied[d] = new Set(selected[d]);
         paintFact(); paintTubes(); sendBack();
-        if (applied[d] !== kept(d)) dispatch(d); // slider moved while the pulse travelled
+        if (!sameSet(applied[d], selected[d])) dispatch(d); // selection changed while the pulse travelled
       });
     }
 
     DIMS.forEach(d => {
+      // Slider = quick "select the first N members".
       slider(d).addEventListener('input', () => {
-        document.getElementById(`${d}Out`).textContent = `${slider(d).value}% kept`;
+        selected[d] = firstK(Math.round(Number(slider(d).value) / 10));
+        syncSlider(d);
         dispatch(d);
+      });
+      // Chips = slicer buttons: click (or Enter / Space) toggles a member.
+      chips[d].forEach((g, i) => {
+        g.setAttribute('role', 'button');
+        g.setAttribute('tabindex', '0');
+        const toggle = () => {
+          const set = selected[d].size === 0 ? ALL() : new Set(selected[d]);
+          if (set.has(i)) set.delete(i); else set.add(i);
+          selected[d] = set.size === 10 ? ALL() : set;
+          syncSlider(d);
+          dispatch(d);
+        };
+        g.addEventListener('click', toggle);
+        g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
       });
     });
 
     // Start with each dimension keeping a random 50–100% of its members.
     DIMS.forEach(d => {
-      slider(d).value = 100 - 10 * Math.floor(Math.random() * 6);
-      document.getElementById(`${d}Out`).textContent = `${slider(d).value}% kept`;
-      applied[d] = kept(d);
+      selected[d] = firstK(10 - Math.floor(Math.random() * 6));
+      syncSlider(d);
+      applied[d] = new Set(selected[d]);
     });
     customerBack = computeBack();
     paintFact(); paintChips(); paintTubes();
     document.querySelector('.two-way .fwd').style.fill = 'var(--c-customer)';
+    // Slider icons and thumbs wear their dimension's colour, matching the chips.
+    DIMS.forEach((d, i) => {
+      const icon = document.querySelectorAll('.panel .filter-icon')[i];
+      if (icon) icon.style.fill = `var(--c-${d})`;
+      slider(d).style.accentColor = `var(--c-${d})`;
+    });
   </script>
 
 </body>
