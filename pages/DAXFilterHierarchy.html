@@ -124,356 +124,313 @@
     color: var(--accent-2);
     font-weight: 600;
 }
-</style>
+
+    /* ---------- Filter-context funnel ---------- */
+    :root { --lv-model: #9cc8f7; --lv-rls: #86baf3; --lv-rep: #6eaaf0; --lv-pag: #5a9cea; --lv-sli: #478de2; --lv-vis: #397fd8; --lv-cel: #2f72cc; }
+    :root[data-theme="dark"] { --lv-model: #7fb6ee; --lv-rls: #6ca9e8; --lv-rep: #5b9de3; --lv-pag: #4c90dc; --lv-sli: #3f84d4; --lv-vis: #3678c9; --lv-cel: #2f6dbd; }
+    .plant { min-height: 0; padding-top: 12px; }
+    #plant-svg { width: 100%; height: auto; display: block; }
+    .hint { margin: -4px 0 8px; }
+    .panel small { color: var(--muted); font-weight: 500; }
+    .panel input[type=range] { width: 100%; accent-color: var(--accent); }
+    .seg-row { justify-content: flex-start !important; gap: 14px !important; flex-wrap: wrap; }
+    .seg-row label, .grp .row label { display: inline-flex; align-items: center; gap: 6px; }
+    .btns { display: flex; gap: 10px; }
+    .btn.go { background: linear-gradient(135deg, #f59e0b, #f97316); color: #1c1100; border: 0; }
+    .note { min-height: 3.2em; }
+    .meter-top { display: grid; justify-items: center; gap: 2px; margin: 0 auto 6px; padding: 10px 18px; width: fit-content; border-radius: 14px;
+      background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center; }
+    .meter-top strong { font: 800 1.15rem var(--font-display); }
+    .meter-top #seenPct { color: var(--accent); }
+    .meter-top small { color: var(--muted); }
+
+    #plant-svg .tank { fill: var(--panel-solid); stroke: var(--glass); stroke-width: 2; }
+    #plant-svg .water { transition: height .45s var(--ease-out), y .45s var(--ease-out), opacity .3s ease; }
+    #plant-svg .label { font: 700 15px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--panel-solid); stroke-width: 3px; }
+    #plant-svg .sublabel { font: 500 12px var(--font); fill: var(--muted); paint-order: stroke; stroke: var(--panel-solid); stroke-width: 3px; }
+    #plant-svg .val { font: 700 13px var(--mono); fill: #fff; }
+    #plant-svg .lvl.overridden .tank { stroke-dasharray: 8 6; }
+    #plant-svg .lvl.overridden .water { opacity: .25; }
+    #plant-svg .pipe { stroke-width: 16; }
+    #plant-svg .flow { opacity: .25; animation: none; }
+    #plant-svg .flow.active { opacity: 1; animation: flow .9s linear infinite; }
+    #plant-svg .valve { fill: var(--panel-solid); stroke: var(--glass); stroke-width: 3; transition: fill .3s ease; }
+    #plant-svg .valve.active { fill: var(--accent-2); }
+    #plant-svg .valve.lock { fill: var(--danger); }
+    #plant-svg .valve.flash { animation: valve-flash .7s ease-out; }
+    @keyframes valve-flash { 0% { stroke: #fff; stroke-width: 10; } 100% { stroke-width: 3; } }
+    #plant-svg .calc-tank { stroke: var(--accent-3); stroke-width: 2.5; }
+    #plant-svg .calc.off { opacity: .55; }
+    #plant-svg .calc.off .calc-tank { stroke-dasharray: 6 6; }
+    #plant-svg .rc-tank { stroke-dasharray: 6 5; }
+    #plant-svg .rowctx.on .rc-tank { stroke: var(--violet); stroke-dasharray: none; }
+    #plant-svg .rc-pipe { stroke-width: 10; stroke-dasharray: 2 10; }
+    #plant-svg .rc-flow { stroke: var(--violet); }
+    #plant-svg .rc-tag { fill: var(--violet); font-weight: 700; }
+    #plant-svg .meas-tank { stroke: var(--accent); stroke-width: 3; }
+    #plant-svg .meas-water { fill: var(--accent); opacity: .35; }
+    #plant-svg .meas-val { font: 800 28px var(--font-display); fill: var(--ink); }
+    #plant-svg .measure { transform-box: fill-box; transform-origin: center; }
+    #plant-svg .store-box { fill: var(--panel-solid); stroke: var(--glass); stroke-width: 2; }
+    #plant-svg .store-col { fill: var(--accent); opacity: .55; }
+    #plant-svg .bolt { fill: none; stroke: #facc15; stroke-width: 6; stroke-linejoin: round; stroke-linecap: round;
+      stroke-dasharray: 1400; stroke-dashoffset: 1400; opacity: 0; filter: drop-shadow(0 0 8px #facc15); }
+    #plant-svg .bolt-tag { font: 800 14px var(--font); fill: #b45309; opacity: 0; }
+    :root[data-theme="dark"] #plant-svg .bolt-tag { fill: #facc15; }
+    #plant-svg.evaluating .bolt { animation: bolt-strike 1.2s ease-out forwards; }
+    #plant-svg.evaluating .bolt-tag { animation: tag-in 1.4s ease-out forwards; }
+    @keyframes bolt-strike { 0% { opacity: 1; stroke-dashoffset: 1400; } 45% { opacity: 1; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: 0; } }
+    @keyframes tag-in { 0%, 30% { opacity: 0; } 45%, 85% { opacity: 1; } 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { #plant-svg .flow.active { animation: none; } }
+  </style>
 </head><body>
   <header class="srg-enter">
 <h1>The Definitive DAX Filter Context – Water Plant</h1>
-    <p>Data flows from the <strong>Data Model</strong> through filters. <strong>Row-Level Security</strong> is a locked tap. <strong>CALCULATE()</strong> can rewrite filters (except RLS).</p>
+    <p>Every filter narrows what the <strong>measure can see</strong>; the data itself never changes. Tanks are drawn by <strong>scope</strong>, from the whole report down to one cell. <strong>RLS</strong> is a locked valve, and <strong>CALCULATE()</strong> can rewrite every filter except RLS.</p>
   </header>
 
   <div class="wrap">
     <div class="left-column">
       <section class="panel" aria-label="Controls">
-        <h2>Controls</h2>
+        <h2>Filters (% of rows each keeps)</h2>
+        <p class="muted hint">100% = no filter. Rows are never deleted; each level only narrows what the <strong>measure can see</strong>.</p>
         <div class="grp">
-          <div class="row"><label>Row Level Security (RLS)</label><span class="pill">🔒 Locked</span></div>
-          <div class="row"><span class="muted">RLS keeps only <span id="rlsPct">80</span>% of the model.</span><input id="rls" type="range" min="10" max="100" step="5" value="80"/></div>
+          <div class="row"><label for="rls">🔒 Row-Level Security</label><output id="rlsOut">80%</output></div>
+          <input id="rls" type="range" min="10" max="100" step="5" value="80"/>
         </div>
         <div class="grp">
-          <div class="row"><label>Report Level Filter</label><output id="repOut">90%</output></div>
-          <input id="rep" type="range" min="0" max="100" value="90" step="5"/>
-          <div class="row"><label>Page Level Filter</label><output id="pagOut">85%</output></div>
-          <input id="pag" type="range" min="0" max="100" value="85" step="5"/>
-          <div class="row"><label>Visual Level Filter</label><output id="visOut">70%</output></div>
-          <input id="vis" type="range" min="0" max="100" value="70" step="5"/>
-          <div class="row"><label>Slicer / Interactions</label><output id="sliOut">60%</output></div>
-          <input id="sli" type="range" min="0" max="100" value="60" step="5"/>
-          <div class="row"><label>Line-level filter</label><output id="linOut">95%</output></div>
-          <input id="lin" type="range" min="0" max="100" value="95" step="5"/>
+          <div class="row"><label for="rep">Report filter <small>· all pages</small></label><output id="repOut">90%</output></div>
+          <input id="rep" type="range" min="5" max="100" step="5" value="90"/>
+          <div class="row"><label for="pag">Page filter <small>· this page</small></label><output id="pagOut">85%</output></div>
+          <input id="pag" type="range" min="5" max="100" step="5" value="85"/>
+          <div class="row"><label for="sli">Slicer / cross-filter <small>· linked visuals</small></label><output id="sliOut">60%</output></div>
+          <input id="sli" type="range" min="5" max="100" step="5" value="60"/>
+          <div class="row"><label for="vis">Visual filter <small>· this visual</small></label><output id="visOut">70%</output></div>
+          <input id="vis" type="range" min="5" max="100" step="5" value="70"/>
+          <div class="row"><label for="cel">Cell (row/column headers) <small>· this number</small></label><output id="celOut">40%</output></div>
+          <input id="cel" type="range" min="5" max="100" step="5" value="40"/>
         </div>
         <div class="grp">
-          <div class="row"><label>Use CALCULATE()</label><button id="calcBtn" class="btn off" aria-pressed="false">OFF</button></div>
-          <div class="row"><span class="muted">When ON: override report/page/visual/slicer/line with</span><span class="pill" title="New filter expression inside CALCULATE()">Filter Strength</span></div>
-          <div class="row"><label>CALCULATE filter</label><output id="calOut">88%</output></div>
-          <input id="cal" type="range" min="0" max="100" value="88" step="4"/>
+          <div class="row"><label>CALCULATE()</label><button id="calcBtn" class="btn off" type="button" aria-pressed="false">OFF</button></div>
+          <div class="row seg-row" role="radiogroup" aria-label="CALCULATE mode">
+            <label><input type="radio" name="calcMode" value="replace" checked/> Replace filters</label>
+            <label><input type="radio" name="calcMode" value="keep"/> KEEPFILTERS</label>
+          </div>
+          <div class="row"><label for="cal">CALCULATE's own filter</label><output id="calOut">50%</output></div>
+          <input id="cal" type="range" min="5" max="100" step="5" value="50"/>
+          <div class="row"><label><input type="checkbox" id="iter"/> Measure runs inside an iterator (row context)</label></div>
         </div>
-        <div class="grp"><div class="row"><label>Reset</label><button id="resetBtn" class="btn">Reset to defaults</button></div></div>
-        <p class="muted" style="margin-top:10px">Hover any tank/pipe for notes. Flow = model × RLS × active filters (or <em>CALCULATE</em> override).</p>
+        <div class="grp btns">
+          <button id="evalBtn" class="btn go" type="button">⚡ Evaluate</button>
+          <button id="resetBtn" class="btn" type="button">Reset</button>
+        </div>
+        <p class="muted note" id="ruleNote"></p>
       </section>
     </div>
-    
+
     <section class="plant" aria-label="Water plant diagram">
-      <div class="legend">
-        <div class="item"><span class="dot" style="background:var(--flow)"></span>Active Flow</div>
-        <div class="item"><span class="dot" style="background:#fb923c"></span>Interactive Filters</div>
-        <div class="item"><span class="dot" style="background:#34d399"></span>CALCULATE()</div>
-        <div class="item"><span class="dot" style="background:#ef4444"></span>RLS Lock</div>
+      <div class="meter-top" aria-live="polite">
+        <strong>The measure sees <span id="seenPct">—</span> of all rows</strong>
+        <small><span id="seenRows">—</span> of 10,00,000 rows</small>
       </div>
-
-      <svg viewBox="0 0 1100 840" role="img" aria-label="DAX filter water plant">
-        <defs>
-          <linearGradient id="glassGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" style="stop-color:var(--tank-hi)"/><stop offset="100%" style="stop-color:var(--tank-lo)"/></linearGradient>
-          <linearGradient id="waterGrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#c3ecff"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient>
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#7dd3fc" flood-opacity=".55"/></filter>
-        
-          <filter id="wave" x="-20%" y="-20%" width="140%" height="140%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="1" seed="2">
-              <animate attributeName="baseFrequency" values="0.012;0.02;0.012" dur="2.2s" repeatCount="indefinite"/>
-            </feTurbulence>
-            <feDisplacementMap in="SourceGraphic" scale="3.5"/>
-          </filter>
-
-        </defs>
-
-        <g id="g1" transform="translate(60,40)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-model" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">1) Data Model (Pool)</text><text class="sublabel" x="12" y="40">All data before any filter</text><g transform="translate(160,8)"><rect class="call" width="80" height="28" rx="8"/><text id="val-model" x="10" y="18">100%</text></g></g>
-        <g id="g2" transform="translate(420,40)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-rls" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">2) Row Level Security</text><text class="sublabel" x="12" y="40">Locked tap: can't be overridden</text><g transform="translate(160,98)"><rect class="call" width="80" height="28" rx="8"/><text id="val-rls" x="10" y="18">80%</text></g></g>
-        <g id="g3" transform="translate(780,40)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-rep" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">3) Report Filter</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-rep" x="10" y="18">90%</text></g></g>
-
-        <g id="g6" transform="translate(60,260)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-sli" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">6) Slicer / Interactions</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-sli" x="10" y="18">60%</text></g></g>
-        <g id="g5" transform="translate(420,260)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-vis" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">5) Visual Filter</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-vis" x="10" y="18">70%</text></g></g>
-        <g id="g4" transform="translate(780,260)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-pag" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">4) Page Filter</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-pag" x="10" y="18">85%</text></g></g>
-
-        <g id="g7" transform="translate(60,480)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-lin" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">7) Line-level Filter (visual)</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-lin" x="10" y="18">95%</text></g></g>
-        <g id="g8" transform="translate(420,480)"><rect class="tank" width="240" height="140" rx="16"/><rect id="w-cal" class="water" x="6" y="6" width="228" height="128" rx="12"/><text class="label" x="12" y="22">8) CALCULATE()</text><text class="sublabel" x="12" y="40">Rewrites filters (not RLS)</text><g transform="translate(140,98)"><rect class="call" width="110" height="28" rx="8"/><text id="val-cal" x="10" y="18">—</text></g></g>
-        <g id="g9" transform="translate(780,460)"><rect class="tank" x="60" y="-20" width="80" height="220" rx="12"/><rect id="w-out" class="water" x="66" y="-14" width="68" height="208" rx="8"/><text class="label" x="-10" y="-10">9) Result: Evaluation Context</text></g>
-
-        <g id="pipes-row1">
-          <path class="pipe" d="M 292 176 H 360 V 48 H 428"/>
-          <path id="f12" class="flow" d="M 292 176 H 360 V 48 H 428"/>
-          <path class="pipe" d="M 652 176 H 720 V 48 H 788"/>
-          <path id="f23" class="flow" d="M 652 176 H 720 V 48 H 788"/>
-        </g>
-        <g id="pipe-3to4">
-          <path class="pipe" d="M 1012 176 H 1060 V 268 H 1012"/>
-          <path id="f3to4" class="flow" d="M 1012 176 H 1060 V 268 H 1012"/>
-        </g>
-        <g id="pipes-row2">
-          <path class="pipe" d="M 788 392 H 720 V 268 H 652"/>
-          <path id="f45" class="flow" d="M 788 392 H 720 V 268 H 652"/>
-          <path class="pipe" d="M 412 392 H 360 V 268 H 292"/>
-          <path id="f56" class="flow" d="M 412 392 H 360 V 268 H 292"/>
-        </g>
-        <g id="pipe-6to7">
-          <path class="pipe" d="M 68 392 H 20 V 488 H 68"/>
-          <path id="f6to7" class="flow" d="M 68 392 H 20 V 488 H 68"/>
-        </g>
-        <g id="pipes-row3">
-          <path class="pipe" d="M 292 612 H 360 V 488 H 428"/>
-          <path id="f78" class="flow" d="M 292 612 H 360 V 488 H 428"/>
-          <path class="pipe" d="M 652 612 H 750 V 448 H 848"/>
-          <path id="f89" class="flow" d="M 652 612 H 750 V 448 H 848"/>
-        </g>
-        <g id="pipe-2to8">
-          <path class="calcpipe" d="M 540 188 V 240 H 560 V 472"/>
-          <path id="f2to8" class="calcflow" d="M 540 188 V 240 H 560 V 472"/>
-        </g>
-
-        <g id="hit-areas" fill="transparent">
-          <rect id="hit-model" x="60" y="40" width="240" height="140"/>
-          <rect id="hit-rls" x="420" y="40" width="240" height="140"/>
-          <rect id="hit-rep" x="780" y="40" width="240" height="140"/>
-          <rect id="hit-pag" x="780" y="260" width="240" height="140"/>
-          <rect id="hit-vis" x="420" y="260" width="240" height="140"/>
-          <rect id="hit-sli" x="60" y="260" width="240" height="140"/>
-          <rect id="hit-lin" x="60" y="480" width="240" height="140"/>
-          <rect id="hit-cal" x="420" y="480" width="240" height="140"/>
-          <rect id="hit-out" x="840" y="460" width="100" height="220"/>
-        </g>
-      </svg>
-
-      <div id="tooltip" class="tip" role="status" aria-live="polite"></div>
-      <div class="badge">Made for DAX explorers 🧭</div>
-      <div class="kpi">Active rows: <strong id="rows">—</strong> (from 1,000,000)</div>
+      <svg id="plant-svg" viewBox="0 0 1100 920" role="img" aria-label="Filter context funnel: data model, RLS, report, page, slicer, visual and cell filters, CALCULATE and the measure"></svg>
     </section>
   </div>
-  
+
   <section class="filter-hierarchy-section srg-reveal">
-    <h3>DAX Filter Context Hierarchy</h3>
-    <p>This hierarchy demonstrates how filters are applied to your data model. Filters are applied sequentially, with each subsequent filter further reducing the active dataset.</p>
+    <h3>DAX filter context, level by level</h3>
+    <p>The funnel is drawn in order of <strong>scope</strong> (how much of the report a filter reaches). When a measure is evaluated, all these filters are merged into <strong>one filter context</strong> and sent to the storage engine as a single query; they combine by <strong>intersection</strong>, so their order doesn't change the result. Only RLS (always enforced) and CALCULATE (applied on top of the incoming context) have a real position.</p>
     <table class="filter-hierarchy-table">
       <thead>
-        <tr>
-          <th>Filter Type</th>
-          <th>Behavior</th>
-          <th>Override with `CALCULATE()`</th>
-        </tr>
+        <tr><th>Level</th><th>Scope</th><th>Can CALCULATE override it?</th></tr>
       </thead>
       <tbody>
-        <tr class="locked-row">
-          <td>Row-Level Security</td>
-          <td>A security filter applied at the data source.</td>
-          <td>No, this filter is **locked** 🔒.</td>
-        </tr>
-        <tr>
-          <td>Report Level</td>
-          <td>Applies to all pages and visuals in the report.</td>
-          <td>Yes</td>
-        </tr>
-        <tr>
-          <td>Page Level</td>
-          <td>Applies to all visuals on a single page.</td>
-          <td>Yes</td>
-        </tr>
-        <tr>
-          <td>Visual Level</td>
-          <td>Applies to a single visual.</td>
-          <td>Yes</td>
-        </tr>
-        <tr>
-          <td>Slicer/Interactions</td>
-          <td>Applied by user interaction with visuals or slicers.</td>
-          <td>Yes</td>
-        </tr>
-        <tr>
-          <td>Line-level filter</td>
-          <td>A filter defined on an individual DAX expression line.</td>
-          <td>Yes</td>
-        </tr>
-        <tr class="override-row">
-          <td>`CALCULATE()`</td>
-          <td>A powerful DAX function that can modify or remove filter contexts.</td>
-          <td>N/A, it is the override mechanism itself.</td>
-        </tr>
+        <tr class="locked-row"><td>Row-Level Security</td><td>Every query for that user</td><td>No. It is enforced by the engine 🔒</td></tr>
+        <tr><td>Report filter</td><td>All pages and visuals</td><td>Yes (on the columns CALCULATE filters)</td></tr>
+        <tr><td>Page filter</td><td>All visuals on one page</td><td>Yes</td></tr>
+        <tr><td>Slicer / cross-filter</td><td>The visuals it is linked to</td><td>Yes</td></tr>
+        <tr><td>Visual filter</td><td>One visual</td><td>Yes</td></tr>
+        <tr><td>Cell (row/column headers)</td><td>One number in the visual, e.g. 2024 × Chennai</td><td>Yes</td></tr>
+        <tr class="override-row"><td><code>CALCULATE()</code></td><td>The measure it wraps</td><td>It is the override: replaces filters on the same columns, or adds with <code>KEEPFILTERS</code></td></tr>
+        <tr><td>Row context</td><td>The current row of an iterator / calculated column</td><td>Not a filter by itself; <code>CALCULATE</code> turns it into one (context transition)</td></tr>
       </tbody>
     </table>
   </section>
 
-
   <script>
-    const START_ROWS = 1_000_000;
-    const els = { rls: rls, rlsPct: document.getElementById('rlsPct'), rep: rep, pag: pag, vis: vis, sli: sli, lin: lin, cal: cal,
-      repOut: repOut, pagOut: pagOut, visOut: visOut, sliOut: sliOut, linOut: linOut, calOut: calOut, calcBtn: calcBtn, resetBtn: resetBtn, rows: document.getElementById('rows') };
+    // Filter-context funnel. Tanks are drawn narrowest-to-widest by scope;
+    // levels show what fraction of rows is still visible to the measure.
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('plant-svg');
+    const TOTAL_ROWS = 1000000;
+    const LEVELS = [
+      { id: 'model', name: 'Data Model', scope: 'all rows stored · never changes', w: 900, colour: 'var(--lv-model)', tip: 'The Data Model holds every row. Filters never delete rows; they only change what a measure can see.' },
+      { id: 'rls', name: 'Row-Level Security', scope: 'every query for this user', w: 860, colour: 'var(--lv-rls)', lock: true, tip: 'RLS is enforced by the engine for every query. CALCULATE cannot remove it.' },
+      { id: 'rep', name: 'Report filter', scope: 'all pages', w: 800, colour: 'var(--lv-rep)', tip: 'Report-level filters apply to every page and visual.' },
+      { id: 'pag', name: 'Page filter', scope: 'this page', w: 690, colour: 'var(--lv-pag)', tip: 'Page-level filters apply to every visual on this page.' },
+      { id: 'sli', name: 'Slicer / cross-filter', scope: 'linked visuals', w: 580, colour: 'var(--lv-sli)', tip: 'Slicers and cross-filtering apply to the visuals they interact with.' },
+      { id: 'vis', name: 'Visual filter', scope: 'this visual', w: 470, colour: 'var(--lv-vis)', tip: 'Visual-level filters apply to this one visual.' },
+      { id: 'cel', name: 'Cell', scope: 'this number', w: 360, colour: 'var(--lv-cel)', tip: 'The row and column headers of a matrix cell (e.g. 2024 × Chennai), or the axis of a chart point, filter just that number.' }
+    ];
+    const TANK_H = 62, GAP = 34, TOP = 18, CX = 550;
+    const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); if (parent) parent.appendChild(n); return n; };
 
-    const meters = { model: w('model'), rls: w('rls'), rep: w('rep'), pag: w('pag'), vis: w('vis'), sli: w('sli'), lin: w('lin'), cal: w('cal'), out: w('out'),
-      valModel:t('val-model'), valRls:t('val-rls'), valRep:t('val-rep'), valPag:t('val-pag'), valVis:t('val-vis'), valSli:t('val-sli'), valLin:t('val-lin'), valCal:t('val-cal') };
-
-    const flows = ['f12','f23','f3to4','f45','f56','f6to7','f78','f89','f2to8'].map(id=>document.getElementById(id));
-    const waterIds = ['w-model','w-rls','w-rep','w-pag','w-vis','w-sli','w-lin','w-cal','w-out'];
-    const metrics = {}; waterIds.forEach(id=>{ const r=document.getElementById(id); const b=r.getBBox(); metrics[id]={y:b.y,h:b.height}; });
-
-    const tankGroups = { g3:document.getElementById('g3'), g4:document.getElementById('g4'), g5:document.getElementById('g5'), g6:document.getElementById('g6'), g7:document.getElementById('g7'), g8:document.getElementById('g8') };
-    const pipeGroups = {
-      row1: document.getElementById('pipes-row1'),
-      row2: document.getElementById('pipes-row2'),
-      row3: document.getElementById('pipes-row3'),
-      p3to4: document.getElementById('pipe-3to4'),
-      p6to7: document.getElementById('pipe-6to7'),
-      p2to8: document.getElementById('pipe-2to8')
-    };
-
-    function w(name){ return document.getElementById('w-'+name); }
-    function t(id){ return document.getElementById(id); }
-
-    function setFillY(rect,pct){ const m=metrics[rect.id]; const pctClamped=Math.max(0,Math.min(100,pct)); const newH=Math.max(6,m.h*(pctClamped/100)); const newY=m.y+(m.h-newH); rect.setAttribute('y',newY); rect.setAttribute('height',newH); }
-    function fmt(n){ return n.toLocaleString('en-IN'); }
-    function r0(n){ return Math.round(n); }
-
-    function updateFlowVisual(outPct, calcOn){
-  const width = 8 + (outPct/100)*10;
-  const dur   = Math.max(0.4, 1.8 - (outPct/100)*1.2);
-
-  const setGroup = (group, {active}) => {
-    if(!group) return;
-    group.classList.toggle('group-dim', !active);
-    group.querySelectorAll('.flow').forEach(f=>{
-     // f.style.strokeWidth = width+'px';
-      f.style.animationDuration = dur+'s';
-      f.classList.toggle('flow--stopped', !active);
-      f.classList.toggle('flow--alt', active);
-    });
-    group.querySelectorAll('.pipe').forEach(p=>{
-      p.classList.toggle('pipe--alt', active);
-    });
-  };
-
-  // helper to toggle a single segment using its flow id (grabs the adjacent pipe)
-  const setSeg = (flowId, active) => {
-    const f = document.getElementById(flowId);
-    if(!f) return;
-    f.style.strokeWidth = (8 + (outPct/100)*10) + 'px';
-    f.style.animationDuration = Math.max(0.4, 1.8 - (outPct/100)*1.2) + 's';
-    f.classList.toggle('flow--stopped', !active);
-    f.classList.toggle('flow--alt', active);
-    const prev = f.previousElementSibling;
-    if(prev && prev.classList.contains('pipe')){
-      prev.classList.toggle('pipe--alt', active);
-      prev.style.opacity = active ? 1 : 0.35;
-    }
-  };
-
-  // Row sets
-  setGroup(pipeGroups.row1,  {active:true});   // keep base 1->2 visible
-  setGroup(pipeGroups.row3,  {active:true});   // keep 8->9 active
-  setGroup(pipeGroups.p2to8, {active: calcOn});
-  setGroup(pipeGroups.p3to4, {active: !calcOn});
-  setGroup(pipeGroups.row2,  {active: !calcOn});
-  setGroup(pipeGroups.p6to7, {active: !calcOn});
-
-  // Explicitly handle 2->3 and 7->8 segments
-  setSeg('f23', !calcOn);  // when calc ON, 2->3 inactive
-  setSeg('f78', !calcOn);  // when calc ON, 7->8 inactive
-
-  // Pause/restore calculate green
-  const green = document.getElementById('f2to8');
-  if (green) green.classList.toggle('calcflow--stopped', !calcOn);
-}
-
-    function setGroupOpacity(group, o){ if(!group) return; group.querySelectorAll('.pipe,.flow,.calcpipe,.calcflow').forEach(el=>{ el.style.opacity=o; }); }
-    function setDim(el, dim){ if(!el) return; el.classList.toggle('dim', !!dim); }
-
-    function setWaterFlow(ids, on){ ids.forEach(id=>{ const el = w(id); if(el){ el.classList.toggle('wflow', !!on); }}); }
-
-    let useCalculate=false;
-
-    function compute(){
-      const p={ rls:+els.rls.value, rep:+els.rep.value, pag:+els.pag.value, vis:+els.vis.value, sli:+els.sli.value, lin:+els.lin.value, cal:+els.cal.value };
-      els.rlsPct.textContent=p.rls; els.repOut.value=p.rep+'%'; els.pagOut.value=p.pag+'%'; els.visOut.value=p.vis+'%'; els.sliOut.value=p.sli+'%'; els.linOut.value=p.lin+'%'; els.calOut.value=p.cal+'%';
-
-      const cum={};
-      cum.model = 100;
-      cum.rls   = cum.model * (p.rls/100) * 100/100;
-      cum.rep   = cum.rls   * (useCalculate? 1 : (p.rep/100)) * 100/100;
-      cum.pag   = cum.rep   * (useCalculate? 1 : (p.pag/100)) * 100/100;
-      cum.vis   = cum.pag   * (useCalculate? 1 : (p.vis/100)) * 100/100;
-      cum.sli   = cum.vis   * (useCalculate? 1 : (p.sli/100)) * 100/100;
-      cum.lin   = cum.sli   * (useCalculate? 1 : (p.lin/100)) * 100/100;
-
-      // Tank fills
-      setFillY(meters.model, cum.model);
-      setFillY(meters.rls, cum.rls);
-      setFillY(meters.rep,   useCalculate? 100 : cum.rep);
-      setFillY(meters.pag,   useCalculate? 100 : cum.pag);
-      setFillY(meters.vis,   useCalculate? 100 : cum.vis);
-      setFillY(meters.sli,   useCalculate? 100 : cum.sli);
-      setFillY(meters.lin,   useCalculate? 100 : cum.lin);
-      setFillY(meters.cal,   useCalculate ? ((p.rls/100)*(p.cal/100)*100) : 100);
-
-      // Labels raw (cum)
-      meters.valModel.textContent = '100%';
-      meters.valRls.textContent   = r0(p.rls) + '%';
-      meters.valRep.textContent   = useCalculate? (r0(p.rep)+'% (—)') : (r0(p.rep)+'% ('+ r0(cum.rep) +'%)');
-      meters.valPag.textContent   = useCalculate? (r0(p.pag)+'% (—)') : (r0(p.pag)+'% ('+ r0(cum.pag) +'%)');
-      meters.valVis.textContent   = useCalculate? (r0(p.vis)+'% (—)') : (r0(p.vis)+'% ('+ r0(cum.vis) +'%)');
-      meters.valSli.textContent   = useCalculate? (r0(p.sli)+'% (—)') : (r0(p.sli)+'% ('+ r0(cum.sli) +'%)');
-      meters.valLin.textContent   = useCalculate? (r0(p.lin)+'% (—)') : (r0(p.lin)+'% ('+ r0(cum.lin) +'%)');
-      const calCum = Math.round((p.rls/100)*(p.cal/100)*100);
-      meters.valCal.textContent = useCalculate ? (Math.round(p.cal)+'% ('+calCum+'%)') : '—';
-
-      // Dim tanks when CALCULATE is ON; else dim CALCULATE
-      setDim(tankGroups.g3, useCalculate); // report
-      setDim(tankGroups.g4, useCalculate); // page
-      setDim(tankGroups.g5, useCalculate); // visual
-      setDim(tankGroups.g6, useCalculate); // slicer
-      setDim(tankGroups.g7, useCalculate); // line-level
-      setDim(tankGroups.g8, !useCalculate); // calculate when OFF
-
-      // Rows & flow state
-// Rows & flow state
-
-
-      const afterRls = START_ROWS * (p.rls/100);
-      const finalRows = useCalculate ? afterRls * (p.cal/100) : afterRls * (p.rep/100)*(p.pag/100)*(p.vis/100)*(p.sli/100)*(p.lin/100);
-      const outPct = Math.max((finalRows/START_ROWS)*100,0);
-      setFillY(meters.out, Math.max(outPct,2));
-      updateFlowVisual(outPct, useCalculate);
-      els.rows.textContent = fmt(Math.round(finalRows));
-      
-      
-// Tooltips (multiline with \n)
-      const tipData = {
-        'hit-model': 'Data Model:\n100% of rows',
-        'hit-rls':   `RLS:\n100% × ${p.rls}% = ${r0(cum.rls)}%`,
-        'hit-rep':   useCalculate ? 'Report:\nIgnored by CALCULATE()' : `Report:\n100% × ${p.rls}% × ${p.rep}% = ${r0(cum.rep)}%`,
-        'hit-pag':   useCalculate ? 'Page:\nIgnored by CALCULATE()'   : `Page:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% = ${r0(cum.pag)}%`,
-        'hit-vis':   useCalculate ? 'Visual:\nIgnored by CALCULATE()' : `Visual:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% × ${p.vis}% = ${r0(cum.vis)}%`,
-        'hit-sli':   useCalculate ? 'Slicer:\nIgnored by CALCULATE()' : `Slicer:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% × ${p.vis}% \n× ${p.sli}% = ${r0(cum.sli)}%`,
-        'hit-lin':   useCalculate ? 'Line:\nIgnored by CALCULATE()'   : `Line:\n100% × ${p.rls}% × ${p.rep}% \n× ${p.pag}% × ${p.vis}% \n× ${p.sli}% × ${p.lin}% = ${r0(cum.lin)}%`,
-        'hit-cal':   useCalculate ? `CALCULATE:\n${p.cal}% of post-RLS` : 'CALCULATE: OFF',
-        'hit-out':   `Evaluation Context:\nActive rows: ${els.rows.textContent}\n(${r0(outPct)}%)`
-      };
-      
-      Object.entries(tipData).forEach(([id,msg])=>{ const el=document.getElementById(id); if(el) el.setAttribute('data-tip', msg); });
-      
-
-      // Toggle gentle water ripple on active tanks
-      if (useCalculate){
-        setWaterFlow(['model','rls','cal','out'], true);
-        setWaterFlow(['rep','pag','vis','sli','lin'], false);
-      } else {
-        setWaterFlow(['model','rls','rep','pag','vis','sli','lin','out'], true);
-        setWaterFlow(['cal'], false);
+    // Storage-engine bolt (behind everything) and the funnel pipes.
+    const boltLayer = el('g', { class: 'bolt-layer' }, svg);
+    const pipeLayer = el('g', {}, svg);
+    const tankLayer = el('g', {}, svg);
+    const tanks = {};
+    LEVELS.forEach((lv, i) => {
+      const y = TOP + i * (TANK_H + GAP), x = CX - lv.w / 2;
+      const g = el('g', { class: 'lvl', 'data-id': lv.id }, tankLayer);
+      el('rect', { x, y, width: lv.w, height: TANK_H, rx: 14, class: 'tank' }, g);
+      const water = el('rect', { x: x + 5, y: y + 5, width: lv.w - 10, height: TANK_H - 10, rx: 10, class: 'water' }, g);
+      water.style.fill = lv.colour;
+      el('text', { x: x + 16, y: y + 26, class: 'label' }, g).textContent = (lv.lock ? '🔒 ' : '') + lv.name;
+      el('text', { x: x + 16, y: y + 46, class: 'sublabel' }, g).textContent = 'scope: ' + lv.scope;
+      const callout = el('g', { transform: `translate(${x + lv.w - 150}, ${y + 17})` }, g);
+      el('rect', { width: 136, height: 28, rx: 8, class: 'call' }, callout);
+      const val = el('text', { x: 68, y: 19, 'text-anchor': 'middle', class: 'val' }, callout);
+      el('title', {}, g).textContent = lv.tip;
+      tanks[lv.id] = { g, water, val, y, x, w: lv.w };
+      if (i > 0) {
+        const py = y - GAP;
+        el('path', { d: `M ${CX} ${py} V ${y}`, class: 'pipe' }, pipeLayer);
+        tanks[lv.id].flow = el('path', { d: `M ${CX} ${py} V ${y}`, class: 'flow' }, pipeLayer);
+        tanks[lv.id].valve = el('circle', { cx: CX, cy: py + GAP / 2, r: 11, class: 'valve' + (lv.lock ? ' lock' : '') }, pipeLayer);
       }
+    });
+
+    // CALCULATE unit, the row-context side pipe and the measure gauge.
+    const lastY = TOP + (LEVELS.length - 1) * (TANK_H + GAP) + TANK_H;
+    const calcY = lastY + 40, measY = calcY + 110;
+    el('path', { d: `M ${CX} ${lastY} V ${calcY}`, class: 'pipe' }, pipeLayer);
+    const fCalcIn = el('path', { d: `M ${CX} ${lastY} V ${calcY}`, class: 'flow' }, pipeLayer);
+    el('path', { d: `M ${CX} ${calcY + 64} V ${measY}`, class: 'pipe' }, pipeLayer);
+    const fCalcOut = el('path', { d: `M ${CX} ${calcY + 64} V ${measY}`, class: 'flow' }, pipeLayer);
+    const calcG = el('g', { class: 'calc off' }, tankLayer);
+    el('rect', { x: CX - 190, y: calcY, width: 380, height: 64, rx: 14, class: 'tank calc-tank' }, calcG);
+    el('text', { x: CX - 174, y: calcY + 26, class: 'label' }, calcG).textContent = 'CALCULATE()';
+    const calcSub = el('text', { x: CX - 174, y: calcY + 46, class: 'sublabel' }, calcG);
+    const calcCall = el('g', { transform: `translate(${CX + 44}, ${calcY + 18})` }, calcG);
+    el('rect', { width: 136, height: 28, rx: 8, class: 'call' }, calcCall);
+    const calcVal = el('text', { x: 68, y: 19, 'text-anchor': 'middle', class: 'val' }, calcCall);
+    el('title', {}, calcG).textContent = 'CALCULATE starts from the incoming context, then replaces filters on the columns it names (or intersects with KEEPFILTERS). It can never remove RLS.';
+
+    // Row context enters only through CALCULATE (context transition).
+    const rcX = CX + 330;
+    const rcG = el('g', { class: 'rowctx' }, tankLayer);
+    el('rect', { x: rcX - 70, y: calcY - 70, width: 190, height: 50, rx: 12, class: 'tank rc-tank' }, rcG);
+    el('text', { x: rcX + 25, y: calcY - 49, 'text-anchor': 'middle', class: 'label' }, rcG).textContent = 'Row context';
+    el('text', { x: rcX + 25, y: calcY - 31, 'text-anchor': 'middle', class: 'sublabel' }, rcG).textContent = 'iterator’s current row';
+    el('path', { d: `M ${rcX + 25} ${calcY - 20} V ${calcY + 32} H ${CX + 190}`, class: 'pipe rc-pipe' }, pipeLayer);
+    const fRc = el('path', { d: `M ${rcX + 25} ${calcY - 20} V ${calcY + 32} H ${CX + 190}`, class: 'flow rc-flow' }, pipeLayer);
+    const rcTag = el('text', { x: rcX + 34, y: calcY + 22, class: 'sublabel rc-tag' }, pipeLayer);
+    rcTag.textContent = 'context transition';
+
+    const measG = el('g', { class: 'measure' }, tankLayer);
+    el('rect', { x: CX - 120, y: measY, width: 240, height: 96, rx: 18, class: 'tank meas-tank' }, measG);
+    const measWater = el('rect', { x: CX - 114, y: measY + 6, width: 228, height: 84, rx: 13, class: 'water meas-water' }, measG);
+    el('text', { x: CX, y: measY + 30, 'text-anchor': 'middle', class: 'label' }, measG).textContent = '📏 Measure';
+    const measVal = el('text', { x: CX, y: measY + 66, 'text-anchor': 'middle', class: 'meas-val' }, measG);
+
+    // Storage block + bolt path (for Evaluate).
+    const storeG = el('g', { class: 'store' }, tankLayer);
+    el('rect', { x: 20, y: TOP + 4, width: 70, height: TANK_H - 8, rx: 8, class: 'store-box' }, storeG);
+    [0, 1, 2, 3].forEach(k => el('rect', { x: 28 + k * 15, y: TOP + 12, width: 10, height: TANK_H - 24, rx: 2, class: 'store-col' }, storeG));
+    el('title', {}, storeG).textContent = 'Columnar, compressed, in-memory storage (VertiPaq).';
+    const bolt = el('path', { d: `M 55 ${TOP + TANK_H} L 80 ${TOP + 260} L 44 ${TOP + 270} L 92 ${measY - 30} L ${CX - 122} ${measY + 48}`, class: 'bolt' }, boltLayer);
+    const boltTag = el('text', { x: 100, y: measY + 4, class: 'bolt-tag' }, boltLayer);
+    boltTag.textContent = 'one query · all filters at once';
+
+    // ---- Controls ----
+    const ids = ['rls', 'rep', 'pag', 'sli', 'vis', 'cel'];
+    const input = (id) => document.getElementById(id);
+    let calcOn = false;
+    const calcBtn = document.getElementById('calcBtn');
+    const pct = (v) => (v < 0.1 ? `${(v * 100).toFixed(1)}%` : `${Math.round(v * 100)}%`); // small shares keep a decimal
+    const fmt = (n) => Math.round(n).toLocaleString('en-IN');
+
+    function compute() {
+      const keep = Object.fromEntries(ids.map(id => [id, Number(input(id).value) / 100]));
+      ids.forEach(id => { document.getElementById(id + 'Out').textContent = input(id).value + '%'; });
+      document.getElementById('calOut').textContent = input('cal').value + '%';
+      const mode = document.querySelector('input[name="calcMode"]:checked').value;
+      const calc = Number(input('cal').value) / 100;
+      const iter = input('iter').checked;
+      // Visible share after each level (intersection = product of kept shares).
+      const vis = { model: 1 };
+      let run = 1;
+      ids.forEach(id => { run *= keep[id]; vis[id] = run; });
+      // CALCULATE: Replace keeps only RLS from upstream; KEEPFILTERS intersects.
+      // Context transition (iterator + CALCULATE) adds the current row: one row in 10 here.
+      const ROW_SHARE = 0.1;
+      let final = vis.cel;
+      if (calcOn) {
+        final = (mode === 'replace' ? keep.rls : vis.cel) * calc * (iter ? ROW_SHARE : 1);
+      }
+      // Paint tanks
+      tanks.model.val.textContent = 'visible 100%';
+      setLevel(tanks.model, 1);
+      ids.forEach(id => {
+        const t = tanks[id];
+        const overridden = calcOn && mode === 'replace' && id !== 'rls';
+        t.g.classList.toggle('overridden', overridden);
+        t.val.textContent = overridden ? 'replaced by CALC' : `visible ${pct(vis[id])}`;
+        setLevel(t, vis[id]);
+        t.flow.classList.toggle('active', keep[id] < 1);
+        t.valve.classList.toggle('active', keep[id] < 1);
+      });
+      calcG.classList.toggle('off', !calcOn);
+      calcSub.textContent = calcOn ? (mode === 'replace' ? 'replaces outer filters, keeps RLS' : 'KEEPFILTERS: intersects them') : 'off: passes straight through';
+      calcVal.textContent = calcOn ? `keeps ${input('cal').value}%` : '—';
+      fCalcIn.classList.add('active'); fCalcOut.classList.add('active');
+      rcG.classList.toggle('on', iter);
+      fRc.classList.toggle('active', iter && calcOn);
+      rcTag.textContent = iter ? (calcOn ? 'context transition: row → filter' : 'no CALCULATE: row context filters nothing') : 'context transition';
+      measVal.textContent = pct(final);
+      measWater.setAttribute('height', Math.max(4, 84 * final));
+      measWater.setAttribute('y', measY + 6 + 84 * (1 - final));
+      document.getElementById('seenPct').textContent = pct(final);
+      document.getElementById('seenRows').textContent = fmt(TOTAL_ROWS * final);
+      document.getElementById('ruleNote').textContent = calcOn
+        ? (mode === 'replace'
+          ? 'Replace: CALCULATE drops the outer filters on the columns it filters (assumed here: the same columns) and applies its own. RLS still applies.'
+          : 'KEEPFILTERS: CALCULATE keeps the outer filters and intersects its own with them.')
+        : (iter ? 'Row context alone does not filter. Switch CALCULATE on to see context transition.' : 'Drag any level below 100% to filter. Press Evaluate to see all filters go to the engine as one query.');
+    }
+    function setLevel(t, share) {
+      const h = (TANK_H - 10) * Math.max(0.04, share);
+      t.water.setAttribute('height', h);
+      t.water.setAttribute('y', t.y + 5 + (TANK_H - 10 - h));
     }
 
-    ['rls','rep','pag','vis','sli','lin','cal'].forEach(id=>els[id].addEventListener('input',compute));
-    calcBtn.addEventListener('click',()=>{useCalculate=!useCalculate; calcBtn.classList.toggle('off',!useCalculate); calcBtn.textContent=useCalculate?'ON':'OFF'; calcBtn.setAttribute('aria-pressed',String(useCalculate)); compute();});
-    resetBtn.addEventListener('click',()=>{ Object.assign(els.rls,{value:80}); Object.assign(els.rep,{value:90}); Object.assign(els.pag,{value:85}); Object.assign(els.vis,{value:70}); Object.assign(els.sli,{value:60}); Object.assign(els.lin,{value:95}); Object.assign(els.cal,{value:88}); useCalculate=false; calcBtn.classList.add('off'); calcBtn.textContent='OFF'; compute(); });
+    function evaluate() {
+      const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.querySelectorAll('.valve.active, .valve.lock').forEach(v => { v.classList.remove('flash'); void v.getBBox(); v.classList.add('flash'); });
+      svg.classList.remove('evaluating'); void svg.getBBox(); svg.classList.add('evaluating');
+      if (!reduce) measG.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 600, delay: 650, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      setTimeout(() => svg.classList.remove('evaluating'), 1600);
+    }
 
-    // Tooltip: position relative to the diagram container
-    const tip=document.getElementById('tooltip'); const plant=document.querySelector('.plant'); const hit=document.getElementById('hit-areas');
-    function showTip(e, text){ const rect=plant.getBoundingClientRect(); tip.textContent=text; tip.style.left=(e.clientX-rect.left)+'px'; tip.style.top=(e.clientY-rect.top)+'px'; tip.classList.add('show'); }
-    function hideTip(){ tip.classList.remove('show'); }
-    hit.querySelectorAll('rect').forEach(el=>{ el.addEventListener('mousemove', e=>{ const t=el.getAttribute('data-tip')||''; showTip(e,t); }); el.addEventListener('mouseleave', hideTip); });
+    ids.concat(['cal']).forEach(id => input(id).addEventListener('input', compute));
+    document.querySelectorAll('input[name="calcMode"]').forEach(r => r.addEventListener('change', compute));
+    input('iter').addEventListener('change', compute);
+    calcBtn.addEventListener('click', () => {
+      calcOn = !calcOn;
+      calcBtn.classList.toggle('off', !calcOn);
+      calcBtn.textContent = calcOn ? 'ON' : 'OFF';
+      calcBtn.setAttribute('aria-pressed', String(calcOn));
+      compute();
+    });
+    document.getElementById('evalBtn').addEventListener('click', evaluate);
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      Object.entries({ rls: 80, rep: 90, pag: 85, sli: 60, vis: 70, cel: 40, cal: 50 }).forEach(([k, v]) => { input(k).value = v; });
+      input('iter').checked = false;
+      document.querySelector('input[name="calcMode"][value="replace"]').checked = true;
+      calcOn = false; calcBtn.classList.add('off'); calcBtn.textContent = 'OFF'; calcBtn.setAttribute('aria-pressed', 'false');
+      compute();
+    });
 
     compute();
   </script>
