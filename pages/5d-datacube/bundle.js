@@ -21136,6 +21136,17 @@ void main() {
       gridRoot.add(line(new Vector3(x, y, -offset), new Vector3(x, y, offset), gridMaterial));
     }
   }
+  // Site theme hook (hand-patched into the build): structural lines and empty-cell
+  // wireframes need real contrast against a light or dark page.
+  var applyLineTheme = (t) => {
+    const dark = t === "dark";
+    const ink = dark ? 14217198 : 2047289;
+    edgeMaterial.color.set(ink); edgeMaterial.opacity = dark ? 0.6 : 0.55;
+    gridMaterial.color.set(ink); gridMaterial.opacity = dark ? 0.32 : 0.3;
+    ghostMaterial.color.set(ink); ghostMaterial.opacity = dark ? 0.24 : 0.22;
+    cells.forEach((c) => { if (c.material && c.material.wireframe) { c.material.color.set(ink); c.material.opacity = ghostMaterial.opacity; } });
+  };
+  if (window.SRG) { applyLineTheme(SRG.theme()); SRG.onThemeChange(applyLineTheme); }
   function line(from, to, material) {
     const geometry = new BufferGeometry().setFromPoints([from, to]);
     return new Line(geometry, material);
