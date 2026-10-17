@@ -400,6 +400,17 @@
     .story[data-step="3"] .calendar { transform: translate(-150%, 0) scale(.85); }
     .story[data-step="3"] .family { opacity: 1; transform: none; }
     @media (max-width: 560px) { .id-card { width: 60%; } .age-bubble { width: 56%; } }
+  
+    @media (max-width: 560px) {
+      .age-stage { min-height: 400px; }
+      .id-card { left: 5%; right: 5%; width: auto; max-width: none; top: 18px; }
+      .calendar { left: 5%; right: auto; top: 222px; width: 104px; }
+      .age-bubble { right: 5%; left: auto; top: 222px; width: 55%; padding: 12px 12px 10px; }
+      .age-v b { font-size: 1.8rem; }
+      .family { left: 4%; right: 4%; top: 158px; bottom: auto; }
+      .fam-row { grid-template-columns: .9fr 1.3fr .8fr; padding: 6px 10px; font-size: .82rem; }
+      .story[data-step="3"] .calendar { left: 50%; top: 18px; transform: translateX(-50%) scale(.9); }
+    }
   </style>
 </head>
 <body>

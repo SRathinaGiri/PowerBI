@@ -170,6 +170,8 @@
 
     .result-table th { background: rgb(var(--join-rgb) / .12); color: var(--join-ink); border-bottom: 2px solid rgb(var(--join-rgb) / .45); }
 
+    .layout > *, .tables-row > * { min-width: 0; }
+    .result-card, .table-card { overflow-x: auto; } /* wide tables scroll inside their card on phones */ /* long <select> options were forcing sideways scroll */
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
       .tables-row { grid-template-columns: 1fr; }

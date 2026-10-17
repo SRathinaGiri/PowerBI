@@ -336,6 +336,18 @@
     .door-leaf::after { content: ""; position: absolute; right: 12px; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: #f2c94c; }
     .door.open .door-leaf { transform: perspective(500px) rotateY(-70deg); }
     .door.filtering .door-sign { opacity: 1; transform: none; }
+  
+    @media (max-width: 560px) {
+      .class-stage { min-height: 680px; }
+      .room { width: 94%; }
+      .teacher { left: calc(50% - 17px); }
+      .kid { width: 80px; margin-left: -40px; }
+      .kid .face { width: 40px; height: 40px; font-size: 22px; }
+      .kid .nm { font-size: .76rem; }
+      .door { left: 50%; right: auto; translate: -50% 0; top: 380px; width: 120px; height: 150px; }
+      .pile-wrap { left: 3%; right: 3%; width: auto; top: 370px; height: auto; }
+      .pile { grid-template-columns: repeat(8, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -663,7 +675,9 @@
         { name: 'Sana', sec: 'A', face: '👧🏻', c: '#db2777', books: 4 }
       ];
       // Desk positions as % of the stage, inside the .room box (left 3%, width 64%).
-      const pos = (i) => ({ x: 3 + 64 * (0.2 + (i % 3) * 0.3), y: 96 + Math.floor(i / 3) * 124 });
+      // On phones the room spans the full width (door / pile move below it).
+      const narrow = () => window.matchMedia('(max-width: 560px)').matches;
+      const pos = (i) => ({ x: 3 + (narrow() ? 94 : 64) * (0.2 + (i % 3) * 0.3), y: 96 + Math.floor(i / 3) * 124 });
       const spot = document.createElement('div');
       spot.className = 'spot';
       stage.appendChild(spot);
@@ -678,6 +692,7 @@
         stage.appendChild(d);
         return d;
       });
+      window.addEventListener('resize', () => els.forEach((d, i) => { const p = pos(i); d.style.left = p.x + '%'; }));
       return {
         KIDS, els,
         spotOn(i) { const p = pos(i); spot.style.left = p.x + '%'; spot.style.top = p.y + 'px'; spot.classList.add('on'); },
