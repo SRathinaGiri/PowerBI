@@ -134,32 +134,39 @@
 
 
     /* Pipes and Filters */
-    .pipe {
-      fill: none;
-      stroke: var(--muted);
-      stroke-width: 14;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      transition: stroke .2s ease;
-    }
+    /* Glass tube = dark rim + light bore; the filter is the fluid moving inside. */
+    :root { --tube-rim: #64748b; --tube-bore: #e8eef6; --fluid: #0284c7; --fluid-back: #d97706; }
+    :root[data-theme="dark"] { --tube-rim: #94a3b8; --tube-bore: #0b1324; --fluid: #38bdf8; --fluid-back: #fbbf24; }
+    .pipe, .bore, .flow { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .pipe { stroke: var(--tube-rim); stroke-width: 24; }
+    .bore { stroke: var(--tube-bore); stroke-width: 16; }
     .flow {
-      fill: none;
-      stroke: var(--flow);
-      stroke-width: 10;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 10 20;
-      opacity: 0;
-      transition: opacity .3s ease;
+      stroke: var(--fluid);
+      stroke-width: 9;
+      stroke-dasharray: 18 10;
+      opacity: .22;                      /* idle: still liquid, no filter applied */
+      transition: opacity .35s ease;
     }
-    .flow.active-flow { animation: filter-flow 1.5s linear infinite; opacity: 1; }
-
-    @keyframes filter-flow { to { stroke-dashoffset: -80; } }
+    .flow.active-flow {
+      opacity: 1;
+      filter: drop-shadow(0 0 5px var(--fluid));
+      animation: filter-flow .8s linear infinite;
+    }
+    /* Fact → Customer stream shares the Customer tube and runs the other way. */
+    .flow.back { stroke: var(--fluid-back); stroke-width: 5; stroke-dasharray: 8 20; stroke-dashoffset: 14; }
+    .flow.back.active-flow { filter: drop-shadow(0 0 5px var(--fluid-back)); animation: filter-back .8s linear infinite; }
+    @keyframes filter-flow { to { stroke-dashoffset: -56; } }
+    @keyframes filter-back { from { stroke-dashoffset: 14; } to { stroke-dashoffset: 70; } }
+    .two-way { font: 800 15px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--panel-solid); stroke-width: 5px; }
+    .two-way .fwd { fill: var(--fluid); }
+    .two-way .bck { fill: var(--fluid-back); }
+    .slider-hint { margin: -4px 0 6px; font-size: .85rem; color: var(--muted); }
+    @media (prefers-reduced-motion: reduce) { .flow.active-flow { animation: none; } }
 
     .kpi {
-      position: absolute;
-      top: 16px;
-      right: 16px;
+      position: static;
+      display: inline-block;
+      margin: -18px 0 6px;
       background: var(--panel);
       box-shadow: var(--shadow);
       border: 1px solid var(--border);
@@ -219,6 +226,8 @@
     }
 
 
+      /* Stacked layout: the filter panel must not stay stuck over the diagram. */
+    @media (max-width: 1024px) { .left-column { position: static; } }
   </style>
 </head>
 <body>
@@ -227,6 +236,7 @@
     <div class="left-column">
       <section class="panel">
         <h2>Filters</h2>
+        <p class="slider-hint">Each slider is the <strong>% of rows the filter keeps</strong>. 100% = no filter, as in the Water Plant.</p>
         <div class="grp">
           <div class="row">
             <label>
@@ -235,9 +245,9 @@
               </svg>
               Time Filter
             </label>
-            <output id="timeOut">0%</output>
+            <output id="timeOut">100% kept</output>
           </div>
-          <input type="range" id="filter-time" min="0" max="100" value="0" />
+          <input type="range" id="filter-time" min="0" max="100" value="100" aria-label="Time: percent of rows kept" />
           <div class="row">
             <label>
               <svg class="filter-icon" viewBox="0 0 24 24">
@@ -245,9 +255,9 @@
               </svg>
               Place Filter
             </label>
-            <output id="placeOut">0%</output>
+            <output id="placeOut">100% kept</output>
           </div>
-          <input type="range" id="filter-place" min="0" max="100" value="0" />
+          <input type="range" id="filter-place" min="0" max="100" value="100" aria-label="Place: percent of rows kept" />
           <div class="row">
             <label>
               <svg class="filter-icon" viewBox="0 0 24 24">
@@ -255,9 +265,9 @@
               </svg>
               Customer Filter
             </label>
-            <output id="customerOut">0%</output>
+            <output id="customerOut">100% kept</output>
           </div>
-          <input type="range" id="filter-customer" min="0" max="100" value="0" />
+          <input type="range" id="filter-customer" min="0" max="100" value="100" aria-label="Customer: percent of rows kept" />
           <div class="row">
             <label>
               <svg class="filter-icon" viewBox="0 0 24 24">
@@ -265,9 +275,9 @@
               </svg>
               Product Filter
             </label>
-            <output id="productOut">0%</output>
+            <output id="productOut">100% kept</output>
           </div>
-          <input type="range" id="filter-product" min="0" max="100" value="0" />
+          <input type="range" id="filter-product" min="0" max="100" value="100" aria-label="Product: percent of rows kept" />
           <div class="row">
             <label>
               <svg class="filter-icon" viewBox="0 0 24 24">
@@ -275,9 +285,9 @@
               </svg>
               Salesperson Filter
             </label>
-            <output id="salespersonOut">0%</output>
+            <output id="salespersonOut">100% kept</output>
           </div>
-          <input type="range" id="filter-salesperson" min="0" max="100" value="0" />
+          <input type="range" id="filter-salesperson" min="0" max="100" value="100" aria-label="Salesperson: percent of rows kept" />
         </div>
       </section>
 
@@ -400,27 +410,32 @@
         </g>
 
         <path id="pipe-time-fact" class="pipe" d="M 230 180 H 420 V 310" />
+        <path class="bore" d="M 230 180 H 420 V 310" />
         <path id="flow-time-fact" class="flow" d="M 230 180 H 420 V 310" />
         <path id="pipe-place-fact" class="pipe" d="M 230 680 H 420 V 490" />
+        <path class="bore" d="M 230 680 H 420 V 490" />
         <path id="flow-place-fact" class="flow" d="M 230 680 H 420 V 490" />
         
         <path id="pipe-customer-fact" class="pipe" d="M 860 180 H 680 V 310" />
+        <path class="bore" d="M 860 180 H 680 V 310" />
         <path id="flow-customer-fact" class="flow" d="M 860 180 H 680 V 310" />
         
         <path id="pipe-product-fact" class="pipe" d="M 860 680 H 680 V 490" />
+        <path class="bore" d="M 860 680 H 680 V 490" />
         <path id="flow-product-fact" class="flow" d="M 860 680 H 680 V 490" />
 
         <path id="pipe-salesperson-fact" class="pipe" d="M 550 100 V 300" />
+        <path class="bore" d="M 550 100 V 300" />
         <path id="flow-salesperson-fact" class="flow" d="M 550 100 V 300" />
 
-        <path id="pipe-fact-customer" class="pipe" d="M 680 450 H 1040 V 180" />
-        <path id="flow-fact-customer" class="flow reverse-anim" d="M 680 450 H 1040 V 180" />
+        <path id="flow-fact-customer" class="flow back" d="M 860 180 H 680 V 310" />
+        <text class="two-way" x="770" y="160" text-anchor="middle"><tspan class="fwd">←</tspan> two-way <tspan class="bck">→</tspan></text>
       </svg>
     </section>
   </div>
 
   <section class="explanation-section">
-    <p>In a star schema, data typically flows from the descriptive dimension tables to the central fact table. This is represented by a **single-direction relationship** (one-way pipe). The Customer dimension has a special **bidirectional relationship** (two-way pipe) that allows filters to flow back to it from the fact table, which is useful for advanced analysis like filtering customers based on specific product purchases.</p>
+    <p>In a star schema, filters normally flow from the descriptive dimension tables into the central fact table: a <strong>single-direction relationship</strong> (one-way tube). The Customer dimension has a <strong>bidirectional relationship</strong>, so its single tube carries two streams: <span style="color:var(--fluid);font-weight:700">cyan</span> flows Customer → Fact, and <span style="color:var(--fluid-back);font-weight:700">amber</span> flows Fact → Customer whenever another dimension is filtered. That's useful for questions like “which customers bought this product?”. Each slider shows the <strong>% of rows kept</strong>: drag it below 100% to apply that filter and watch the fluid move.</p>
   </section>
 
   <script>
@@ -462,8 +477,8 @@
         ];
         
         sliders.forEach(slider => {
-            const randomValue = Math.floor(Math.random() * 51); // 0 to 50
-            slider.value = randomValue;
+            // Start each dimension keeping a random 50–100% of its rows.
+            slider.value = 100 - Math.floor(Math.random() * 51);
         });
     }
     
@@ -480,29 +495,31 @@
     }
     
     function updateFlow() {
-      const filterPct = {
+      // Slider value = % of rows kept by that filter (100 = no filter).
+      const keptPct = {
         time: parseInt(elements.timeIn.value),
         place: parseInt(elements.placeIn.value),
         customer: parseInt(elements.customerIn.value),
         product: parseInt(elements.productIn.value),
         salesperson: parseInt(elements.salespersonIn.value),
       };
+      const filterPct = Object.fromEntries(Object.entries(keptPct).map(([k, v]) => [k, 100 - v]));
 
       const remainingPct = {
-        time: (100 - filterPct.time) / 100,
-        place: (100 - filterPct.place) / 100,
-        customer: (100 - filterPct.customer) / 100,
-        product: (100 - filterPct.product) / 100,
-        salesperson: (100 - filterPct.salesperson) / 100,
+        time: keptPct.time / 100,
+        place: keptPct.place / 100,
+        customer: keptPct.customer / 100,
+        product: keptPct.product / 100,
+        salesperson: keptPct.salesperson / 100,
       };
 
       let finalPercentage = remainingPct.time * remainingPct.place * remainingPct.customer * remainingPct.product * remainingPct.salesperson;
 
-      elements.timeOut.textContent = `${filterPct.time}%`;
-      elements.placeOut.textContent = `${filterPct.place}%`;
-      elements.customerOut.textContent = `${filterPct.customer}%`;
-      elements.productOut.textContent = `${filterPct.product}%`;
-      elements.salespersonOut.textContent = `${filterPct.salesperson}%`;
+      elements.timeOut.textContent = `${keptPct.time}% kept`;
+      elements.placeOut.textContent = `${keptPct.place}% kept`;
+      elements.customerOut.textContent = `${keptPct.customer}% kept`;
+      elements.productOut.textContent = `${keptPct.product}% kept`;
+      elements.salespersonOut.textContent = `${keptPct.salesperson}% kept`;
       
       elements.timeFlow.classList.toggle('active-flow', filterPct.time > 0);
       elements.placeFlow.classList.toggle('active-flow', filterPct.place > 0);

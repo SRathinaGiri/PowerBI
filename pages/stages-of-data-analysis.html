@@ -139,6 +139,22 @@
     @keyframes draw { to { stroke-dashoffset: 0; } }
     @keyframes ping { 0% { opacity: .9; transform: scale(.6); } 100% { opacity: 0; transform: scale(2.6); } }
 
+
+    /* 2D map (pivot) */
+    .fm-sheet { fill: #eaf4ea; stroke: rgb(var(--fg-rgb) / .35); stroke-width: 1.5; }
+    :root[data-theme="dark"] .fm-sheet { fill: #1d2b24; }
+    .fm-grid line { stroke: rgb(var(--fg-rgb) / .14); stroke-width: 1; stroke-dasharray: 3 4; }
+    .fm-land { fill: rgb(var(--accent-3-rgb) / .3); stroke: rgb(var(--accent-3-rgb) / .8); stroke-width: 1.5; }
+    .fm-pin circle { fill: #e5484d; stroke: #fff; stroke-width: 2; }
+    .fm-pin text { font: 700 12px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--panel-solid); stroke-width: 3px; }
+    .fm-compass circle { fill: var(--panel-solid); stroke: rgb(var(--fg-rgb) / .4); }
+    .fm-compass path { fill: #e5484d; }
+    .fm-compass text { font: 800 11px var(--font); fill: var(--ink); text-anchor: middle; }
+    .flatmap { transform-box: view-box; transform-origin: 300px 170px; }
+    .story[data-step="1"] .flatmap { animation: pivot-turn 6s var(--ease-out) infinite; }
+    @keyframes pivot-turn { 0%, 18% { transform: rotate(0); } 42%, 62% { transform: rotate(90deg) scale(.86); } 86%, 100% { transform: rotate(0); } }
+    .fm-rotate-hint path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+
     /* 3 globe */
     .globe { fill: rgb(var(--accent-rgb) / .14); stroke: var(--accent); stroke-width: 2; }
     .m, .lat { fill: none; stroke: rgb(var(--accent-rgb) / .55); stroke-width: 1.3; }
@@ -222,38 +238,33 @@
                   <g class="xt-lines">
                     <line x1="178" y1="124" x2="422" y2="124"/><line x1="178" y1="152" x2="422" y2="152"/>
                     <line x1="178" y1="180" x2="422" y2="180"/><line x1="178" y1="208" x2="422" y2="208"/>
-                    <line x1="240" y1="98" x2="240" y2="222"/><line x1="300" y1="98" x2="300" y2="222"/><line x1="360" y1="98" x2="360" y2="222"/>
+                    <line x1="270" y1="98" x2="270" y2="222"/><line x1="346" y1="98" x2="346" y2="222"/>
                   </g>
-                  <text x="270" y="116" class="xt-t">North</text><text x="330" y="116" class="xt-t">South</text><text x="391" y="116" class="xt-t">East</text>
-                  <text x="208" y="142" class="xt-t">Tea</text><text x="208" y="170" class="xt-t">Rice</text><text x="208" y="198" class="xt-t">Oil</text>
-                  <text x="270" y="142" class="xt-n">42</text><text x="330" y="142" class="xt-n">35</text><text x="391" y="142" class="xt-n">28</text>
-                  <text x="270" y="170" class="xt-n">51</text><text x="330" y="170" class="xt-n">47</text><text x="391" y="170" class="xt-n">39</text>
-                  <text x="270" y="198" class="xt-n">18</text><text x="330" y="198" class="xt-n">22</text><text x="391" y="198" class="xt-n">16</text>
+                  <text x="224" y="116" class="xt-t">City</text><text x="308" y="116" class="xt-t">Lat °N</text><text x="384" y="116" class="xt-t">Long °E</text>
+                  <text x="224" y="142" class="xt-t">Chennai</text><text x="224" y="170" class="xt-t">Kochi</text><text x="224" y="198" class="xt-t">Pune</text>
+                  <text x="308" y="142" class="xt-n">13.08</text><text x="384" y="142" class="xt-n">80.27</text>
+                  <text x="308" y="170" class="xt-n">9.93</text><text x="384" y="170" class="xt-n">76.27</text>
+                  <text x="308" y="198" class="xt-n">18.52</text><text x="384" y="198" class="xt-n">73.86</text>
                 </g>
                 <path class="pencil" d="M440 214 l26 -26 l8 8 l-26 26 z M440 214 l-6 14 l14 -6"/>
               </g>
             </g>
 
-            <!-- 2. Atlas with index = pivot table -->
+            <!-- 2. Flat 2D map = pivot table: same data, turned to a new angle -->
             <g class="era era-1">
-              <path class="book" d="M120 74 Q210 60 300 80 L300 268 Q210 248 120 262 Z"/>
-              <path class="book" d="M300 80 Q390 60 480 74 L480 262 Q390 248 300 268 Z"/>
-              <line x1="300" y1="80" x2="300" y2="268" class="spine"/>
-              <g class="map-blobs">
-                <path d="M150 110 q30 -16 60 0 q24 14 50 -4 l18 36 q-40 30 -80 14 q-34 -10 -48 -46z"/>
-                <path d="M160 190 q36 -10 70 6 q20 10 46 0 l-4 40 q-50 10 -90 -4 q-20 -16 -22 -42z"/>
+              <g class="flatmap">
+                <rect x="170" y="62" width="260" height="216" rx="10" class="fm-sheet"/>
+                <g class="fm-grid">
+                  <line x1="170" y1="116" x2="430" y2="116"/><line x1="170" y1="170" x2="430" y2="170"/><line x1="170" y1="224" x2="430" y2="224"/>
+                  <line x1="235" y1="62" x2="235" y2="278"/><line x1="300" y1="62" x2="300" y2="278"/><line x1="365" y1="62" x2="365" y2="278"/>
+                </g>
+                <path class="fm-land" d="M188 74 H418 L408 150 Q370 210 318 262 Q296 276 284 262 Q258 214 232 168 Q206 124 188 74 Z"/>
+                <g class="fm-pin"><circle cx="218" cy="96" r="6"/><text x="228" y="100">Pune</text></g>
+                <g class="fm-pin"><circle cx="384" cy="186" r="6"/><text x="334" y="206">Chennai</text></g>
+                <g class="fm-pin"><circle cx="282" cy="240" r="6"/><text x="292" y="244">Kochi</text></g>
+                <g class="fm-compass"><circle cx="404" cy="90" r="14"/><path d="M404 78 L409 92 L404 89 L399 92 Z"/><text x="404" y="70">N</text></g>
               </g>
-              <circle cx="232" cy="148" r="9" class="hit"/>
-              <text x="320" y="104" class="idx-h">INDEX</text>
-              <g class="idx">
-                <text x="320" y="132">Chennai ........ 12</text>
-                <text x="320" y="156" class="idx-on">Kochi .......... 18</text>
-                <text x="320" y="180">Madurai ........ 21</text>
-                <text x="320" y="204">Mysuru ......... 27</text>
-                <text x="320" y="228">Pune ........... 34</text>
-              </g>
-              <rect x="314" y="142" width="152" height="20" rx="6" class="idx-mark"/>
-              <path d="M314 152 C 280 152, 270 150, 244 148" class="idx-arrow"/>
+              <g class="fm-rotate-hint"><path d="M450 120 a 40 40 0 0 1 0 100" /><path d="M444 214 l6 8 l6 -10"/></g>
             </g>
 
             <!-- 3. Globe = data cube -->
@@ -312,8 +323,8 @@
         </div>
         <div class="story-side">
           <ol class="story-steps">
-            <li><strong>Paper map → Cross tab.</strong> A fixed grid you read by hand. New question? Draw a new map.</li>
-            <li><strong>Atlas index → Pivot table.</strong> Look up what you need and jump straight to it.</li>
+            <li><strong>Coordinates table → Cross tab.</strong> Places as rows, latitude and longitude as columns. Exact, but you read it by hand.</li>
+            <li><strong>2D map → Pivot table.</strong> The same places on a map you can turn around, a new view without new data.</li>
             <li><strong>Globe → Data cube.</strong> Every angle is pre-built. Just turn it.</li>
             <li><strong>Phone map → Interactive BI.</strong> Pinch, zoom and tap. You explore it yourself.</li>
             <li><strong>Voice GPS → AI-enabled BI.</strong> It warns you <em>before</em> you hit the jam.</li>
