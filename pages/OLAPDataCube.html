@@ -543,7 +543,92 @@
         .cube-controls button:hover, #pivot-table-btn:hover, .slicing-controls button:hover, .dicing-controls button:hover { transform: translateY(-2px); }
         .cube-controls button:active, #pivot-table-btn:active, .slicing-controls button:active, .dicing-controls button:active { transform: scale(.96); }
         :root:not([data-theme="dark"]) .small-cube .face { border-color: rgb(255 255 255 / .7); }
-        </style>
+        /* White labels sit on mid-tone tiles: a dark halo keeps them legible in both themes. */
+        .small-cube .face, .dimension-label, th[class*="-color"], .total-cell { text-shadow: 0 1px 2px rgb(0 0 0 / .6), 0 0 1px rgb(0 0 0 / .5); }
+        .total-cell { background-color: #1e8449 !important; color: #fff !important; }
+        .cube-controls button, .slicing-controls button { background-color: #1e8e4f; }
+        .cube-controls button:hover, .slicing-controls button:hover { background-color: #187a43; }
+        
+        .header, .content, .table-container { box-sizing: border-box; }
+        /* Uncoloured header cells (e.g. the Total row) follow the theme instead of hard-coded white. */
+        .table-container th:not([class*="-color"]):not(.total-cell) { color: var(--ink) !important; } /* width:100% + padding was causing sideways scroll */
+        /* --- Rotatable cubes (all tabs) --- */
+        #olap-cube, #sliced-cube-container, #diced-cube-container, #drilling-cube, #drilled-cube, #rolled-up-cube { cursor: grab; touch-action: none; }
+        .is-dragging { cursor: grabbing !important; transition: none !important; }
+        .tooltip { position: fixed; }
+        .small-cube .face > * { pointer-events: none; }
+
+        /* --- Labelled cuboids used by drilling / rolling --- */
+        .box-stage { position: relative; width: 100%; height: 320px; perspective: 1400px; display: flex; align-items: center; justify-content: center; }
+        #drilled-cube.box-world, #rolled-up-cube.box-world {
+            position: relative; width: 0; height: 0; margin: 0;
+            transform-style: preserve-3d; transition: transform .5s var(--ease-out);
+        }
+        .box { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
+        .bface {
+            position: absolute; box-sizing: border-box;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+            color: #fff; line-height: 1.1; text-align: center; overflow: hidden;
+            border: 1px solid rgb(255 255 255 / .55);
+            text-shadow: 0 1px 2px rgb(0 0 0 / .6), 0 0 1px rgb(0 0 0 / .5);
+            backface-visibility: hidden;
+            transition: filter .2s ease;
+        }
+        .bface small { font-size: .78em; opacity: .92; pointer-events: none; white-space: nowrap; }
+        .bface b { font-size: 1.05em; pointer-events: none; }
+        .box[data-leaving] .bface > * { opacity: 0; transition: opacity .15s ease; } /* blocks fuse without overlapping labels */
+        .box.drillable { cursor: pointer; }
+        .box.drillable:hover .bface { filter: brightness(1.18) saturate(1.1); }
+        .box:hover .bface { filter: brightness(1.12); }
+
+        /* --- Drilling layout --- */
+        .drilling-visuals-container { flex-wrap: wrap !important; align-items: center !important; }
+        .drilled-view { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: min(560px, 100%); }
+        .drilled-view[hidden] { display: none; }
+        #drilled-stage { height: 260px; }
+        #drilled-table-container { width: min(520px, 100%); }
+        #drilled-data-table, #detailed-data-table { width: 100%; border-collapse: collapse; }
+        #drilled-data-table th, #drilled-data-table td { border: 1px solid var(--border-strong); padding: 8px 10px; text-align: center; }
+        .drill-hint { margin: 12px 0 0; color: var(--muted); font-size: .92rem; text-align: left; }
+        .muted { color: var(--muted); font-weight: 400; }
+
+        .seg { display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .seg-label { padding: 0 10px 0 12px; color: var(--muted); font-size: .85rem; font-weight: 600; }
+        .seg label { position: relative; padding: 7px 16px; border-radius: 999px; cursor: pointer; font-weight: 600; color: var(--muted); transition: background .2s ease, color .2s ease; }
+        .seg label:has(input:checked) { background: var(--accent); color: var(--on-accent); }
+        .seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .seg input { position: absolute; opacity: 0; pointer-events: none; }
+
+        .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; min-height: 36px; margin-top: 4px; }
+        .breadcrumb .crumb { all: unset; padding: 6px 12px; border-radius: 999px; font-size: .92rem; font-weight: 600; color: var(--ink); background: rgb(var(--fg-rgb) / .06); }
+        .breadcrumb button.crumb { cursor: pointer; color: var(--accent-ink); background: rgb(var(--accent-rgb) / .12); }
+        .breadcrumb button.crumb:hover { background: rgb(var(--accent-rgb) / .22); }
+        .breadcrumb button.crumb:focus-visible { outline: 2px solid var(--accent); }
+        .breadcrumb .crumb.now { background: var(--accent); color: var(--on-accent); }
+        .breadcrumb .crumb.ctx { background: transparent; color: var(--muted); font-weight: 500; }
+        .breadcrumb .sep { color: var(--muted); }
+
+        /* --- Rolling layout --- */
+        .rolling-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 18px; }
+        .roll-filter { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--muted); }
+        .roll-filter[hidden] { display: none; }
+        .roll-filter select { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--control-bg); color: var(--ink); font: inherit; }
+        .level-stepper { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+        .level-stepper .step { all: unset; cursor: pointer; padding: 8px 18px; border-radius: 999px; font-weight: 700; color: var(--muted); background: rgb(var(--fg-rgb) / .06); border: 1px solid var(--border); transition: background .25s ease, color .25s ease, transform .3s var(--ease-spring); }
+        .level-stepper .step:hover { color: var(--ink); transform: translateY(-1px); }
+        .level-stepper .step:focus-visible { outline: 2px solid var(--accent); }
+        .level-stepper .step.active { background: var(--accent); color: var(--on-accent); border-color: transparent; box-shadow: 0 6px 16px rgb(var(--accent-rgb) / .3); }
+        .level-stepper .step-arrow { color: var(--muted); }
+        .rolling-visuals-container { flex-direction: column !important; align-items: center !important; gap: 18px !important; width: 100%; }
+        .roll-stage { height: 300px; }
+        #detailed-table-container { flex: none !important; width: min(1100px, 100%) !important; max-width: 100% !important; }
+        .table-scroll { overflow-x: auto; }
+        #detailed-data-table th, #detailed-data-table td { border: 1px solid var(--border-strong); padding: 7px 9px; text-align: center; white-space: nowrap; font-size: .9rem; }
+        #detailed-data-table thead th { color: var(--ink); background: rgb(var(--fg-rgb) / .05); font-weight: 700; }
+        #detailed-data-table thead th.total-cell { color: #fff !important; }
+        .cell-label { display: block; font-size: .72rem; color: var(--muted); }
+        #detailed-data-table tbody th[class*="-color"], #drilled-data-table tbody th[class*="-color"] { color: #fff; }
+    </style>
 </head>
 <body>
 
@@ -715,87 +800,95 @@
       <div id="drilling" class="page">
             <h2>Drilling Down</h2>
             <div class="description">
-                <p><strong>Drilling Down</strong> allows you to navigate from a summary level to a more detailed level of data, such as moving from 'Year' to 'Quarter' to 'Month' in the Time dimension. ⬇️</p>
+                <p><strong>Drilling Down</strong> moves from a summary to finer detail, one level at a time: <strong>Year → Quarter → Month</strong> in Time, or <strong>Region → Street → Address</strong> in Place. Click any cell of the cube, then click a quarter (or street) to go one level deeper. Drag any cube to rotate it; double-click to reset the view. ⬇️</p>
             </div>
             <div class="drilling-controls-container">
-                <div class="drilling-controls">
-                    <label>Drill on:</label>
-                    <label>
-                        <input type="radio" name="drill-dimension" value="time" checked> Time
-                    </label>
-                    <label>
-                        <input type="radio" name="drill-dimension" value="region"> Region
-                    </label>
+                <div class="drilling-controls seg" role="radiogroup" aria-label="Dimension to drill">
+                    <span class="seg-label">Drill on</span>
+                    <label><input type="radio" name="drill-dimension" value="time" checked> Time</label>
+                    <label><input type="radio" name="drill-dimension" value="region"> Region</label>
                 </div>
             </div>
+            <nav id="drill-breadcrumb" class="breadcrumb" aria-label="Drill path"></nav>
             <div class="drilling-visuals-container">
                 <div class="cube-container">
-                    <div id="drilling-cube"></div> 
+                    <div id="drilling-cube"></div>
                 </div>
-                <div id="drilled-view-container" class="visuals-container" style="display: none;">
-                    <div id="drilled-cube-container" class="cube-container"></div>
-                    <div class="table-container">
-                        <h3>Drilled View</h3>
+                <div id="drilled-view-container" class="drilled-view" hidden>
+                    <div class="box-stage" id="drilled-stage">
+                        <div id="drilled-cube" class="box-world"></div>
+                    </div>
+                    <div class="table-container" id="drilled-table-container">
+                        <h3 id="drilled-title">Drilled View</h3>
                         <table id="drilled-data-table">
-                            <thead>
-                                <tr id="drilled-table-head-row">
-                                    <th class="table-corner"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="drilled-table-body">
-                            </tbody>
+                            <thead><tr id="drilled-table-head-row"></tr></thead>
+                            <tbody id="drilled-table-body"></tbody>
                         </table>
+                        <p id="drill-hint" class="drill-hint"></p>
                     </div>
                 </div>
             </div>
             <div class="cube-controls">
-                <button onclick="initializeDrilling()">Reset</button>
+                <button id="drill-up-btn" type="button" disabled>⬆ Drill up</button>
+                <button type="button" onclick="initializeDrilling()">Reset</button>
             </div>
         </div>
-        
+
         <div id="rolling" class="page">
             <h2>Rolling Up</h2>
             <div class="description">
-                <p><strong>Rolling Up</strong> aggregates data from a lower level to a higher level. For example, rolling up from 'Quarter' to 'Year' or from 'Street' to 'Region'. ⬆️</p>
+                <p><strong>Rolling Up</strong> is the reverse of drilling: detail is aggregated into broader groups. Watch <strong>Months merge into Quarters, then into Years</strong> (or <strong>Addresses → Streets → Regions</strong>). The Total column never changes, because rolling up only regroups the same sales. Drag the blocks to rotate; double-click to reset. ⬆️</p>
             </div>
-            <div class="rolling-ui">
-                <div class="rolling-controls-container">
-                    <div class="rolling-controls">
-                        <div class="drill-toggle">
-                          <label><input type="radio" name="rollup-option" value="time" checked> Time</label>
-                          <label><input type="radio" name="rollup-option" value="region"> Region</label>
-                        </div>
-
-                        <div id="time-checkboxes">
-                          <label><input type="checkbox" name="rollup-time" value="0" checked> 2023</label>
-                          <label><input type="checkbox" name="rollup-time" value="1" checked> 2024</label>
-                          <label><input type="checkbox" name="rollup-time" value="2" checked> 2025</label>
-                        </div>
-
-                        <div id="region-checkboxes" style="display:none">
-                          <label><input type="checkbox" name="rollup-region" value="0" checked> Seattle</label>
-                          <label><input type="checkbox" name="rollup-region" value="1" checked> London</label>
-                          <label><input type="checkbox" name="rollup-region" value="2" checked> Delhi</label>
-                        </div>
-                    </div>
+            <div class="rolling-controls">
+                <div class="seg" role="radiogroup" aria-label="Hierarchy to roll up">
+                    <span class="seg-label">Hierarchy</span>
+                    <label><input type="radio" name="rollup-option" value="time" checked> Time</label>
+                    <label><input type="radio" name="rollup-option" value="region"> Region</label>
                 </div>
-                <div class="rolling-visuals-container">
-                    <div id="detailed-table-container" class="table-container">
-                        <h3>Detailed View</h3>
+                <label class="roll-filter">Product
+                    <select id="roll-product">
+                        <option value="all">All products</option>
+                        <option value="0">Product A</option>
+                        <option value="1">Product B</option>
+                        <option value="2">Product C</option>
+                    </select>
+                </label>
+                <label class="roll-filter" id="roll-region-filter">Region
+                    <select id="roll-region">
+                        <option value="all">All regions</option>
+                        <option value="0">Seattle</option>
+                        <option value="1">London</option>
+                        <option value="2">Delhi</option>
+                    </select>
+                </label>
+                <label class="roll-filter" id="roll-year-filter" hidden>Year
+                    <select id="roll-year">
+                        <option value="all">All years</option>
+                        <option value="0">2023</option>
+                        <option value="1">2024</option>
+                        <option value="2">2025</option>
+                    </select>
+                </label>
+            </div>
+            <div class="level-stepper" id="roll-levels" aria-label="Aggregation level"></div>
+            <div class="rolling-visuals-container">
+                <div class="box-stage roll-stage">
+                    <div id="rolled-up-cube" class="box-world"></div>
+                </div>
+                <div id="detailed-table-container" class="table-container">
+                    <h3 id="roll-title">Detailed View</h3>
+                    <div class="table-scroll">
                         <table id="detailed-data-table">
-                            <thead id="detailed-table-head">
-                                <tr id="detailed-table-head-row"></tr>
-                            </thead>
+                            <thead id="detailed-table-head"></thead>
                             <tbody id="detailed-table-body"></tbody>
                         </table>
-                    </div>
-                    <div id="rolled-up-cube-container" class="cube-container">
-                        <div id="rolled-up-cube"></div>
                     </div>
                 </div>
             </div>
             <div class="cube-controls">
-                <button onclick="resetRolling()">Reset</button>
+                <button id="roll-down-btn" type="button">⬇ Drill down</button>
+                <button id="roll-up-btn" type="button">⬆ Roll up</button>
+                <button type="button" onclick="resetRolling()">Reset</button>
             </div>
         </div>
 
@@ -942,8 +1035,10 @@
                 updateTable('pivoting');
             } else if (pageId === 'slicing') {
                 initializeSlicing();
+                makeRotatable(document.getElementById('sliced-cube-container'));
             } else if (pageId === 'dicing') {
                 initializeDicing();
+                makeRotatable(document.getElementById('diced-cube-container'));
             } else if (pageId === 'drilling') {
                 const drillingCubeContainer = document.querySelector('#drilling .cube-container');
                 if (drillingCubeContainer) drillingCubeContainer.style.display = 'flex';
@@ -1511,413 +1606,425 @@
             });
         });
 
-        // drilling.js
-        const drilledCubeContainer = document.getElementById('drilled-cube-container');
-        const mainCubeInDrillingPage = document.getElementById('drilling-cube');
-        let drillLevel = 'summary';
-        let selectedDrillDimension = 'time'; // Default value
+        // ===== Shared 3D helpers =============================================
+        // Drag-to-rotate for any preserve-3d wrapper. Move/up are tracked on
+        // window (no pointer capture) so a plain click still reaches the face
+        // underneath — drilling depends on face clicks.
+        function makeRotatable(el, start) {
+            if (!el || el.dataset.rotatable) return;
+            el.dataset.rotatable = '1';
+            const home = start || { x: -30, y: 45 };
+            el._rot = { x: home.x, y: home.y };
+            const apply = () => { el.style.transform = `rotateX(${el._rot.x}deg) rotateY(${el._rot.y}deg)`; };
+            let drag = null;
+            el.style.touchAction = 'none';
+            el.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+                drag = { x: e.clientX, y: e.clientY, moved: 0 };
+                el.classList.add('is-dragging');
+            });
+            window.addEventListener('pointermove', (e) => {
+                if (!drag) return;
+                const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+                drag.moved += Math.abs(dx) + Math.abs(dy);
+                if (drag.moved < 4) return;
+                el._rot.y += dx * 0.5;
+                el._rot.x = Math.max(-85, Math.min(85, el._rot.x - dy * 0.5));
+                drag.x = e.clientX; drag.y = e.clientY;
+                apply();
+                hideTooltip();
+            });
+            window.addEventListener('pointerup', () => {
+                if (!drag) return;
+                el._justDragged = drag.moved > 6;
+                drag = null;
+                el.classList.remove('is-dragging');
+                setTimeout(() => { el._justDragged = false; }, 0);
+            });
+            // A drag that ends over a face must not count as a click on it.
+            el.addEventListener('click', (e) => { if (el._justDragged) { e.stopPropagation(); e.preventDefault(); } }, true);
+            el.addEventListener('dblclick', () => { el._rot = { x: home.x, y: home.y }; apply(); });
+            apply();
+        }
+
+        // A labelled cuboid centred at (x, y, z); w/h/d may differ, so a parent
+        // block can be exactly as wide as the children it rolls up.
+        function makeBox({ w, h, d, x, y, z = 0, label, value, colorClass, tooltip }) {
+            const box = document.createElement('div');
+            box.className = 'box';
+            box.style.transform = `translate3d(${x}px, ${y}px, ${z}px)`;
+            const spec = {
+                front:  [w, h, `translateZ(${d / 2}px)`],
+                back:   [w, h, `rotateY(180deg) translateZ(${d / 2}px)`],
+                right:  [d, h, `rotateY(90deg) translateZ(${w / 2}px)`],
+                left:   [d, h, `rotateY(-90deg) translateZ(${w / 2}px)`],
+                top:    [w, d, `rotateX(90deg) translateZ(${h / 2}px)`],
+                bottom: [w, d, `rotateX(-90deg) translateZ(${h / 2}px)`]
+            };
+            Object.entries(spec).forEach(([name, [fw, fh, t]]) => {
+                const f = document.createElement('div');
+                f.className = `bface ${name} ${colorClass || ''}`;
+                f.style.width = `${fw}px`;
+                f.style.height = `${fh}px`;
+                f.style.left = `${-fw / 2}px`;
+                f.style.top = `${-fh / 2}px`;
+                f.style.transform = t;
+                f.style.fontSize = `${Math.max(9, Math.min(15, Math.min(fw, fh) / 3))}px`;
+                if (name === 'front' || name === 'back' || name === 'top') {
+                    f.innerHTML = `<small>${label}</small><b>${value}</b>`;
+                }
+                if (tooltip) f.dataset.tooltip = tooltip;
+                f.addEventListener('mouseenter', showTooltip);
+                f.addEventListener('mouseleave', hideTooltip);
+                box.appendChild(f);
+            });
+            return box;
+        }
+
+        const plural = (n) => (n.endsWith('s') ? n + 'es' : n + 's');
+        const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ===== Hierarchy data (synthetic teaching data) =======================
+        // Months and addresses are split from the existing quarter / street
+        // figures with fixed weights; the last child takes the remainder, so
+        // every level adds up exactly to its parent (and to the cube cells).
+        const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
+        const HOUSE_NOS = [12, 48, 90];
+        const sum = (arr) => arr.reduce((s, v) => s + v, 0);
+        function split3(v, w) { const a = Math.round(v * w[0]), b = Math.round(v * w[1]); return [a, b, v - a - b]; }
+        const monthSplit = (v) => split3(v, [0.31, 0.33]);
+        const addressSplit = (v) => split3(v, [0.28, 0.34]);
+
+        function quarterValue(year, qi, r, p) { return hierarchicalData[year][QUARTERS[qi]][r][p]; }
+        function monthValue(year, m, r, p) { return monthSplit(quarterValue(year, Math.floor(m / 3), r, p))[m % 3]; }
+        function streetsOf(region) { return hierarchicalStreetData[region]['2023'].streets; }
+        function streetValue(region, year, s, p) { return hierarchicalStreetData[region][year].data[s][p]; }
+        function addressValue(region, year, s, a, p) { return addressSplit(streetValue(region, year, s, p))[a]; }
+        function addressLabel(region, s, a) { return `${HOUSE_NOS[a]} ${streetsOf(region)[s]}`; }
+
+        // ===== Drilling down ==================================================
+        // Level 0 is the 3×3×3 cube. Clicking a cell opens level 1 (its quarters
+        // or streets); clicking one of those opens level 2 (months / addresses).
+        let selectedDrillDimension = 'time';
+        let drillPath = null; // { dim, product, year, region, child: null | index }
 
         function setupDrillingControls() {
-            const radioButtons = document.querySelectorAll('input[name="drill-dimension"]');
-            radioButtons.forEach(radio => {
+            document.querySelectorAll('input[name="drill-dimension"]').forEach(radio => {
+                if (radio.dataset.bound) return;
+                radio.dataset.bound = '1';
                 radio.addEventListener('change', (e) => {
                     selectedDrillDimension = e.target.value;
+                    drillPath = null;
+                    renderDrill(false);
                 });
             });
+            const up = document.getElementById('drill-up-btn');
+            if (!up.dataset.bound) { up.dataset.bound = '1'; up.addEventListener('click', drillUp); }
         }
 
         function initializeDrilling() {
-            drillLevel = 'summary';
-            const mainCubeContainer = document.querySelector('#drilling .cube-container');
-            if (mainCubeContainer) {
-                mainCubeContainer.style.display = 'flex';
-            }
-            const drilledView = document.getElementById('drilled-view-container');
-            if (drilledView) {
-                drilledView.style.display = 'none';
-            }
-            
+            drillPath = null;
             const defaultRadio = document.querySelector('input[name="drill-dimension"][value="time"]');
-            if(defaultRadio) defaultRadio.checked = true;
+            if (defaultRadio) defaultRadio.checked = true;
             selectedDrillDimension = 'time';
-
-            document.querySelector('#drilling h2').textContent = "Drilling Down";
-            document.querySelector('#drilling .description p').innerHTML = "<strong>Drilling Down</strong> allows you to navigate from a summary level to a more detailed level of data, such as moving from 'Year' to 'Quarter' to 'Month' in the Time dimension. ⬇️";
-
-            const mainCubeFaces = document.querySelectorAll('#drilling-cube .small-cube .face');
-            mainCubeFaces.forEach(face => {
-                face.removeEventListener('click', handleDrillDown); 
+            document.querySelectorAll('#drilling-cube .small-cube .face').forEach(face => {
+                face.removeEventListener('click', handleDrillDown);
                 face.addEventListener('click', handleDrillDown);
             });
-            
+            makeRotatable(document.getElementById('drilling-cube'));
+            makeRotatable(document.getElementById('drilled-cube'), { x: -18, y: -24 });
             setupDrillingControls();
+            renderDrill(false);
         }
 
         function handleDrillDown(event) {
-            const face = event.target;
-            const tooltipContent = face.dataset.tooltip;
-            const parts = tooltipContent.split('\n');
-            
-            const product = parts[0].split(': ')[1];
-            const year = parts[1].split(': ')[1];
-            const region = parts[2].split(': ')[1];
-            const sales = parts[3].split(': ')[1];
+            const [product, year, region] = (event.currentTarget.dataset.tooltip || '').split('\n').map(s => s.split(': ')[1]);
+            if (!dimensions.x.includes(product) || !dimensions.y.includes(year) || !dimensions.z.includes(region)) return;
+            hideTooltip();
+            drillPath = { dim: selectedDrillDimension, product, year, region, child: null };
+            renderDrill(true);
+        }
 
-            let drilledDimensions = {};
-            let dataForCube = [];
-            let dataForTable = [];
-            let drilledOnDimension = selectedDrillDimension;
-            let drilledTotalSales = 0;
+        function drillInto(i) { if (drillPath && drillPath.child === null) { drillPath.child = i; renderDrill(true); } }
 
-            if (drilledOnDimension === 'time' && year !== 'null' && year !== 'undefined' && hierarchicalData[year]) {
-                drilledDimensions = {
-                    x: [product],
-                    y: Object.keys(hierarchicalData[year]),
-                    z: [region]
-                };
-                const productIndex = dimensions.x.indexOf(product);
-                const regionIndex = dimensions.z.indexOf(region);
+        function drillUp() {
+            if (!drillPath) return;
+            if (drillPath.child !== null) drillPath.child = null; else drillPath = null;
+            renderDrill(true);
+        }
 
-                dataForCube = Object.values(hierarchicalData[year]).map(quarterData => {
-                    return [[quarterData[regionIndex][productIndex]]];
-                });
-                
-                dataForTable = Object.values(hierarchicalData[year]).map(quarterData => {
-                    return [quarterData[regionIndex][productIndex]];
-                });
+        function drillMembers(dp) {
+            const p = dimensions.x.indexOf(dp.product), r = dimensions.z.indexOf(dp.region);
+            if (dp.dim === 'time') {
+                if (dp.child === null) return QUARTERS.map((q, qi) => ({ label: q, value: quarterValue(dp.year, qi, r, p) }));
+                return [0, 1, 2].map(i => { const m = dp.child * 3 + i; return { label: MONTHS[m], value: monthValue(dp.year, m, r, p) }; });
+            }
+            if (dp.child === null) return streetsOf(dp.region).map((s, si) => ({ label: s, value: streetValue(dp.region, dp.year, si, p) }));
+            return [0, 1, 2].map(a => ({ label: `#${HOUSE_NOS[a]}`, full: addressLabel(dp.region, dp.child, a), value: addressValue(dp.region, dp.year, dp.child, a, p) }));
+        }
 
-                drilledTotalSales = dataForTable.reduce((total, row) => total + row[0], 0);
-
-            } else if (drilledOnDimension === 'region' && region !== 'null' && region !== 'undefined' && hierarchicalStreetData[region] && hierarchicalStreetData[region][year]) {
-                drilledDimensions = {
-                    x: [product],
-                    y: [year],
-                    z: hierarchicalStreetData[region][year].streets
-                };
-                const productIndex = dimensions.x.indexOf(product);
-                const streetData = hierarchicalStreetData[region][year].data;
-
-                dataForCube = streetData.map(streetArray => [[streetArray[productIndex]]]);
-                dataForTable = streetData.map(streetArray => [streetArray[productIndex]]);
-                
-                drilledTotalSales = dataForTable.reduce((total, row) => total + row[0], 0);
-
-            } else {
-                alert("Please click on a valid dimension for your selected drill-down option.");
+        function renderDrill(animate) {
+            const view = document.getElementById('drilled-view-container');
+            const crumb = document.getElementById('drill-breadcrumb');
+            document.getElementById('drill-up-btn').disabled = !drillPath;
+            if (!drillPath) {
+                view.hidden = true;
+                crumb.innerHTML = '<span class="crumb now">👆 Click any cell of the cube to drill down</span>';
                 return;
             }
-            
-            const drilledView = document.getElementById('drilled-view-container');
-            if (drilledView) {
-                drilledView.style.display = 'flex';
-            }
+            const dp = drillPath, isTime = dp.dim === 'time';
+            const names = isTime ? ['Year', 'Quarter', 'Month'] : ['Region', 'Street', 'Address'];
+            const parentLabel = isTime ? dp.year : dp.region;
+            const midLabels = isTime ? QUARTERS : streetsOf(dp.region);
+            const level = dp.child === null ? 1 : 2;
+            const ctx = isTime ? `${dp.product} · ${dp.region}` : `${dp.product} · ${dp.year}`;
 
-            const drilledViewHeader = document.querySelector('#drilled-table-container h3');
-            if (drilledViewHeader) {
-                drilledViewHeader.innerHTML = `Drilled View: <strong>${product}</strong> in <strong>${region}</strong> for <strong>${year}</strong> <br> (Total Sales: ${drilledTotalSales})`;
-            }
+            crumb.innerHTML =
+                `<button class="crumb" type="button" data-go="cube">Cube</button><span class="sep">›</span>` +
+                `<button class="crumb" type="button" data-go="1">${names[0]} ${parentLabel}</button>` +
+                (level === 2 ? `<span class="sep">›</span><span class="crumb">${names[1]} ${midLabels[dp.child]}</span>` : '') +
+                `<span class="sep">›</span><span class="crumb now">${plural(names[level])}</span><span class="crumb ctx">${ctx}</span>`;
+            crumb.querySelectorAll('button[data-go]').forEach(b => b.addEventListener('click', () => {
+                if (b.dataset.go === 'cube') drillPath = null; else if (drillPath) drillPath.child = null;
+                renderDrill(true);
+            }));
 
-            createDrilledCube(drilledDimensions, dataForCube, drilledOnDimension);
-            updateDrilledTable(drilledDimensions, dataForTable);
-        }
-
-        function createDrilledCube(drilledDimensions, data, drilledOnDimension) {
-            drilledCubeContainer.innerHTML = '';
-            const cubeSize = 100;
-
-            const xLabels = drilledDimensions.x;
-            const yLabels = drilledDimensions.y;
-            const zLabels = drilledDimensions.z;
-
-            for (let z = 0; z < zLabels.length; z++) {
-                for (let y = 0; y < yLabels.length; y++) {
-                    for (let x = 0; x < xLabels.length; x++) {
-                        const cube = document.createElement('div');
-                        cube.classList.add('small-cube');
-                        
-                        let translateX, translateY, translateZ;
-                        
-                        if (drilledOnDimension === 'time') {
-                            translateX = (x - (xLabels.length - 1) / 2) * cubeSize;
-                            translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
-                            translateZ = (z - (zLabels.length - 1) / 2) * cubeSize;
-                        } else if (drilledOnDimension === 'region') {
-                            translateX = (z - (zLabels.length - 1) / 2) * cubeSize;
-                            translateY = (y - (yLabels.length - 1) / 2) * cubeSize;
-                            translateZ = (x - (xLabels.length - 1) / 2) * cubeSize;
-                        }
-
-                        cube.style.transform = `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`;
-
-                        const faces = ['front', 'back', 'right', 'left', 'top', 'bottom'];
-                        faces.forEach(faceName => {
-                            const face = document.createElement('div');
-                            face.classList.add('face', faceName);
-
-                            let content;
-                            let tooltipContent;
-                            
-                            if (drilledOnDimension === 'time') {
-                                content = data[y][0][x];
-                                tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[y]}\nRegion: ${zLabels[0]}\nSales: ${content}`;
-                                face.classList.add(getDimensionColorClass(yLabels[y]));
-                                face.classList.add(getDimensionColorClass(zLabels[0]));
-                            } else if (drilledOnDimension === 'region') {
-                                content = data[z][0][x];
-                                tooltipContent = `Product: ${xLabels[x]}\nTime: ${yLabels[0]}\nRegion: ${zLabels[z]}\nSales: ${content}`;
-                                face.classList.add(getDimensionColorClass(yLabels[0]));
-                                face.classList.add(getDimensionColorClass(zLabels[z]));
-                            }
-                            
-                            face.textContent = content;
-                            face.dataset.tooltip = tooltipContent;
-
-                            face.addEventListener('mouseenter', showTooltip);
-                            face.addEventListener('mouseleave', hideTooltip);
-
-                            face.classList.add(getDimensionColorClass(xLabels[x]));
-                            cube.appendChild(face);
-                        });
-                        drilledCubeContainer.appendChild(cube);
-                    }
+            const members = drillMembers(dp);
+            const total = sum(members.map(m => m.value));
+            const colorClass = isTime ? dimensionColors.y[dimensions.y.indexOf(dp.year)] : dimensionColors.z[dimensions.z.indexOf(dp.region)];
+            const world = document.getElementById('drilled-cube');
+            world.innerHTML = '';
+            const s = 84, gap = 16, n = members.length;
+            members.forEach((m, i) => {
+                const x = (i - (n - 1) / 2) * (s + gap);
+                const box = makeBox({
+                    w: s, h: s, d: s, x, y: 0, label: m.label, value: m.value, colorClass,
+                    tooltip: `${names[level]}: ${m.full || m.label}\nProduct: ${dp.product}\n${isTime ? 'Region: ' + dp.region : 'Year: ' + dp.year}\nSales: ${m.value}`
+                });
+                if (level === 1) {
+                    box.classList.add('drillable');
+                    box.addEventListener('click', () => drillInto(i));
                 }
-            }
-        }
-
-        function updateDrilledTable(drilledDimensions, data) {
-            const tableHeadRow = document.getElementById('drilled-table-head-row');
-            const tableBody = document.getElementById('drilled-table-body');
-
-            if (!tableHeadRow || !tableBody) return;
-
-            const colLabels = drilledDimensions.x;
-            const rowLabels = drilledDimensions.y.length > 1 ? drilledDimensions.y : drilledDimensions.z;
-            const dataSlice = data;
-
-            tableHeadRow.innerHTML = `<th class="table-corner"></th>`;
-            colLabels.forEach((label) => {
-                const th = document.createElement('th');
-                th.textContent = label;
-                th.classList.add(getDimensionColorClass(label));
-                tableHeadRow.appendChild(th);
+                world.appendChild(box);
+                if (animate && !reduceMotion()) {
+                    // Members fan out of the clicked cell, like slicing it open.
+                    box.animate(
+                        [{ transform: 'translate3d(0px, 0px, 0px) scale(.3)', opacity: 0 }, { transform: box.style.transform, opacity: 1 }],
+                        { duration: 650, delay: i * 70, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }
+                    );
+                }
             });
 
-            const rowTotalHeader = document.createElement('th');
-            rowTotalHeader.textContent = 'Total';
-            rowTotalHeader.classList.add('total-cell');
-            tableHeadRow.appendChild(rowTotalHeader);
-
-            let grandTotal = 0;
-            let colTotals = Array(colLabels.length).fill(0);
-            tableBody.innerHTML = '';
-
-            for (let r = 0; r < rowLabels.length; r++) {
-                const row = document.createElement('tr');
-                const rowHeader = document.createElement('th');
-                rowHeader.textContent = rowLabels[r];
-                rowHeader.classList.add(getDimensionColorClass(rowHeader.textContent));
-                row.appendChild(rowHeader);
-
-                let rowTotal = 0;
-                for (let c = 0; c < colLabels.length; c++) {
-                    const cell = document.createElement('td');
-                    const dataValue = dataSlice[r][c];
-                    cell.textContent = dataValue;
-                    cell.classList.add('fact-color');
-                    row.appendChild(cell);
-                    rowTotal += dataValue;
-                    colTotals[c] += dataValue;
-                }
-
-                const totalCell = document.createElement('td');
-                totalCell.textContent = rowTotal;
-                totalCell.classList.add('total-cell');
-                row.appendChild(totalCell);
-                grandTotal += rowTotal;
-                tableBody.appendChild(row);
-            }
-
-            const totalRow = document.createElement('tr');
-            const totalRowHeader = document.createElement('th');
-            totalRowHeader.textContent = 'Total';
-            totalRow.appendChild(totalRowHeader);
-
-            for (let i = 0; i < colTotals.length; i++) {
-                const totalCell = document.createElement('td');
-                totalCell.textContent = colTotals[i];
-                totalCell.classList.add('total-cell');
-                totalRow.appendChild(totalCell);
-            }
-
-            const grandTotalCell = document.createElement('td');
-            grandTotalCell.textContent = grandTotal;
-            grandTotalCell.classList.add('total-cell');
-            totalRow.appendChild(grandTotalCell);
-            tableBody.appendChild(totalRow);
+            const scope = level === 1 ? `${names[0]} ${parentLabel}` : `${names[1]} ${midLabels[dp.child]}`;
+            document.getElementById('drilled-title').innerHTML = `${plural(names[level])} of <strong>${scope}</strong> <span class="muted">(${ctx})</span>`;
+            document.getElementById('drilled-table-head-row').innerHTML = `<th>${names[level]}</th><th>Sales</th><th>Share</th>`;
+            document.getElementById('drilled-table-body').innerHTML =
+                members.map(m => `<tr><th class="${colorClass}">${m.full || m.label}</th><td>${m.value}</td><td>${(m.value / total * 100).toFixed(1)}%</td></tr>`).join('') +
+                `<tr><th>Total</th><td class="total-cell">${total}</td><td class="total-cell">100%</td></tr>`;
+            document.getElementById('drill-hint').innerHTML = level === 1
+                ? `The total <strong>${total}</strong> equals the cube cell you clicked. Click a ${names[1].toLowerCase()} block to drill into its ${plural(names[2]).toLowerCase()}.`
+                : `The total <strong>${total}</strong> equals ${names[1]} ${midLabels[dp.child]}. This is the lowest level; use <strong>⬆ Drill up</strong> to go back.`;
+            view.hidden = false;
         }
 
-        // rolling.js
-        let selectedRollupOption = 'time';
+        // ===== Rolling up =====================================================
+        // Leaves (months / addresses) sit in rows (years / regions). A parent
+        // block spans exactly the width of its children, so rolling up is the
+        // children physically sliding together into one block.
+        const ROLL = { dim: 'time', level: 0 };
+        const ROLL_S = 40, ROLL_G = 4, ROLL_ROW = 66;
+        let rollBusy = false;
+        let rollBound = false;
 
-        function setupRollingControls() {
-            const rollupOptions = document.querySelectorAll('input[name="rollup-option"]');
-            const timeCheckboxes = document.querySelectorAll('input[name="rollup-time"]');
-            const regionCheckboxes = document.querySelectorAll('input[name="rollup-region"]');
-            
-            rollupOptions.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    selectedRollupOption = radio.value;
-                    if (selectedRollupOption === 'time') {
-                        document.getElementById('time-checkboxes').style.display = 'flex';
-                        document.getElementById('region-checkboxes').style.display = 'none';
-                    } else {
-                        document.getElementById('time-checkboxes').style.display = 'none';
-                        document.getElementById('region-checkboxes').style.display = 'flex';
-                    }
-                    handleRollupSelection();
+        function rollSel(id) { const v = document.getElementById(id).value; return v === 'all' ? [0, 1, 2] : [Number(v)]; }
+
+        function rollGroups(leaves, size, labels) {
+            const out = [];
+            for (let i = 0; i < leaves.length; i += size) {
+                const kids = leaves.slice(i, i + size);
+                out.push({ label: labels ? labels[i / size] : kids[0].label, full: labels ? null : kids[0].full, value: sum(kids.map(k => k.value)), start: i, count: size });
+            }
+            return out;
+        }
+
+        function rollModel() {
+            const prods = rollSel('roll-product');
+            if (ROLL.dim === 'time') {
+                const regs = rollSel('roll-region');
+                return {
+                    names: ['Month', 'Quarter', 'Year'], rowName: 'Year',
+                    rows: dimensions.y.map((year, yi) => {
+                        const leaves = MONTHS.map((label, m) => ({ label, value: sum(prods.flatMap(p => regs.map(r => monthValue(year, m, r, p)))) }));
+                        return { label: year, colorClass: dimensionColors.y[yi], leaves,
+                            groups: [rollGroups(leaves, 1), rollGroups(leaves, 3, QUARTERS), rollGroups(leaves, 12, [year])] };
+                    })
+                };
+            }
+            const yrs = rollSel('roll-year');
+            return {
+                names: ['Address', 'Street', 'Region'], rowName: 'Region',
+                rows: dimensions.z.map((region, ri) => {
+                    const leaves = [];
+                    streetsOf(region).forEach((st, s) => [0, 1, 2].forEach(a => leaves.push({
+                        label: `#${HOUSE_NOS[a]}`, full: addressLabel(region, s, a),
+                        value: sum(prods.flatMap(p => yrs.map(y => addressValue(region, dimensions.y[y], s, a, p))))
+                    })));
+                    return { label: region, colorClass: dimensionColors.z[ri], leaves,
+                        groups: [rollGroups(leaves, 1), rollGroups(leaves, 3, streetsOf(region)), rollGroups(leaves, 9, [region])] };
+                })
+            };
+        }
+
+        function rollSpan(start, count, nLeaves) {
+            const full = nLeaves * ROLL_S + (nLeaves - 1) * ROLL_G;
+            const w = count * ROLL_S + (count - 1) * ROLL_G;
+            return { cx: start * (ROLL_S + ROLL_G) + w / 2 - full / 2, w };
+        }
+
+        const contains = (outer, inner) => outer.dataset.row === inner.dataset.row &&
+            +inner.dataset.start >= +outer.dataset.start && +inner.dataset.start < +outer.dataset.start + +outer.dataset.count;
+
+        function renderRoll(fromLevel) {
+            const model = rollModel();
+            const lvl = ROLL.level;
+            const world = document.getElementById('rolled-up-cube');
+            const old = Array.from(world.children).filter(b => !b.dataset.leaving);
+            const nRows = model.rows.length;
+            const fresh = [];
+
+            model.rows.forEach((row, ri) => {
+                const y = (ri - (nRows - 1) / 2) * ROLL_ROW;
+                row.groups[lvl].forEach(g => {
+                    const { cx, w } = rollSpan(g.start, g.count, row.leaves.length);
+                    const box = makeBox({
+                        w, h: ROLL_S, d: ROLL_S, x: cx, y, label: g.label, value: g.value, colorClass: row.colorClass,
+                        tooltip: `${model.rowName}: ${row.label}\n${model.names[lvl]}: ${g.full || g.label}\nSales: ${g.value}`
+                    });
+                    Object.assign(box.dataset, { row: ri, start: g.start, count: g.count, cx, y, w });
+                    fresh.push(box);
                 });
             });
 
-            timeCheckboxes.forEach(cb => cb.addEventListener('change', handleRollupSelection));
-            regionCheckboxes.forEach(cb => cb.addEventListener('change', handleRollupSelection));
+            const animate = fromLevel !== undefined && fromLevel !== lvl && old.length && !reduceMotion();
+            if (animate && lvl > fromLevel) {
+                // Roll up: each child slides and stretches into its parent's footprint.
+                old.forEach(b => {
+                    const parent = fresh.find(n => contains(n, b));
+                    b.dataset.leaving = '1';
+                    b.animate(
+                        [{ transform: b.style.transform, opacity: 1 },
+                         { transform: `translate3d(${parent.dataset.cx}px, ${b.dataset.y}px, 0px) scaleX(${parent.dataset.w / b.dataset.w})`, opacity: 0.15 }],
+                        { duration: 620, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }
+                    ).finished.then(() => b.remove(), () => b.remove());
+                });
+                fresh.forEach(n => {
+                    world.appendChild(n);
+                    n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, delay: 470, easing: 'ease-out', fill: 'backwards' });
+                });
+            } else if (animate) {
+                // Drill back down: children split out of the parent block.
+                old.forEach(b => {
+                    b.dataset.leaving = '1';
+                    b.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' }).finished.then(() => b.remove(), () => b.remove());
+                });
+                fresh.forEach(n => {
+                    const parent = old.find(o => contains(o, n));
+                    world.appendChild(n);
+                    if (parent) {
+                        n.animate(
+                            [{ transform: `translate3d(${parent.dataset.cx}px, ${n.dataset.y}px, 0px) scaleX(${parent.dataset.w / n.dataset.w})`, opacity: 0.2 },
+                             { transform: n.style.transform, opacity: 1 }],
+                            { duration: 650, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }
+                        );
+                    }
+                });
+            } else {
+                world.innerHTML = '';
+                fresh.forEach(n => world.appendChild(n));
+            }
+
+            renderRollTable(model);
+            renderRollStepper(model);
+            document.getElementById('roll-up-btn').disabled = lvl === 2;
+            document.getElementById('roll-down-btn').disabled = lvl === 0;
+        }
+
+        function renderRollTable(model) {
+            const lvl = ROLL.level;
+            const isTime = ROLL.dim === 'time';
+            const cols = model.rows[0].groups[lvl];
+            const head = cols.length === 1
+                ? `<th>${model.names[lvl]}</th>`
+                : cols.map((g, i) => `<th>${isTime ? g.label : `${model.names[lvl]} ${i + 1}`}</th>`).join('');
+            document.getElementById('detailed-table-head').innerHTML = `<tr><th>${model.rowName}</th>${head}<th class="total-cell">Total</th></tr>`;
+            let grand = 0;
+            document.getElementById('detailed-table-body').innerHTML = model.rows.map(row => {
+                const cells = row.groups[lvl].map(g => `<td>${isTime ? '' : `<span class="cell-label">${g.full || g.label}</span>`}${g.value}</td>`).join('');
+                const t = sum(row.leaves.map(l => l.value));
+                grand += t;
+                return `<tr><th class="${row.colorClass}">${row.label}</th>${cells}<td class="total-cell">${t}</td></tr>`;
+            }).join('') + `<tr><th>Total</th><td colspan="${cols.length}" class="muted">Same grand total at every level</td><td class="total-cell">${grand}</td></tr>`;
+            const filters = isTime
+                ? [document.getElementById('roll-product'), document.getElementById('roll-region')]
+                : [document.getElementById('roll-product'), document.getElementById('roll-year')];
+            const ctx = filters.map(s => s.options[s.selectedIndex].text).join(' · ');
+            document.getElementById('roll-title').innerHTML = `Sales by ${model.rowName} × <strong>${model.names[lvl]}</strong> <span class="muted">(${ctx})</span>`;
+        }
+
+        function renderRollStepper(model) {
+            const el = document.getElementById('roll-levels');
+            el.innerHTML = model.names.map((n, i) =>
+                `${i ? '<span class="step-arrow" aria-hidden="true">→</span>' : ''}<button type="button" class="step${i === ROLL.level ? ' active' : ''}" data-level="${i}" aria-pressed="${i === ROLL.level}">${n}</button>`
+            ).join('');
+            el.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setRollLevel(+b.dataset.level)));
+        }
+
+        function setRollLevel(l) {
+            if (rollBusy || l < 0 || l > 2 || l === ROLL.level) return;
+            const from = ROLL.level;
+            ROLL.level = l;
+            rollBusy = true;
+            renderRoll(from);
+            setTimeout(() => { rollBusy = false; }, 720);
+        }
+
+        function syncRollFilters() {
+            document.getElementById('roll-region-filter').hidden = ROLL.dim !== 'time';
+            document.getElementById('roll-year-filter').hidden = ROLL.dim === 'time';
+        }
+
+        function setupRollingControls() {
+            if (rollBound) return;
+            rollBound = true;
+            document.querySelectorAll('input[name="rollup-option"]').forEach(r => r.addEventListener('change', () => {
+                ROLL.dim = r.value;
+                ROLL.level = 0;
+                syncRollFilters();
+                renderRoll();
+            }));
+            ['roll-product', 'roll-region', 'roll-year'].forEach(id => document.getElementById(id).addEventListener('change', () => renderRoll()));
+            document.getElementById('roll-up-btn').addEventListener('click', () => setRollLevel(ROLL.level + 1));
+            document.getElementById('roll-down-btn').addEventListener('click', () => setRollLevel(ROLL.level - 1));
         }
 
         function initializeRolling() {
-            const rolledUpCubeContainer = document.getElementById('rolled-up-cube');
-            if (rolledUpCubeContainer) {
-                const aggregatedData = getAggregatedData();
-                createCubeGrid(rolledUpCubeContainer, dimensions.x, dimensions.y, dimensions.z, aggregatedData, 100);
-            }
-            
+            makeRotatable(document.getElementById('rolled-up-cube'), { x: -22, y: -18 });
             setupRollingControls();
-            handleRollupSelection();
+            syncRollFilters();
+            renderRoll();
         }
 
         function resetRolling() {
             document.querySelector('input[name="rollup-option"][value="time"]').checked = true;
-            document.getElementById('time-checkboxes').style.display = 'flex';
-            document.getElementById('region-checkboxes').style.display = 'none';
-
-            const allCheckboxes = document.querySelectorAll('#rolling input[type="checkbox"]');
-            allCheckboxes.forEach(cb => {
-                cb.checked = true;
-            });
-            
-            handleRollupSelection();
-        }
-
-        function handleRollupSelection() {
-            const detailedTableBody = document.getElementById('detailed-table-body');
-            const detailedTableHead = document.getElementById('detailed-table-head');
-            if (!detailedTableBody || !detailedTableHead) return;
-
-            detailedTableBody.innerHTML = '';
-            detailedTableHead.innerHTML = '';
-            
-            let selectedYears = Array.from(document.querySelectorAll('input[name="rollup-time"]:checked')).map(cb => dimensions.y[parseInt(cb.value)]);
-            let selectedRegions = Array.from(document.querySelectorAll('input[name="rollup-region"]:checked')).map(cb => dimensions.z[parseInt(cb.value)]);
-
-            if (selectedYears.length === 0 || selectedRegions.length === 0) {
-                const rolledUpCubeContainer = document.getElementById('rolled-up-cube');
-                rolledUpCubeContainer.innerHTML = '';
-                return;
-            }
-
-            const aggregatedData = getAggregatedData(selectedYears, selectedRegions);
-            const rolledUpCubeContainer = document.getElementById('rolled-up-cube');
-            if (rolledUpCubeContainer) {
-                createCubeGrid(rolledUpCubeContainer, dimensions.x, selectedYears, selectedRegions, aggregatedData, 100);
-            }
-
-            const headerRow = document.createElement('tr');
-
-            if (selectedRollupOption === 'time') {
-                headerRow.innerHTML = `
-                    <th>Year</th>
-                    <th>Quarter</th>
-                    <th>Region</th>
-                    <th>Product</th>
-                    <th>Sales</th>
-                `;
-            } else { // region
-                headerRow.innerHTML = `
-                    <th>Year</th>
-                    <th>Region</th>
-                    <th>Street</th>
-                    <th>Product</th>
-                    <th>Sales</th>
-                `;
-            }
-            detailedTableHead.appendChild(headerRow);
-            
-            if (selectedRollupOption === 'time') {
-                selectedYears.forEach(year => {
-                    selectedRegions.forEach(region => {
-                        const yearData = hierarchicalData[year];
-                        const quarters = Object.keys(yearData);
-                        const regionIndex = dimensions.z.indexOf(region);
-                        
-                        quarters.forEach(quarter => {
-                            const quarterData = yearData[quarter][regionIndex];
-                            dimensions.x.forEach((product, productIndex) => {
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                                    <td>${year}</td>
-                                    <td>${quarter}</td>
-                                    <td>${region}</td>
-                                    <td>${product}</td>
-                                    <td>${quarterData[productIndex]}</td>
-                                `;
-                                detailedTableBody.appendChild(row);
-                            });
-                        });
-                    });
-                });
-            } else { // region
-                selectedRegions.forEach(region => {
-                    selectedYears.forEach(year => {
-                        const yearData = hierarchicalStreetData[region];
-                        if (yearData && yearData[year]) {
-                            const streets = yearData[year].streets;
-                            const streetSalesData = yearData[year].data;
-                            
-                            streets.forEach((street, streetIndex) => {
-                                const salesArray = streetSalesData[streetIndex];
-                                dimensions.x.forEach((product, productIndex) => {
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `
-                                        <td>${year}</td>
-                                        <td>${region}</td>
-                                        <td>${street}</td>
-                                        <td>${product}</td>
-                                        <td>${salesArray[productIndex]}</td>
-                                    `;
-                                    detailedTableBody.appendChild(row);
-                                });
-                            });
-                        }
-                    });
-                });
-            }
-        }
-
-        function getAggregatedData(years = dimensions.y, regions = dimensions.z) {
-            const aggregatedCube = [];
-            const productCount = dimensions.x.length;
-            
-            regions.forEach((region, zIndex) => {
-                const regionSlice = [];
-                years.forEach((year, yIndex) => {
-                    const yearSlice = [];
-                    for (let x = 0; x < productCount; x++) {
-                        yearSlice.push(sampleData[zIndex][yIndex][x]);
-                    }
-                    regionSlice.push(yearSlice);
-                });
-                aggregatedCube.push(regionSlice);
-            });
-            
-            return aggregatedCube;
+            ROLL.dim = 'time';
+            ROLL.level = 0;
+            ['roll-product', 'roll-region', 'roll-year'].forEach(id => { document.getElementById(id).value = 'all'; });
+            syncRollFilters();
+            const world = document.getElementById('rolled-up-cube');
+            world._rot = { x: -22, y: -18 };
+            world.style.transform = 'rotateX(-22deg) rotateY(-18deg)';
+            renderRoll();
         }
     </script>
 </body>
