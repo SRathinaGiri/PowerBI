@@ -4,28 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Context Transition Lab | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <style>
-    :root {
-      --bg: #08111f;
-      --panel: rgba(10, 20, 38, 0.82);
-      --border: rgba(255, 255, 255, 0.1);
-      --ink: #eef4ff;
-      --muted: #9eb1c9;
-      --accent: #58b7ff;
-      --accent-2: #ffb84d;
-      --accent-3: #58e5ae;
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-    }
 
     * { box-sizing: border-box; }
     html, body { margin: 0; min-height: 100%; }
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(88, 183, 255, 0.18), transparent 34%),
-        radial-gradient(circle at 85% 15%, rgba(88, 229, 174, 0.14), transparent 24%),
-        linear-gradient(180deg, #07101d, #091526 35%, #040912);
     }
 
     code { font-family: Consolas, "Courier New", monospace; }
@@ -36,19 +23,6 @@
       grid-template-columns: minmax(0, 1.5fr) minmax(320px, 460px);
       gap: 18px;
       align-items: stretch;
-    }
-    .back-row { margin-bottom: 10px; }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      color: #d9ecff;
-      text-decoration: none;
-      font-weight: 700;
-      background: rgba(88, 183, 255, 0.14);
-      border: 1px solid rgba(88, 183, 255, 0.18);
     }
     .eyebrow {
       margin: 0 0 8px;
@@ -69,7 +43,7 @@
       font-size: 1.03rem;
     }
     .formula-card, .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
       border: 1px solid var(--border);
       border-radius: 24px;
       box-shadow: var(--shadow);
@@ -81,8 +55,8 @@
       justify-content: center;
       gap: 10px;
       background:
-        linear-gradient(135deg, rgba(88,183,255,.18), rgba(88,183,255,.05)),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+        linear-gradient(135deg, rgb(var(--accent-rgb) / .18), rgb(var(--accent-rgb) / .05)),
+        linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
     }
     .formula-label {
       font-size: 0.8rem;
@@ -94,7 +68,7 @@
     .formula-card code {
       font-size: 1.05rem;
       line-height: 1.5;
-      color: #ffffff;
+      color: var(--ink-strong);
     }
     .formula-card p { margin: 0; color: var(--muted); }
 
@@ -110,7 +84,7 @@
       flex-direction: column;
       gap: 16px;
       position: sticky;
-      top: 12px;
+      top: calc(var(--srg-bar-h) + 12px);
       height: fit-content;
     }
     .control-panel h2, .panel h2, .panel h3 { margin: 0; }
@@ -137,13 +111,13 @@
       gap: 10px;
     }
     .transport button {
-      background: rgba(255,255,255,.06);
+      background: rgb(var(--fg-rgb) / .06);
       color: var(--ink);
       border: 1px solid var(--border);
     }
     .note-card, .filter-card, .story-card {
       background: var(--panel);
-      border: 1px solid rgba(255,255,255,.08);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
       border-radius: 18px;
       padding: 16px;
     }
@@ -161,8 +135,8 @@
     .kpi {
       padding: 14px 12px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(88,183,255,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(88,183,255,.14);
+      background: linear-gradient(180deg, rgb(var(--accent-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-rgb) / .14);
     }
     .kpi-label {
       display: block;
@@ -191,9 +165,9 @@
       font-weight: 700;
       font-size: 0.85rem;
     }
-    .badge.neutral { background: rgba(88,183,255,.14); color: #cfeaff; }
-    .badge.warning { background: rgba(255,184,77,.16); color: #ffe3b7; }
-    .badge.success { background: rgba(88,229,174,.16); color: #d6ffee; }
+    .badge.neutral { background: rgb(var(--accent-rgb) / .14); color: var(--accent-ink); }
+    .badge.warning { background: rgb(var(--accent-2-rgb) / .16); color: var(--accent-2-ink); }
+    .badge.success { background: rgb(var(--accent-3-rgb) / .16); color: var(--accent-3-ink); }
     .story-card p {
       margin: 8px 0 0;
       color: var(--muted);
@@ -217,11 +191,11 @@
       border-radius: 999px;
       font-size: 0.75rem;
       letter-spacing: 0.04em;
-      background: rgba(88,183,255,.14);
-      color: #d7ecff;
+      background: rgb(var(--accent-rgb) / .14);
+      color: var(--accent-ink);
     }
-    .tiny-tag.alt { background: rgba(255,184,77,.14); color: #ffe6bc; }
-    .tiny-tag.compare-tag { background: rgba(88,229,174,.14); color: #d7ffee; }
+    .tiny-tag.alt { background: rgb(var(--accent-2-rgb) / .14); color: var(--accent-2-ink); }
+    .tiny-tag.compare-tag { background: rgb(var(--accent-3-rgb) / .14); color: var(--accent-3-ink); }
     .table-header, .rep-row {
       display: grid;
       grid-template-columns: 1.2fr 0.9fr 0.9fr 1.1fr;
@@ -239,16 +213,16 @@
     .rep-row {
       padding: 14px;
       border-radius: 18px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.06);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .06);
       transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
     }
     .rep-row.active {
       transform: translateX(6px);
-      border-color: rgba(88,183,255,.5);
-      box-shadow: 0 14px 30px rgba(88,183,255,.18);
+      border-color: rgb(var(--accent-rgb) / .5);
+      box-shadow: 0 14px 30px rgb(var(--accent-rgb) / .18);
     }
-    .rep-row.done { border-color: rgba(88,229,174,.25); }
+    .rep-row.done { border-color: rgb(var(--accent-3-rgb) / .25); }
     .rep-name {
       display: flex;
       flex-direction: column;
@@ -273,10 +247,10 @@
       overflow: hidden;
       padding: 14px;
       border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.08);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
       background:
-        radial-gradient(circle at top right, rgba(88,183,255,.12), transparent 40%),
-        rgba(255,255,255,.03);
+        radial-gradient(circle at top right, rgb(var(--accent-rgb) / .12), transparent 40%),
+        rgb(var(--fg-rgb) / .03);
       min-height: 136px;
       transition: transform .24s ease, opacity .24s ease, border-color .24s ease, box-shadow .24s ease;
     }
@@ -285,18 +259,18 @@
       position: absolute;
       inset: auto -20% -45% -20%;
       height: 80px;
-      background: radial-gradient(circle, rgba(88,183,255,.22), transparent 70%);
+      background: radial-gradient(circle, rgb(var(--accent-rgb) / .22), transparent 70%);
       opacity: 0;
       transition: opacity .24s ease;
     }
     .order-card.visible {
       transform: translateY(-4px);
-      border-color: rgba(88,183,255,.48);
-      box-shadow: 0 16px 32px rgba(88,183,255,.18);
+      border-color: rgb(var(--accent-rgb) / .48);
+      box-shadow: 0 16px 32px rgb(var(--accent-rgb) / .18);
     }
     .order-card.visible.filtered {
-      border-color: rgba(88,229,174,.56);
-      box-shadow: 0 16px 32px rgba(88,229,174,.22);
+      border-color: rgb(var(--accent-3-rgb) / .56);
+      box-shadow: 0 16px 32px rgb(var(--accent-3-rgb) / .22);
     }
     .order-card.visible::after { opacity: 1; }
     .order-card.hidden {
@@ -314,8 +288,8 @@
       padding: 5px 9px;
       border-radius: 999px;
       font-size: 0.76rem;
-      background: rgba(255,255,255,.08);
-      color: #dce9ff;
+      background: rgb(var(--fg-rgb) / .08);
+      color: var(--accent-ink);
     }
     .order-meta {
       color: var(--muted);
@@ -335,12 +309,12 @@
     .compare-box {
       padding: 18px;
       border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255,184,77,.11), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,184,77,.2);
+      background: linear-gradient(180deg, rgb(var(--accent-2-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-2-rgb) / .2);
     }
     .compare-box.success {
-      background: linear-gradient(180deg, rgba(88,229,174,.12), rgba(255,255,255,.03));
-      border-color: rgba(88,229,174,.2);
+      background: linear-gradient(180deg, rgb(var(--accent-3-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-3-rgb) / .2);
     }
     .compare-label {
       color: var(--muted);
@@ -363,8 +337,8 @@
       margin-top: 16px;
       padding: 16px 18px;
       border-radius: 18px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
     }
     .guide-grid {
       display: grid;
@@ -374,8 +348,8 @@
     .guide-card {
       padding: 18px;
       border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
     }
     .guide-card h3 {
       margin: 0 0 10px;
@@ -394,9 +368,9 @@
       margin-top: 12px;
       padding: 14px 16px;
       border-radius: 16px;
-      background: rgba(4, 11, 22, 0.78);
-      border: 1px solid rgba(88,183,255,.16);
-      color: #f4f8ff;
+      background: var(--code-bg);
+      border: 1px solid rgb(var(--accent-rgb) / .16);
+      color: var(--code-ink);
       overflow-x: auto;
       white-space: pre-wrap;
       line-height: 1.6;
@@ -405,8 +379,8 @@
       margin-top: 16px;
       padding: 16px 18px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,184,77,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,184,77,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-2-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-2-rgb) / .18);
       color: var(--muted);
       line-height: 1.7;
     }
@@ -424,15 +398,21 @@
       .context-row { grid-template-columns: 1fr; }
       .transport { grid-template-columns: 1fr; }
     }
+  
+    /* Motion polish */
+    .chip:last-child { animation: lab-pop .45s var(--ease-spring) both; }
+    @keyframes lab-pop { from { opacity: 0; transform: translateY(6px) scale(.9); } }
+    .panel, .hero-card { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .result-card, .guide-card, .kpi { transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease; }
+    .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    h1 { font-family: var(--font-display); letter-spacing: -.02em; }
+    .eyebrow { color: var(--accent-2); }
   </style>
 </head>
 <body>
-  <header class="hero">
+  <header class="hero srg-enter">
     <div class="hero-copy">
-      <div class="back-row">
-        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-      </div>
-      <p class="eyebrow">Power BI Learning Lab</p>
+<p class="eyebrow">Power BI Learning Lab</p>
       <h1>Context Transition and Row Evaluation Context</h1>
       <p class="subtitle">
         A real-life commission example. Watch each salesperson row create a row context, then see
