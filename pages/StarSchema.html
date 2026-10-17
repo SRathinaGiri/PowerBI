@@ -240,8 +240,8 @@
     @media (max-width: 1024px) { .left-column { position: static; } }
   
     /* ---- Row grid: the fact table never shrinks; filters hide rows ---- */
-    :root { --back-pulse: #64748b; --row-on: #7fb6ef; }
-    :root[data-theme="dark"] { --back-pulse: #e2e8f0; --row-on: #6fa8d6; }
+    :root { --back-pulse: #ca8a04; --row-on: #7fb6ef; }
+    :root[data-theme="dark"] { --back-pulse: #facc15; --row-on: #6fa8d6; }
     .fact-tank, [id^="dim-"] > .table { fill: var(--panel-solid); }
     .cell rect { fill: var(--row-on); stroke: rgb(var(--fg-rgb) / .25); stroke-width: .8; transition: fill .45s ease, opacity .45s ease; }
     .cell.off rect { fill: rgb(var(--fg-rgb) / .05); }
@@ -271,6 +271,13 @@
     .lg-row i { width: 4px; height: 4px; border-radius: 50%; }
     .lg-chip { width: 22px; height: 13px; border-radius: 4px; background: var(--c-customer); }
     .lg-chip.back { background: transparent; border: 1.5px dashed var(--c-customer); }
+    .lg-chip.bar { position: relative; }
+    .lg-chip.bar::after { content: ""; position: absolute; left: 3px; bottom: 2px; width: 10px; height: 3px; border-radius: 2px; background: #fff; }
+  
+    .sales-bar { fill: #fff; opacity: .9; transition: width .45s var(--ease-out); pointer-events: none; }
+    .chip.off .sales-bar, .chip.back-off .sales-bar { opacity: 0; }
+    .preset-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+    .preset-row .btn { cursor: pointer; padding: 8px 12px; border-radius: 10px; font: 600 .88rem var(--font); }
   </style>
 </head>
 <body>
@@ -280,6 +287,7 @@
       <section class="panel">
         <h2>Filters</h2>
         <p class="slider-hint"><strong>Click the coloured chips</strong> in the diagram to select or deselect members, just like a slicer; the sliders follow (or drag a slider to select the first N). Each member owns 10 of the 100 fact rows. <strong>Nothing selected = no filter</strong>, as in Power BI.</p>
+        <div class="preset-row"><button id="twoWayDemo" class="btn" type="button">⇄ Show the two-way effect</button><button id="clearAll" class="btn" type="button">Clear all filters</button></div>
         <div class="grp">
           <div class="row">
             <label>
@@ -444,7 +452,8 @@
         <li><span class="lg-row"></span> Row the measure can see</li>
         <li><span class="lg-row off"><i style="background:var(--c-product)"></i><i style="background:var(--c-time)"></i></span> Hidden row: dots show which filters hide it</li>
         <li><span class="lg-chip"></span> Dimension member kept by its filter</li>
-        <li><span class="lg-chip back"></span> Customer with no visible sales (filtered back from the fact table)</li>
+        <li><span class="lg-chip bar"></span> White bar on a customer = its sales still visible (sent back by the <b style="color:var(--back-pulse)">gold</b> two-way stream)</li>
+        <li><span class="lg-chip back"></span> Customer with no visible sales: filtered out by the two-way relationship</li>
       </ul>
     </section>
   </div>
@@ -494,7 +503,8 @@
       slider(d).value = n === 0 ? 100 : n * 10;
       document.getElementById(`${d}Out`).textContent = n === 0 ? 'none selected = all' : `${n * 10}% kept`;
     }
-    let customerBack = new Set(Array.from({ length: 10 }, (_, i) => i)); // customers with visible rows
+    // Visible fact rows per customer, as last delivered by the return (Fact → Customer) pulse.
+    let customerBack = Array(10).fill(10);
 
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -538,6 +548,7 @@
         Object.entries({ x: x + cw / 2, y: y + 15, 'text-anchor': 'middle' }).forEach(([k, v]) => t.setAttribute(k, v));
         t.textContent = name;
         g.append(rect, t);
+        g.geom = { x, y, cw };
         host.appendChild(g);
         return g;
       });
@@ -593,7 +604,22 @@
         g.classList.toggle('off', !own);
         g.setAttribute('aria-pressed', String(own && selected[d].size !== 0));
         g.setAttribute('aria-label', `${LABEL[d]} ${MEMBERS[d][i]}: ${own ? 'selected' : 'not selected'}`);
-        g.classList.toggle('back-off', d === 'customer' && own && !customerBack.has(i));
+        g.classList.toggle('back-off', d === 'customer' && own && customerBack[i] === 0);
+        if (d === 'customer') {
+          // Bar = this customer's sales still visible to the measure (10 rows max).
+          if (!g.bar) {
+            const { x, y, cw } = g.geom;
+            g.bar = document.createElementNS(NS, 'rect');
+            Object.entries({ x: x + 3, y: y + 17, height: 3, rx: 1.5, class: 'sales-bar' }).forEach(([k, v]) => g.bar.setAttribute(k, v));
+            g.bar.full = cw - 6;
+            g.appendChild(g.bar);
+            g.tip = document.createElementNS(NS, 'title');
+            g.appendChild(g.tip);
+          }
+          const n = own ? customerBack[i] : 0;
+          g.bar.setAttribute('width', g.bar.full * n / 10);
+          g.tip.textContent = own ? `${MEMBERS[d][i]}: ${n} of 10 sales rows visible to the measure` : `${MEMBERS[d][i]}: not selected`;
+        }
       }));
     }
 
@@ -606,14 +632,14 @@
     // Customers that still have at least one visible fact row (bidirectional filter).
     function computeBack() {
       const vis = visibleRows();
-      const seen = new Set();
-      vis.forEach((v, r) => { if (v) seen.add(rowMember[r].customer); });
-      return seen;
+      const counts = Array(10).fill(0);
+      vis.forEach((v, r) => { if (v) counts[rowMember[r].customer] += 1; });
+      return counts;
     }
 
     function sendBack() {
       const next = computeBack();
-      const same = next.size === customerBack.size && [...next].every(c => customerBack.has(c));
+      const same = next.every((c, i) => c === customerBack[i]);
       if (same) return;
       pulse(document.getElementById('flow-fact-customer'), 'var(--back-pulse)', true, () => { customerBack = computeBack(); paintChips(); });
     }
@@ -654,6 +680,13 @@
         g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
       });
     });
+
+    // Presets: a narrow Product + Time selection leaves most customers with no sales.
+    function setSelection(map) {
+      DIMS.forEach(d => { selected[d] = map[d] ? new Set(map[d]) : ALL(); syncSlider(d); dispatch(d); });
+    }
+    document.getElementById('twoWayDemo').addEventListener('click', () => setSelection({ product: [0, 1], time: [1, 2, 3] }));
+    document.getElementById('clearAll').addEventListener('click', () => setSelection({}));
 
     // Start with each dimension keeping a random 50–100% of its members.
     DIMS.forEach(d => {
