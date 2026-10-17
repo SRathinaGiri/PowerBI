@@ -6,6 +6,8 @@
   <title>Context Transition Lab | Power BI</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
 
     * { box-sizing: border-box; }
@@ -407,6 +409,65 @@
     .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     h1 { font-family: var(--font-display); letter-spacing: -.02em; }
     .eyebrow { color: var(--accent-2); }
+  
+    /* ---------- Analogy scene: the classroom ---------- */
+    .class-stage { min-height: 380px; }
+    .room { position: absolute; left: 3%; top: 64px; width: 64%; height: 270px; border-radius: 16px;
+      background: repeating-linear-gradient(90deg, rgb(var(--fg-rgb) / .03) 0 40px, transparent 40px 80px), rgb(var(--accent-2-rgb) / .06);
+      border: 2px solid rgb(var(--fg-rgb) / .15); }
+    .board { position: absolute; left: 20%; right: 20%; top: -26px; height: 34px; border-radius: 8px; background: #1f4d3a; border: 4px solid #8a6a4a;
+      color: #e8f5ee; font: 600 .8rem/26px var(--mono); text-align: center; white-space: nowrap; overflow: hidden; }
+    .teacher { position: absolute; left: calc(3% + 32% - 22px); top: 16px; font-size: 34px; line-height: 1; z-index: 3; }
+    .kid { position: absolute; width: 92px; margin-left: -46px; text-align: center; z-index: 2;
+      transition: left 1s var(--ease-out), top 1s var(--ease-out), opacity .8s ease, transform .5s var(--ease-spring); }
+    .kid .face { width: 46px; height: 46px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 26px;
+      background: var(--panel-solid); border: 3px solid var(--kc); box-shadow: var(--shadow); }
+    .kid .nm { margin-top: 4px; font: 700 .82rem var(--font); color: var(--ink); }
+    .kid .sec { display: inline-block; margin-top: 2px; padding: 1px 7px; border-radius: 999px; font: 700 .68rem var(--font); color: #fff; background: var(--kc); }
+    .kid .desk { width: 70px; height: 10px; margin: 6px auto 0; border-radius: 4px; background: #a87b52; }
+    .kid.out { opacity: 0; transform: translateX(60px) scale(.8); }
+    .kid.up { transform: translateY(-12px); }
+    .kid.up .face { box-shadow: 0 0 0 6px rgb(var(--accent-2-rgb) / .35), var(--shadow); }
+    .kid.faint { opacity: .3; }
+    .spot { position: absolute; width: 96px; height: 120px; margin: -10px 0 0 -48px; border-radius: 50%; z-index: 1; pointer-events: none;
+      background: radial-gradient(closest-side, rgb(var(--accent-2-rgb) / .85), rgb(var(--accent-2-rgb) / .2) 70%, transparent);
+      transition: left .55s var(--ease-out), top .55s var(--ease-out), opacity .4s ease; opacity: 0; }
+    .spot.on { opacity: 1; }
+    .meter { position: absolute; left: 3%; bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap; z-index: 4; max-width: 94%; }
+    .class-stage { min-height: 400px; }
+    .meter span { padding: 4px 10px; border-radius: 999px; font: 600 .78rem var(--font); background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--muted); }
+    .meter b { color: var(--ink); }
+    .meter .m-row b { color: var(--accent-2-ink); }
+    .meter .m-filter b { color: var(--accent-3-ink); }
+    .meter span.hide { display: none; }
+
+    .pile-wrap { position: absolute; right: 3%; top: 64px; width: 27%; min-width: 150px; height: 270px; border-radius: 16px; padding: 10px;
+      background: rgb(var(--fg-rgb) / .04); border: 2px dashed rgb(var(--fg-rgb) / .2); }
+    .pile-title { font: 700 .74rem var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); text-align: center; margin-bottom: 8px; }
+    .pile { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .nb { height: 30px; border-radius: 3px 6px 6px 3px; background: var(--kc); position: relative; box-shadow: inset 4px 0 0 rgb(0 0 0 / .18);
+      transition: opacity .5s ease, transform .5s var(--ease-spring), box-shadow .3s ease; }
+    .nb::after { content: ""; position: absolute; left: 9px; right: 6px; top: 9px; height: 3px; background: rgb(255 255 255 / .6); border-radius: 2px; }
+    .nb.on { transform: translateY(-3px); box-shadow: inset 4px 0 0 rgb(0 0 0 / .18), 0 0 0 3px rgb(var(--accent-2-rgb) / .9); }
+    .nb.off { opacity: .15; transform: scale(.85); }
+    .beam { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; opacity: 0; transition: opacity .4s ease; z-index: 3; }
+    .beam path { fill: none; stroke: var(--accent-3); stroke-width: 3; stroke-dasharray: 8 6; animation: beam-flow .8s linear infinite; }
+    .beam.on { opacity: 1; }
+    @keyframes beam-flow { to { stroke-dashoffset: -16; } }
+    #ct-stage .room { width: 64%; }
+    #analogy code { font-family: var(--mono); }
+  
+    @media (max-width: 560px) {
+      .class-stage { min-height: 680px; }
+      .room { width: 94%; }
+      .teacher { left: calc(50% - 17px); }
+      .kid { width: 80px; margin-left: -40px; }
+      .kid .face { width: 40px; height: 40px; font-size: 22px; }
+      .kid .nm { font-size: .76rem; }
+      .door { left: 50%; right: auto; translate: -50% 0; top: 380px; width: 120px; height: 150px; }
+      .pile-wrap { left: 3%; right: 3%; width: auto; top: 370px; height: auto; }
+      .pile { grid-template-columns: repeat(8, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -425,6 +486,31 @@
       <p id="formulaHint">Without CALCULATE, the current row does not filter the Orders table.</p>
     </div>
   </header>
+
+  <section id="analogy" class="story srg-reveal" data-story data-delay="4800" aria-labelledby="ct-story-title">
+    <header class="story-head">
+      <p class="story-kicker">Real-world analogy</p>
+      <h2 id="ct-story-title">Whose notebooks are these?</h2>
+      <p>Students are a dimension table; the notebook pile is the fact table. Standing at one student's desk (row context) doesn't filter the pile. <code>CALCULATE</code> turns that student into a filter, so only their notebooks count.</p>
+    </header>
+    <div class="story-body">
+      <div class="story-stage class-stage" id="ct-stage" aria-hidden="true">
+        <div class="meter"><span class="m-row">Row context: <b id="ct-cur">–</b></span><span class="m-filter">Filter: <b id="ct-filter">none</b></span><span>Notebooks counted: <b id="ct-count">–</b></span></div>
+        <div class="room"><div class="board" id="ct-board">Students (dimension)</div></div>
+        <div class="teacher">👩🏽‍🏫</div>
+        <div class="pile-wrap"><div class="pile-title">Notebook pile (fact)</div><div class="pile" id="ct-pile"></div></div>
+        <svg class="beam" id="ct-beam"><path d=""/></svg>
+      </div>
+      <div class="story-side">
+        <ol class="story-steps">
+          <li><strong>Roll call stops at Ravi.</strong> That's row context on the Students table.</li>
+          <li><strong>“Count the notebooks.”</strong> Row context alone doesn't filter the pile, so all 24 count, for every student.</li>
+          <li><strong>CALCULATE = “only Ravi's”.</strong> Ravi's row becomes a filter that flows to the pile. 3 notebooks.</li>
+          <li><strong>Move to the next desk.</strong> The filter follows the roll call: Priya 5, Arjun 4, and so on.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
 
   <main class="layout">
     <aside class="control-panel panel">
@@ -538,6 +624,8 @@
           <span class="tiny-tag compare-tag">Practical DAX situations</span>
         </div>
 
+        <details class="story-more">
+          <summary>Explain more</summary>
         <div class="guide-grid">
           <div class="guide-card">
             <h3>1. In a measure</h3>
@@ -615,6 +703,7 @@ SUM(Orders[Amount])</code></div>
           <code>CALCULATE()</code>. In a calculated column that calls a measure, the measure reference already brings an implicit
           <code>CALCULATE()</code>, so the transition happens automatically.
         </div>
+        </details>
       </section>
     </section>
   </main>
@@ -860,6 +949,107 @@ SUM(Orders[Amount])</code></div>
     renderOrders();
     updateFormulaCard();
     resetDemo();
+  
+    // Shared classroom builder: six students at desks (2 rows × 3), a roll-call spotlight.
+    function buildClassroom(stage) {
+      const KIDS = [
+        { name: 'Ravi', sec: 'B', face: '👦🏽', c: '#e5484d', books: 3 },
+        { name: 'Priya', sec: 'A', face: '👧🏽', c: '#3b82f6', books: 5 },
+        { name: 'Arjun', sec: 'B', face: '👦🏾', c: '#d97706', books: 4 },
+        { name: 'Meena', sec: 'C', face: '👧🏾', c: '#8b5cf6', books: 6 },
+        { name: 'Kabir', sec: 'B', face: '👦🏻', c: '#059669', books: 2 },
+        { name: 'Sana', sec: 'A', face: '👧🏻', c: '#db2777', books: 4 }
+      ];
+      // Desk positions as % of the stage, inside the .room box (left 3%, width 64%).
+      // On phones the room spans the full width (door / pile move below it).
+      const narrow = () => window.matchMedia('(max-width: 560px)').matches;
+      const pos = (i) => ({ x: 3 + (narrow() ? 94 : 64) * (0.2 + (i % 3) * 0.3), y: 96 + Math.floor(i / 3) * 124 });
+      const spot = document.createElement('div');
+      spot.className = 'spot';
+      stage.appendChild(spot);
+      const els = KIDS.map((k, i) => {
+        const d = document.createElement('div');
+        d.className = 'kid';
+        d.style.setProperty('--kc', k.c);
+        d.innerHTML = `<div class="face">${k.face}</div><div class="nm">${k.name}</div><span class="sec">Sec ${k.sec}</span><div class="desk"></div>`;
+        const p = pos(i);
+        d.style.left = p.x + '%';
+        d.style.top = p.y + 'px';
+        stage.appendChild(d);
+        return d;
+      });
+      window.addEventListener('resize', () => els.forEach((d, i) => { const p = pos(i); d.style.left = p.x + '%'; }));
+      return {
+        KIDS, els,
+        spotOn(i) { const p = pos(i); spot.style.left = p.x + '%'; spot.style.top = p.y + 'px'; spot.classList.add('on'); },
+        spotOff() { spot.classList.remove('on'); },
+        reset() { els.forEach(e => e.classList.remove('out', 'up', 'faint')); spot.classList.remove('on'); }
+      };
+    }
+
+    // ---- Analogy scene: context transition (row → filter) with a notebook pile ----
+    (function () {
+      const story = document.getElementById('analogy');
+      const stage = document.getElementById('ct-stage');
+      if (!story || !stage) return;
+      const room = buildClassroom(stage);
+      const pile = document.getElementById('ct-pile');
+      const owners = [];
+      room.KIDS.forEach((k, i) => { for (let n = 0; n < k.books; n++) owners.push(i); });
+      // Step through the list 7 at a time (7 and 24 are coprime): a fixed shuffle
+      // that keeps every student's notebook count, like an unsorted fact table.
+      const order = owners.map((o, n) => owners[(n * 7) % owners.length]);
+      order.forEach(i => { const d = document.createElement('div'); d.className = 'nb'; d.dataset.owner = i; d.style.setProperty('--kc', room.KIDS[i].c); pile.appendChild(d); });
+      const books = Array.from(pile.children);
+      const cur = document.getElementById('ct-cur');
+      const filt = document.getElementById('ct-filter');
+      const count = document.getElementById('ct-count');
+      const board = document.getElementById('ct-board');
+      const beam = document.getElementById('ct-beam');
+      let timers = [];
+      const at = (i) => { room.spotOn(i); cur.textContent = room.KIDS[i].name; };
+      const markAll = () => { books.forEach(b => { b.classList.add('on'); b.classList.remove('off'); }); count.textContent = String(books.length); };
+      // Dashed "filter flow" from the current student's face to the pile.
+      const beamTo = (i) => {
+        const sr = stage.getBoundingClientRect();
+        const f = room.els[i].querySelector('.face').getBoundingClientRect();
+        const pr = pile.getBoundingClientRect();
+        const x1 = f.right - sr.left, y1 = f.top + f.height / 2 - sr.top;
+        const x2 = pr.left - sr.left - 6, y2 = pr.top + pr.height / 2 - sr.top;
+        const mx = (x1 + x2) / 2;
+        beam.querySelector('path').setAttribute('d', `M${x1} ${y1} C ${mx} ${y1 - 40}, ${mx} ${y2 + 40}, ${x2} ${y2}`);
+      };
+      const filterTo = (i) => {
+        beamTo(i);
+        books.forEach(b => { const mine = Number(b.dataset.owner) === i; b.classList.toggle('on', mine); b.classList.toggle('off', !mine); });
+        filt.textContent = `Student = ${room.KIDS[i].name}`;
+        count.textContent = String(room.KIDS[i].books);
+      };
+      function show(step) {
+        timers.forEach(t => { clearTimeout(t); clearInterval(t); }); timers = [];
+        room.reset(); beam.classList.remove('on');
+        books.forEach(b => b.classList.remove('on', 'off'));
+        filt.textContent = 'none'; count.textContent = '–';
+        board.textContent = 'Students (dimension)';
+        at(0);
+        if (step === 1) { board.textContent = 'COUNTROWS(Notebooks) at Ravi’s desk'; timers.push(setTimeout(markAll, 500)); }
+        if (step === 2) {
+          board.textContent = 'CALCULATE(COUNTROWS(Notebooks))';
+          markAll();
+          timers.push(setTimeout(() => { room.els[0].classList.add('up'); filterTo(0); beam.classList.add('on'); }, 600));
+        }
+        if (step === 3) {
+          board.textContent = 'CALCULATE(…) for each student';
+          beam.classList.add('on');
+          let k = 0;
+          const tick = () => { const i = k % room.KIDS.length; room.els.forEach(e => e.classList.remove('up')); room.els[i].classList.add('up'); at(i); filterTo(i); k++; };
+          tick();
+          timers.push(setInterval(tick, 1100));
+        }
+      }
+      story.addEventListener('story:step', (e) => show(e.detail.step));
+      show(Number(story.dataset.step || 0));
+    })();
   </script>
 </body>
 </html>

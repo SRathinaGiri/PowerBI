@@ -6,6 +6,8 @@
     <title>OLTP vs OLAP: An Interactive Infographic</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
     <style>
 /* --- GLOBAL STYLES --- */
     :root { --oltp: #16a34a; --olap: #1d6ad6; --orange: #ea6c0a; --gold: #d99a00; --cell: rgb(var(--fg-rgb) / .06); }
@@ -165,6 +167,36 @@
     @media (max-width: 860px) {
       #page-1 .container, #page-1 .notes-section, #page-3 .container, #page-2 .storage-section { flex-direction: column; }
     }
+  
+    html, body { overflow-x: clip; } /* the spinning 3D cube in section 4 pokes past the viewport */
+    /* ---------- Analogy scene: suitcases vs wardrobes ---------- */
+    #analogy { scroll-margin-top: calc(var(--srg-bar-h) + 70px); }
+    .pack-stage { min-height: 360px; }
+    .pack-stage svg { position: absolute; inset: 0; }
+    .pack-counter { position: absolute; top: 12px; right: 14px; padding: 6px 14px; border-radius: 999px; font-weight: 700;
+      background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--muted); }
+    .pack-counter b { color: var(--ink); font-size: 1.15em; display: inline-block; transition: transform .35s var(--ease-spring); }
+    .pack-counter b.bump { transform: scale(1.45); color: var(--accent); }
+    #pack-svg .mv { transition: transform .9s var(--ease-out), opacity .5s ease; transform-box: view-box; }
+    #pack-svg .case-body { fill: #b5653a; stroke: #7a3f1f; stroke-width: 2; }
+    #pack-svg .case-inner { fill: #f3e2c7; }
+    :root[data-theme="dark"] #pack-svg .case-inner { fill: #3a2e22; }
+    #pack-svg .case-lid { fill: #c8794c; stroke: #7a3f1f; stroke-width: 2; transition: transform .6s var(--ease-spring), opacity .4s ease; transform-box: fill-box; transform-origin: 50% 0%; }
+    #pack-svg .case-handle { fill: none; stroke: #7a3f1f; stroke-width: 4; }
+    #pack-svg .case.dim, #pack-svg .robe.dim, #pack-svg .case-lid.dim, #pack-svg .robe-door.dim { opacity: .35; }
+    #pack-svg .robe-body { fill: var(--panel-solid); stroke: rgb(var(--fg-rgb) / .45); stroke-width: 2; }
+    #pack-svg .robe-door { fill: #8a6a4a; stroke: #5a4029; stroke-width: 1.5; transition: transform .7s var(--ease-spring); transform-box: fill-box; }
+    :root[data-theme="dark"] #pack-svg .robe-door { fill: #6b5139; }
+    #pack-svg .lbl { font: 700 12px var(--font); fill: var(--muted); text-anchor: middle; }
+    #pack-svg .item { transition: transform .9s var(--ease-out), opacity .4s ease, filter .3s ease; }
+    #pack-svg .item.glow { filter: drop-shadow(0 0 6px rgb(var(--accent-2-rgb) / .95)); }
+    #pack-svg .item.faint { opacity: .3; }
+    #pack-svg .shirt { fill: #3b82f6; }
+    #pack-svg .shoe { fill: #7c4a1e; }
+    :root[data-theme="dark"] #pack-svg .shoe { fill: #c58a52; }
+    #pack-svg .book { fill: #16a34a; }
+    #pack-svg .layer { transition: opacity .6s ease; }
+    #pack-svg .layer.off { opacity: 0; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -175,11 +207,35 @@
     </header>
 
     <nav class="main-nav">
-<a href="#page-1">1. Comparison</a>
+<a href="#analogy">Analogy</a>
+        <a href="#page-1">1. Comparison</a>
         <a href="#page-2">2. Storage</a>
         <a href="#page-3">3. Schemas</a>
         <a href="#page-4">4. The Cube</a>
     </nav>
+
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4200" aria-labelledby="olap-story-title">
+        <header class="story-head">
+            <p class="story-kicker">Real-world analogy</p>
+            <h2 id="olap-story-title">Suitcases vs wardrobes</h2>
+            <p>Row storage packs each record together, like one suitcase per traveller. Column storage keeps like with like, like wardrobes for shirts, shoes and books.</p>
+        </header>
+        <div class="story-body">
+            <div class="story-stage pack-stage" aria-hidden="true">
+                <svg id="pack-svg" viewBox="0 0 600 340"></svg>
+                <div class="pack-counter"><span id="pack-count-label">Opened</span> <b id="pack-count">0</b></div>
+            </div>
+            <div class="story-side">
+                <ol class="story-steps">
+                    <li><strong>Row store = suitcases.</strong> Each traveller's things are packed together, like one row with all its columns.</li>
+                    <li><strong>OLTP: check in one traveller.</strong> Open one suitcase and you have everything. Fast.</li>
+                    <li><strong>Count every shoe?</strong> With suitcases you must open <em>all</em> of them.</li>
+                    <li><strong>Column store = wardrobes.</strong> The same things, sorted by type.</li>
+                    <li><strong>OLAP: count every shoe.</strong> Open <em>one</em> wardrobe. That's why analytics uses columnstores.</li>
+                </ol>
+            </div>
+        </div>
+    </section>
 
     <section id="page-1" class="full-page">
         <div class="main-wrapper">
@@ -542,7 +598,115 @@
         observer.observe(page);
     });
 });
-</script>
+
+    // ---- Analogy scene: suitcases (row store) vs wardrobes (column store) ----
+    (function () {
+        const svg = document.getElementById('pack-svg');
+        const story = document.getElementById('analogy');
+        if (!svg || !story) return;
+        const NS = 'http://www.w3.org/2000/svg';
+        const el = (tag, attrs, parent) => { const n = document.createElementNS(NS, tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); if (parent) parent.appendChild(n); return n; };
+        const KINDS = ['shirt', 'shoe', 'book'];
+        const ROBE_LABELS = ['Shirts', 'Shoes', 'Books'];
+        const PAX = 4;
+        const caseX = (p) => 30 + p * 140, caseY = 96;          // suitcase top-left
+        const robeX = (k) => 70 + k * 170, robeY = 52;          // wardrobe top-left
+
+        // Icons drawn around (0,0), sized ~26px.
+        const ICON = {
+            shirt: 'M-13 -8 l7 -6 h12 l7 6 l-5 6 l-3 -2 v16 h-16 v-16 l-3 2z',
+            shoe: 'M-14 4 v-10 h8 l4 6 h10 q6 0 6 6 v2 h-28z',
+            book: 'M-10 -12 h20 v24 h-20z M-6 -12 v24'
+        };
+
+        const cases = [], robes = [], items = [];
+        // Back-to-front: containers, items, then lids/doors so closing hides the items.
+        const caseLayer = el('g', { class: 'layer' }, svg);
+        const robeLayer = el('g', { class: 'layer off' }, svg);
+        const itemLayer = el('g', {}, svg);
+        const lidLayer = el('g', { class: 'layer' }, svg);
+        const doorLayer = el('g', { class: 'layer off' }, svg);
+
+        for (let p = 0; p < PAX; p++) {
+            const g = el('g', { class: 'case' }, caseLayer);
+            el('path', { d: `M${caseX(p) + 38} ${caseY} v-14 h34 v14`, class: 'case-handle' }, g);
+            el('rect', { x: caseX(p), y: caseY, width: 110, height: 92, rx: 12, class: 'case-body' }, g);
+            el('rect', { x: caseX(p) + 8, y: caseY + 10, width: 94, height: 72, rx: 8, class: 'case-inner' }, g);
+            el('text', { x: caseX(p) + 55, y: caseY + 116, class: 'lbl' }, g).textContent = `Traveller ${p + 1}`;
+            g.lid = el('rect', { x: caseX(p) - 2, y: caseY - 2, width: 114, height: 96, rx: 12, class: 'case-lid' }, lidLayer);
+            cases.push(g);
+        }
+        for (let k = 0; k < 3; k++) {
+            const g = el('g', { class: 'robe' }, robeLayer);
+            el('rect', { x: robeX(k), y: robeY, width: 120, height: 236, rx: 8, class: 'robe-body' }, g);
+            el('text', { x: robeX(k) + 60, y: robeY + 258, class: 'lbl' }, g).textContent = ROBE_LABELS[k];
+            g.doors = [
+                el('rect', { x: robeX(k) + 4, y: robeY + 4, width: 56, height: 228, rx: 4, class: 'robe-door door-l' }, doorLayer),
+                el('rect', { x: robeX(k) + 60, y: robeY + 4, width: 56, height: 228, rx: 4, class: 'robe-door door-r' }, doorLayer)
+            ];
+            robes.push(g);
+        }
+
+        for (let p = 0; p < PAX; p++) {
+            KINDS.forEach((kind, k) => {
+                const g = el('g', { class: `item ${kind}` }, itemLayer);
+                el('path', { d: ICON[kind] }, g);
+                g.at = {
+                    suitcase: [caseX(p) + 24 + k * 31, caseY + 46],
+                    robe: [robeX(k) + 60, robeY + 40 + p * 52]
+                };
+                g.dataset.p = p; g.dataset.kind = kind;
+                items.push(g);
+            });
+        }
+
+        const place = (mode) => items.forEach(it => { const [x, y] = it.at[mode]; it.style.transform = `translate(${x}px, ${y}px)`; });
+        const counter = document.getElementById('pack-count');
+        const counterLabel = document.getElementById('pack-count-label');
+        const setCount = (n, label) => { counter.textContent = n; counterLabel.textContent = label; counter.classList.remove('bump'); void counter.offsetWidth; counter.classList.add('bump'); setTimeout(() => counter.classList.remove('bump'), 350); };
+        let timers = [];
+        const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+
+        function show(step) {
+            timers.forEach(clearTimeout); timers = [];
+            const wardrobes = step >= 3;
+            caseLayer.classList.toggle('off', wardrobes);
+            lidLayer.classList.toggle('off', wardrobes);
+            robeLayer.classList.toggle('off', !wardrobes);
+            doorLayer.classList.toggle('off', !wardrobes);
+            place(wardrobes ? 'robe' : 'suitcase');
+            cases.forEach(c => { c.classList.remove('dim'); c.lid.classList.remove('dim'); c.lid.style.transform = ''; });
+            robes.forEach(r => { r.classList.remove('dim'); r.doors.forEach(d => d.classList.remove('dim')); });
+            items.forEach(i => i.classList.remove('glow', 'faint'));
+            const openCase = (p) => { cases[p].lid.style.transform = 'translateY(-34px) scaleY(.35)'; };
+            const openRobe = (k) => { robes[k].doors[0].style.transformOrigin = '0% 50%'; robes[k].doors[0].style.transform = 'scaleX(.12)'; robes[k].doors[1].style.transformOrigin = '100% 50%'; robes[k].doors[1].style.transform = 'scaleX(.12)'; };
+            robes.forEach(r => r.doors.forEach(d => { d.style.transform = ''; }));
+
+            if (step === 0) { setCount(0, 'Opened'); }
+            if (step === 1) {
+                cases.forEach((c, p) => { if (p !== 1) { c.classList.add('dim'); c.lid.classList.add('dim'); } });
+                items.forEach(i => { if (i.dataset.p !== '1') i.classList.add('faint'); });
+                later(() => { openCase(1); setCount(1, 'Suitcases opened'); items.filter(i => i.dataset.p === '1').forEach(i => i.classList.add('glow')); }, 400);
+            }
+            if (step === 2) {
+                setCount(0, 'Suitcases opened');
+                for (let p = 0; p < PAX; p++) later(() => {
+                    openCase(p); setCount(p + 1, 'Suitcases opened');
+                    items.filter(i => i.dataset.p === String(p) && i.dataset.kind === 'shoe').forEach(i => i.classList.add('glow'));
+                }, 400 + p * 650);
+            }
+            if (step === 3) { setCount(0, 'Wardrobes opened'); }
+            if (step === 4) {
+                robes.forEach((r, k) => { if (k !== 1) { r.classList.add('dim'); r.doors.forEach(d => d.classList.add('dim')); } });
+                items.forEach(i => { if (i.dataset.kind !== 'shoe') i.classList.add('faint'); });
+                later(() => { openRobe(1); setCount(1, 'Wardrobes opened'); items.filter(i => i.dataset.kind === 'shoe').forEach(i => i.classList.add('glow')); }, 400);
+            }
+        }
+        place('suitcase');
+        story.addEventListener('story:step', (e) => show(e.detail.step));
+        if (story.dataset.step) show(Number(story.dataset.step));
+    })();
+    </script>
 </body>
 </html>
 }

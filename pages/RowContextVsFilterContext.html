@@ -6,6 +6,8 @@
   <title>Row Context vs Filter Context | Power BI</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
 
     * { box-sizing: border-box; }
@@ -293,6 +295,59 @@
     .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     h1 { font-family: var(--font-display); letter-spacing: -.02em; }
     .eyebrow { color: var(--accent-2); }
+  
+    /* ---------- Analogy scene: the classroom ---------- */
+    .class-stage { min-height: 380px; }
+    .room { position: absolute; left: 3%; top: 64px; width: 64%; height: 270px; border-radius: 16px;
+      background: repeating-linear-gradient(90deg, rgb(var(--fg-rgb) / .03) 0 40px, transparent 40px 80px), rgb(var(--accent-2-rgb) / .06);
+      border: 2px solid rgb(var(--fg-rgb) / .15); }
+    .board { position: absolute; left: 20%; right: 20%; top: -26px; height: 34px; border-radius: 8px; background: #1f4d3a; border: 4px solid #8a6a4a;
+      color: #e8f5ee; font: 600 .8rem/26px var(--mono); text-align: center; white-space: nowrap; overflow: hidden; }
+    .teacher { position: absolute; left: calc(3% + 32% - 22px); top: 16px; font-size: 34px; line-height: 1; z-index: 3; }
+    .kid { position: absolute; width: 92px; margin-left: -46px; text-align: center; z-index: 2;
+      transition: left 1s var(--ease-out), top 1s var(--ease-out), opacity .8s ease, transform .5s var(--ease-spring); }
+    .kid .face { width: 46px; height: 46px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 26px;
+      background: var(--panel-solid); border: 3px solid var(--kc); box-shadow: var(--shadow); }
+    .kid .nm { margin-top: 4px; font: 700 .82rem var(--font); color: var(--ink); }
+    .kid .sec { display: inline-block; margin-top: 2px; padding: 1px 7px; border-radius: 999px; font: 700 .68rem var(--font); color: #fff; background: var(--kc); }
+    .kid .desk { width: 70px; height: 10px; margin: 6px auto 0; border-radius: 4px; background: #a87b52; }
+    .kid.out { opacity: 0; transform: translateX(60px) scale(.8); }
+    .kid.up { transform: translateY(-12px); }
+    .kid.up .face { box-shadow: 0 0 0 6px rgb(var(--accent-2-rgb) / .35), var(--shadow); }
+    .kid.faint { opacity: .3; }
+    .spot { position: absolute; width: 96px; height: 120px; margin: -10px 0 0 -48px; border-radius: 50%; z-index: 1; pointer-events: none;
+      background: radial-gradient(closest-side, rgb(var(--accent-2-rgb) / .85), rgb(var(--accent-2-rgb) / .2) 70%, transparent);
+      transition: left .55s var(--ease-out), top .55s var(--ease-out), opacity .4s ease; opacity: 0; }
+    .spot.on { opacity: 1; }
+    .meter { position: absolute; left: 3%; bottom: 10px; display: flex; gap: 8px; flex-wrap: wrap; z-index: 4; max-width: 94%; }
+    .class-stage { min-height: 400px; }
+    .meter span { padding: 4px 10px; border-radius: 999px; font: 600 .78rem var(--font); background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--muted); }
+    .meter b { color: var(--ink); }
+    .meter .m-row b { color: var(--accent-2-ink); }
+    .meter .m-filter b { color: var(--accent-3-ink); }
+    .meter span.hide { display: none; }
+
+    .door { position: absolute; right: 6%; top: 84px; width: 22%; max-width: 150px; height: 240px; z-index: 1; }
+    .door-sign { position: absolute; left: 50%; top: -30px; translate: -50% 0; padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+      font: 700 .78rem var(--font); background: var(--accent-3); color: #032417; box-shadow: var(--shadow);
+      opacity: 0; transform: translateY(-8px); transition: opacity .4s ease, transform .5s var(--ease-spring); }
+    .door-leaf { position: absolute; inset: 0; border-radius: 6px 6px 0 0; background: linear-gradient(90deg, #8a6a4a, #a3805c); border: 4px solid #5a4029;
+      transform-origin: 0% 50%; transition: transform .8s var(--ease-out); }
+    .door-leaf::after { content: ""; position: absolute; right: 12px; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: #f2c94c; }
+    .door.open .door-leaf { transform: perspective(500px) rotateY(-70deg); }
+    .door.filtering .door-sign { opacity: 1; transform: none; }
+  
+    @media (max-width: 560px) {
+      .class-stage { min-height: 680px; }
+      .room { width: 94%; }
+      .teacher { left: calc(50% - 17px); }
+      .kid { width: 80px; margin-left: -40px; }
+      .kid .face { width: 40px; height: 40px; font-size: 22px; }
+      .kid .nm { font-size: .76rem; }
+      .door { left: 50%; right: auto; translate: -50% 0; top: 380px; width: 120px; height: 150px; }
+      .pile-wrap { left: 3%; right: 3%; width: auto; top: 370px; height: auto; }
+      .pile { grid-template-columns: repeat(8, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -312,6 +367,30 @@
       <p>Row context points to one row. Filter context shrinks or expands the set of rows a measure can see.</p>
     </div>
   </header>
+
+  <section id="analogy" class="story srg-reveal" data-story data-delay="4800" aria-labelledby="row-story-title">
+    <header class="story-head">
+      <p class="story-kicker">Real-world analogy</p>
+      <h2 id="row-story-title">The classroom</h2>
+      <p>Row context is the teacher's roll call: one student at a time. Filter context is the classroom door: it decides who is in the room at all.</p>
+    </header>
+    <div class="story-body">
+      <div class="story-stage class-stage" id="row-stage" aria-hidden="true">
+        <div class="meter"><span class="m-row">Row context: <b id="row-cur">none</b></span><span class="m-filter">Filter context: <b id="row-filter">everyone</b></span><span>Rows visible: <b id="row-vis">6</b></span></div>
+        <div class="room"><div class="board" id="row-board">Class 7 · 6 students</div></div>
+        <div class="teacher">👩🏽‍🏫</div>
+        <div class="door" id="row-door"><div class="door-sign">Section B only</div><div class="door-leaf"></div></div>
+      </div>
+      <div class="story-side">
+        <ol class="story-steps">
+          <li><strong>A table is a class.</strong> Each student is one row.</li>
+          <li><strong>Row context = roll call.</strong> The teacher looks at one student at a time. Nobody leaves the room.</li>
+          <li><strong>Filter context = the door.</strong> “Section B only.” Everyone else steps out, so only 3 rows are visible.</li>
+          <li><strong>Together.</strong> Roll call now visits only the students still in the room.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
 
   <main class="layout">
     <aside class="sidebar">
@@ -396,6 +475,8 @@
           <span class="tiny-tag alt">Foundation for context transition</span>
         </div>
 
+        <details class="story-more">
+          <summary>Explain more</summary>
         <div class="compare-grid">
           <div class="compare-card row-card">
             <h3>Row Context</h3>
@@ -425,6 +506,7 @@
           <code>Total Sales = SUM(Sales[Amount])</code>
           <div>This measure changes only when the visible set of rows changes.</div>
         </div>
+        </details>
       </section>
     </section>
   </main>
@@ -581,6 +663,81 @@
       categoryFilter.value = "All";
       syncFiltersFromUi();
     });
+  
+    // Shared classroom builder: six students at desks (2 rows × 3), a roll-call spotlight.
+    function buildClassroom(stage) {
+      const KIDS = [
+        { name: 'Ravi', sec: 'B', face: '👦🏽', c: '#e5484d', books: 3 },
+        { name: 'Priya', sec: 'A', face: '👧🏽', c: '#3b82f6', books: 5 },
+        { name: 'Arjun', sec: 'B', face: '👦🏾', c: '#d97706', books: 4 },
+        { name: 'Meena', sec: 'C', face: '👧🏾', c: '#8b5cf6', books: 6 },
+        { name: 'Kabir', sec: 'B', face: '👦🏻', c: '#059669', books: 2 },
+        { name: 'Sana', sec: 'A', face: '👧🏻', c: '#db2777', books: 4 }
+      ];
+      // Desk positions as % of the stage, inside the .room box (left 3%, width 64%).
+      // On phones the room spans the full width (door / pile move below it).
+      const narrow = () => window.matchMedia('(max-width: 560px)').matches;
+      const pos = (i) => ({ x: 3 + (narrow() ? 94 : 64) * (0.2 + (i % 3) * 0.3), y: 96 + Math.floor(i / 3) * 124 });
+      const spot = document.createElement('div');
+      spot.className = 'spot';
+      stage.appendChild(spot);
+      const els = KIDS.map((k, i) => {
+        const d = document.createElement('div');
+        d.className = 'kid';
+        d.style.setProperty('--kc', k.c);
+        d.innerHTML = `<div class="face">${k.face}</div><div class="nm">${k.name}</div><span class="sec">Sec ${k.sec}</span><div class="desk"></div>`;
+        const p = pos(i);
+        d.style.left = p.x + '%';
+        d.style.top = p.y + 'px';
+        stage.appendChild(d);
+        return d;
+      });
+      window.addEventListener('resize', () => els.forEach((d, i) => { const p = pos(i); d.style.left = p.x + '%'; }));
+      return {
+        KIDS, els,
+        spotOn(i) { const p = pos(i); spot.style.left = p.x + '%'; spot.style.top = p.y + 'px'; spot.classList.add('on'); },
+        spotOff() { spot.classList.remove('on'); },
+        reset() { els.forEach(e => e.classList.remove('out', 'up', 'faint')); spot.classList.remove('on'); }
+      };
+    }
+
+    // ---- Analogy scene: roll call (row context) vs the door (filter context) ----
+    (function () {
+      const story = document.getElementById('analogy');
+      const stage = document.getElementById('row-stage');
+      if (!story || !stage) return;
+      const room = buildClassroom(stage);
+      const cur = document.getElementById('row-cur');
+      const filt = document.getElementById('row-filter');
+      const vis = document.getElementById('row-vis');
+      const door = document.getElementById('row-door');
+      const board = document.getElementById('row-board');
+      let timers = [];
+      const rollCall = (idxs) => {
+        let k = 0;
+        const tick = () => { const i = idxs[k % idxs.length]; room.spotOn(i); cur.textContent = room.KIDS[i].name; board.textContent = `Roll call: ${room.KIDS[i].name}… present!`; k++; };
+        tick();
+        timers.push(setInterval(tick, 750));
+      };
+      function show(step) {
+        timers.forEach(t => { clearTimeout(t); clearInterval(t); }); timers = [];
+        room.reset(); door.classList.remove('open', 'filtering');
+        cur.textContent = 'none'; filt.textContent = 'everyone'; vis.textContent = '6';
+        board.textContent = 'Class 7 · 6 students';
+        const inB = room.KIDS.map((k, i) => k.sec === 'B' ? i : -1).filter(i => i >= 0);
+        if (step === 1) rollCall([0, 1, 2, 3, 4, 5]);
+        if (step >= 2) {
+          door.classList.add('open', 'filtering');
+          filt.textContent = 'Section = B';
+          board.textContent = 'Door rule: Section B only';
+          room.els.forEach((e, i) => { if (!inB.includes(i)) timers.push(setTimeout(() => e.classList.add('out'), 300 + i * 120)); });
+          timers.push(setTimeout(() => { vis.textContent = String(inB.length); }, 1100));
+        }
+        if (step === 3) timers.push(setTimeout(() => rollCall(inB), 1300));
+      }
+      story.addEventListener('story:step', (e) => show(e.detail.step));
+      show(Number(story.dataset.step || 0));
+    })();
   </script>
 </body>
 </html>

@@ -6,6 +6,8 @@
   <title>SUM vs SUMX Lab | Power BI</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
 
     * { box-sizing: border-box; }
@@ -338,6 +340,53 @@
     .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     h1 { font-family: var(--font-display); letter-spacing: -.02em; }
     .eyebrow { color: var(--accent-2); }
+  
+    /* ---------- Analogy scene: restaurant bill ---------- */
+    .bill-stage { min-height: 380px; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 18px; flex-wrap: wrap; }
+    .receipt { position: relative; width: min(360px, 100%); padding: 16px 16px 20px; background: #fffdf6; color: #1d1d1d;
+      font-family: var(--mono); font-size: .9rem; box-shadow: var(--shadow-lg);
+      -webkit-mask: radial-gradient(circle 7px at 50% 100%, transparent 98%, #000) 0 0 / 18px 100% repeat-x;
+              mask: radial-gradient(circle 7px at 50% 100%, transparent 98%, #000) 0 0 / 18px 100% repeat-x; }
+    :root[data-theme="dark"] .receipt { background: #f2ede0; }
+    .r-head { text-align: center; font: 700 1rem var(--font); padding-bottom: 10px; border-bottom: 2px dashed #9a9a9a; margin-bottom: 6px; }
+    .r-head small { font-weight: 500; color: #555; }
+    .r-row { display: grid; grid-template-columns: 1.4fr .6fr .9fr 1fr; gap: 6px; padding: 6px 4px; border-radius: 6px; transition: background .3s ease; }
+    .r-row span:nth-child(n+2) { text-align: right; }
+    .r-cols { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: #666; }
+    .r-line.active { background: rgb(22 163 74 / .18); }
+    .r-line .amt { color: #0b6b34; font-weight: 700; }
+    .r-line .amt.calc { animation: calc .5s var(--ease-spring); }
+    .r-line .amt.printed { color: #1d1d1d; font-weight: 600; }
+    @keyframes calc { from { transform: translateY(-10px) scale(1.4); opacity: 0; } }
+    .r-line .work { display: block; grid-column: 1 / -1; text-align: right !important; font-size: .76rem; color: #0b6b34; height: 0; overflow: hidden; transition: height .3s ease; }
+    .r-line.active .work { height: 1.2em; }
+    .r-total { margin-top: 6px; border-top: 2px dashed #9a9a9a; font-weight: 800; font-size: 1rem; }
+    .r-total span:last-child { font-size: 1.1rem; }
+    .r-total.sweep span:last-child { animation: calc .6s var(--ease-spring); }
+    .r-stamp { position: absolute; left: 96px; bottom: 12px; padding: 4px 10px; border: 3px solid; border-radius: 8px; font: 900 .9rem var(--font);
+      transform: rotate(-10deg) scale(2); opacity: 0; transition: transform .45s var(--ease-spring), opacity .3s ease; }
+    .r-stamp.on { opacity: 1; transform: rotate(-10deg) scale(1); }
+    .r-stamp.ok { color: #16a34a; border-color: #16a34a; }
+    .r-stamp.bad { color: #dc2626; border-color: #dc2626; }
+
+    .waiter { display: grid; justify-items: center; gap: 8px; width: 170px; }
+    .w-face { font-size: 54px; line-height: 1; animation: bob 2.4s ease-in-out infinite; }
+    @keyframes bob { 50% { transform: translateY(-6px); } }
+    .w-say { position: relative; padding: 10px 12px; border-radius: 14px; background: var(--panel-solid); border: 1px solid var(--border);
+      box-shadow: var(--shadow); font-size: .9rem; text-align: center; color: var(--ink); min-height: 2.6em; }
+    .w-say.pop { animation: pop-in .4s var(--ease-spring); }
+    @keyframes pop-in { from { transform: scale(.7); opacity: 0; } }
+
+    .waiter { width: 230px; }
+    .shortcut { width: 100%; padding: 12px 14px; border-radius: 14px; font-size: .9rem;
+      background: rgb(var(--danger-rgb) / .12); border: 2px solid rgb(var(--danger-rgb) / .6); color: var(--ink); text-align: center;
+      opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .6s var(--ease-spring); }
+    .shortcut { display: none; }
+    .story[data-step="3"] .shortcut { display: block; opacity: 1; transform: none; animation: pop-in .5s var(--ease-spring); }
+    .sc-res { margin-top: 4px; font-size: 1.1rem; font-weight: 700; }
+    .sc-res > b { color: var(--danger); font-size: 1.25rem; }
+    .sc-x { margin-left: 8px; font-size: .9rem; color: var(--muted); }
+    .sc-x b { color: var(--accent-3); }
   </style>
 </head>
 <body>
@@ -359,6 +408,41 @@
       <p>Use <strong>SUMX</strong> when DAX must compute something for each row before adding it up.</p>
     </div>
   </header>
+
+  <section id="analogy" class="story srg-reveal" data-story data-delay="4600" aria-labelledby="bill-story-title">
+    <header class="story-head">
+      <p class="story-kicker">Real-world analogy</p>
+      <h2 id="bill-story-title">The restaurant bill</h2>
+      <p>SUMX is the waiter who works out each line (qty × rate) before totalling. SUM just adds an amount that is already printed. The shortcut, total plates × average rate, gets the bill wrong.</p>
+    </header>
+    <div class="story-body">
+      <div class="story-stage bill-stage" aria-hidden="true">
+        <div class="receipt">
+          <div class="r-head">🍛 Annapoorna Mess<br><small>Table 7 · Bill</small></div>
+          <div class="r-row r-cols"><span>Item</span><span>Qty</span><span>Rate</span><span>Amount</span></div>
+          <div id="bill-lines"></div>
+          <div class="r-row r-total"><span>Total</span><span></span><span></span><span id="bill-total">–</span></div>
+          <div class="r-stamp" id="bill-stamp"></div>
+        </div>
+        <div class="waiter">
+          <div class="w-face">🧑🏽‍🍳</div>
+          <div class="w-say" id="bill-say">Here's your order!</div>
+          <div class="shortcut" id="bill-shortcut">
+          <div class="sc-line">Plates <b id="sc-plates">8</b> × average rate <b id="sc-avg">₹107.50</b></div>
+          <div class="sc-res">= <b id="sc-wrong">₹860</b> <span class="sc-x">✗ should be <b id="sc-right">₹650</b></span></div>
+        </div>
+        </div>
+      </div>
+      <div class="story-side">
+        <ol class="story-steps">
+          <li><strong>The bill has Qty and Rate.</strong> No amount per line yet, like a table without a NetAmount column.</li>
+          <li><strong>SUMX = the careful waiter.</strong> For each line: qty × rate, then add them all up.</li>
+          <li><strong>SUM = amount already printed.</strong> Once each line has its amount, just add the column.</li>
+          <li><strong>The wrong shortcut.</strong> Total plates × average rate overcharges you. Prices differ line by line.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
 
   <main class="layout">
     <aside class="sidebar">
@@ -479,6 +563,8 @@
           <span class="tiny-tag alt">And why X functions matter</span>
         </div>
 
+        <details class="story-more">
+          <summary>Explain more</summary>
         <div class="guide-grid">
           <div class="guide-card">
             <h3>Use SUM when</h3>
@@ -530,6 +616,7 @@ SUMX(
           <em>“for each row, calculate something, then total it”</em>, you probably need an <code>X</code> function.
           If it sounds like <em>“just add the values already stored in this column”</em>, plain <code>SUM</code> is enough.
         </div>
+        </details>
       </section>
     </section>
   </main>
@@ -749,6 +836,81 @@ SUMX(
       segmentFilter.value = "All";
       syncFilters();
     });
+  
+    // ---- Analogy scene: restaurant bill (SUM vs SUMX) ----
+    // Amounts are held in integer paise; display uses Indian grouping.
+    (function () {
+      const story = document.getElementById('analogy');
+      if (!story) return;
+      const LINES = [
+        { item: 'Masala dosa', qty: 2, rate: 8000 },
+        { item: 'Filter coffee', qty: 3, rate: 4000 },
+        { item: 'South Indian thali', qty: 1, rate: 25000 },
+        { item: 'Sweet lassi', qty: 2, rate: 6000 }
+      ];
+      const inr = (paise) => '₹' + (paise / 100).toLocaleString('en-IN', { minimumFractionDigits: paise % 100 ? 2 : 0, maximumFractionDigits: 2 });
+      const host = document.getElementById('bill-lines');
+      const totalEl = document.getElementById('bill-total');
+      const say = document.getElementById('bill-say');
+      const stamp = document.getElementById('bill-stamp');
+      const rows = LINES.map(l => {
+        const r = document.createElement('div');
+        r.className = 'r-row r-line';
+        r.innerHTML = `<span>${l.item}</span><span>${l.qty}</span><span>${inr(l.rate)}</span><span class="amt"></span><span class="work"></span>`;
+        host.appendChild(r);
+        return r;
+      });
+      const correct = LINES.reduce((s, l) => s + l.qty * l.rate, 0);
+      const plates = LINES.reduce((s, l) => s + l.qty, 0);
+      const avgRate = LINES.reduce((s, l) => s + l.rate, 0) / LINES.length; // 10750 paise, exact
+      const wrong = plates * avgRate;
+      document.getElementById('sc-plates').textContent = plates;
+      document.getElementById('sc-avg').textContent = inr(avgRate);
+      document.getElementById('sc-wrong').textContent = inr(wrong);
+      document.getElementById('sc-right').textContent = inr(correct);
+
+      let timers = [];
+      const talk = (t) => { say.textContent = t; say.classList.remove('pop'); void say.offsetWidth; say.classList.add('pop'); };
+      const setStamp = (text, cls) => { stamp.className = 'r-stamp' + (text ? ` on ${cls}` : ''); stamp.textContent = text; };
+      function reset(printed) {
+        rows.forEach((r, i) => {
+          r.classList.remove('active');
+          const a = r.querySelector('.amt');
+          a.className = 'amt' + (printed ? ' printed' : '');
+          a.textContent = printed ? inr(LINES[i].qty * LINES[i].rate) : '';
+          r.querySelector('.work').textContent = '';
+        });
+        totalEl.textContent = '–';
+        setStamp('', '');
+      }
+      function show(step) {
+        timers.forEach(clearTimeout); timers = [];
+        if (step === 0) { reset(false); talk('Here’s your order! Qty and rate only.'); }
+        if (step === 1) {
+          reset(false); talk('Let me work it out, line by line…');
+          let running = 0;
+          rows.forEach((r, i) => timers.push(setTimeout(() => {
+            rows.forEach(x => x.classList.remove('active'));
+            r.classList.add('active');
+            const l = LINES[i], amt = l.qty * l.rate;
+            r.querySelector('.work').textContent = `${l.qty} × ${inr(l.rate)} = ${inr(amt)}`;
+            const a = r.querySelector('.amt'); a.textContent = inr(amt); a.classList.add('calc');
+            running += amt; totalEl.textContent = inr(running);
+            if (i === rows.length - 1) timers.push(setTimeout(() => { r.classList.remove('active'); talk(`SUMX total: ${inr(correct)} ✓`); setStamp('SUMX ✓', 'ok'); }, 700));
+          }, 500 + i * 850)));
+        }
+        if (step === 2) {
+          reset(true); talk('Amounts are printed. I just add them.');
+          timers.push(setTimeout(() => { totalEl.textContent = inr(correct); totalEl.parentElement.classList.remove('sweep'); void totalEl.offsetWidth; totalEl.parentElement.classList.add('sweep'); setStamp('SUM ✓', 'ok'); }, 800));
+        }
+        if (step === 3) {
+          reset(true); totalEl.textContent = inr(wrong);
+          talk('Shortcut: plates × average rate?'); setStamp('Overcharged!', 'bad');
+        }
+      }
+      story.addEventListener('story:step', (e) => show(e.detail.step));
+      show(Number(story.dataset.step || 0));
+    })();
   </script>
 </body>
 </html>

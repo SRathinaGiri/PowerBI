@@ -6,6 +6,8 @@
   <title>ALL vs ALLEXCEPT vs ALLSELECTED | Power BI</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
 
     * { box-sizing: border-box; }
@@ -321,6 +323,38 @@
     .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     h1 { font-family: var(--font-display); letter-spacing: -.02em; }
     .eyebrow { color: var(--accent-2); }
+  
+    /* ---------- Analogy scene: exam marks share ---------- */
+    .exam-stage { min-height: 380px; padding: 44px 16px 92px; }
+    .school-label { position: absolute; left: 16px; top: 12px; font: 700 .85rem var(--font); color: var(--muted); }
+    .classes { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; z-index: 1; }
+    .cls { padding: 10px; border-radius: 14px; background: var(--panel-solid); border: 2px solid var(--border); box-shadow: var(--shadow);
+      transition: border-color .4s ease, box-shadow .4s ease, opacity .4s ease; }
+    .cls h4 { margin: 0 0 8px; font: 800 .9rem var(--font); color: var(--ink); display: flex; justify-content: space-between; }
+    .cls h4 small { font-weight: 600; color: var(--muted); }
+    .stu { display: flex; justify-content: space-between; padding: 6px 8px; margin-top: 5px; border-radius: 9px; font-size: .88rem;
+      background: rgb(var(--fg-rgb) / .05); color: var(--ink); transition: background .35s ease, transform .4s var(--ease-spring), opacity .35s ease, box-shadow .35s ease; }
+    .stu b { font-family: var(--mono); }
+    .stu.in { background: rgb(var(--accent-rgb) / .2); box-shadow: inset 0 0 0 2px rgb(var(--accent-rgb) / .55); }
+    .stu.me { background: var(--accent-2); color: #2b1c00; transform: scale(1.04); box-shadow: 0 6px 16px rgb(var(--accent-2-rgb) / .45); }
+    .stu.out { opacity: .35; }
+    .cls.dim { opacity: .5; }
+    .hall { position: absolute; left: 10px; top: 36px; width: calc((100% - 32px - 28px) * 2 / 3 + 14px + 12px); height: calc(100% - 36px - 84px);
+      border: 3px dashed var(--accent-3); border-radius: 18px; background: rgb(var(--accent-3-rgb) / .06); z-index: 0;
+      opacity: 0; transform: scale(1.05); transition: opacity .5s ease, transform .6s var(--ease-spring); }
+    .hall span { position: absolute; right: 10px; bottom: -14px; padding: 2px 10px; border-radius: 999px; background: var(--accent-3); color: #032417; font: 700 .72rem var(--font); }
+    .story[data-step="3"] .hall { opacity: 1; transform: none; }
+    .fraction { position: absolute; left: 16px; right: 16px; bottom: 14px; display: flex; align-items: baseline; justify-content: center; gap: 10px; flex-wrap: wrap;
+      padding: 10px 14px; border-radius: 14px; background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+    .fraction .fn { font: 700 .82rem var(--mono); padding: 3px 10px; border-radius: 999px; background: rgb(var(--accent-rgb) / .14); color: var(--accent-ink); }
+    .fraction .num, .fraction .den, .fraction .pct { font: 800 1.5rem var(--font-display); }
+    .fraction .num { color: var(--accent-2); }
+    .fraction .den { color: var(--accent); }
+    .fraction .pct { color: var(--accent-3); }
+    .fraction .div, .fraction .eq { color: var(--muted); font-size: 1.3rem; }
+    .fraction .bump { animation: bump .5s var(--ease-spring); display: inline-block; }
+    @keyframes bump { from { transform: translateY(-12px) scale(1.3); opacity: 0; } }
+    @media (max-width: 560px) { .classes { grid-template-columns: 1fr; } .hall { display: none; } .exam-stage { padding-bottom: 110px; } }
   </style>
 </head>
 <body>
@@ -343,6 +377,33 @@
       <p><strong>ALLSELECTED</strong> respects the outer selection but ignores the inner visual grain.</p>
     </div>
   </header>
+
+  <section id="analogy" class="story srg-reveal" data-story data-delay="4400" aria-labelledby="all-story-title">
+    <header class="story-head">
+      <p class="story-kicker">Real-world analogy</p>
+      <h2 id="all-story-title">Ravi's share of the marks</h2>
+      <p>Ravi scored 90. Is that a big share? It depends on <em>out of whom</em>. That “out of whom” is exactly what ALL, ALLEXCEPT and ALLSELECTED change: the denominator.</p>
+    </header>
+    <div class="story-body">
+      <div class="story-stage exam-stage" id="exam-stage" aria-hidden="true">
+        <div class="school-label">🏫 Whole school</div>
+        <div class="hall" id="exam-hall"><span>Today's exam hall · slicer: 10-A, 10-B</span></div>
+        <div class="classes" id="exam-classes"></div>
+        <div class="fraction">
+          <span class="fn" id="exam-fn">Ravi's marks</span>
+          <span class="num">90</span><span class="div">÷</span><span class="den" id="exam-den">?</span><span class="eq">=</span><span class="pct" id="exam-pct">?</span>
+        </div>
+      </div>
+      <div class="story-side">
+        <ol class="story-steps">
+          <li><strong>Ravi (10-A) scored 90.</strong> That is the numerator: his own row.</li>
+          <li><strong>ALL → out of the whole school.</strong> Every filter removed: 90 ÷ 675.</li>
+          <li><strong>ALLEXCEPT(Class) → out of his class.</strong> Keep only the class filter: 90 ÷ 240.</li>
+          <li><strong>ALLSELECTED → out of today's hall.</strong> Keep what the slicer selected (10-A, 10-B): 90 ÷ 460.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
 
   <main class="layout">
     <aside class="sidebar">
@@ -450,6 +511,8 @@
           <h2>When to use which</h2>
           <span class="tiny-tag alt">Practical report patterns</span>
         </div>
+        <details class="story-more">
+          <summary>Explain more</summary>
         <div class="guide-grid">
           <div class="guide-card">
             <h3>Use ALL when</h3>
@@ -505,6 +568,7 @@ DIVIDE(
         <div class="rule-box">
           <strong>Rule of thumb:</strong> use <strong>ALL</strong> for grand total, <strong>ALLEXCEPT</strong> for subtotal within one grouping, and <strong>ALLSELECTED</strong> for “percent of what the user currently selected”.
         </div>
+        </details>
       </section>
     </section>
   </main>
@@ -700,6 +764,58 @@ DIVIDE(
     });
 
     updateView();
+  
+    // ---- Analogy scene: Ravi's share of the marks (three denominators) ----
+    (function () {
+      const story = document.getElementById('analogy');
+      const host = document.getElementById('exam-classes');
+      if (!story || !host) return;
+      const SCHOOL = [
+        { cls: '10-A', kids: [['Ravi', 90], ['Priya', 80], ['Arjun', 70]] },
+        { cls: '10-B', kids: [['Meena', 85], ['Kabir', 60], ['Sana', 75]] },
+        { cls: '10-C', kids: [['Dev', 95], ['Isha', 65], ['Tara', 55]] }
+      ];
+      const SELECTED = ['10-A', '10-B']; // the slicer selection ("today's exam hall")
+      const total = (pred) => SCHOOL.filter(c => pred(c.cls)).reduce((s, c) => s + c.kids.reduce((t, k) => t + k[1], 0), 0);
+      const boxes = SCHOOL.map(c => {
+        const d = document.createElement('div');
+        d.className = 'cls';
+        d.dataset.cls = c.cls;
+        d.innerHTML = `<h4>${c.cls} <small>${c.kids.reduce((t, k) => t + k[1], 0)}</small></h4>` +
+          c.kids.map(k => `<div class="stu${k[0] === 'Ravi' ? ' me-row' : ''}"><span>${k[0]}</span><b>${k[1]}</b></div>`).join('');
+        host.appendChild(d);
+        return d;
+      });
+      const stus = Array.from(host.querySelectorAll('.stu'));
+      const fn = document.getElementById('exam-fn');
+      const den = document.getElementById('exam-den');
+      const pct = document.getElementById('exam-pct');
+      const bump = (el, txt) => { el.textContent = txt; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); };
+      const STEPS = [
+        { label: "Ravi's marks", pred: null },
+        { label: 'ALL(Students)', pred: () => true },
+        { label: 'ALLEXCEPT(Students, Students[Class])', pred: (c) => c === '10-A' },
+        { label: 'ALLSELECTED(Students)', pred: (c) => SELECTED.includes(c) }
+      ];
+      function show(step) {
+        const s = STEPS[step];
+        stus.forEach(e => e.classList.remove('in', 'out', 'me'));
+        boxes.forEach(b => b.classList.remove('dim'));
+        host.querySelector('.me-row').classList.add('me');
+        fn.textContent = s.label;
+        if (!s.pred) { den.textContent = '?'; pct.textContent = '?'; return; }
+        boxes.forEach(b => {
+          const inside = s.pred(b.dataset.cls);
+          b.classList.toggle('dim', !inside);
+          b.querySelectorAll('.stu').forEach(e => { if (!e.classList.contains('me')) e.classList.add(inside ? 'in' : 'out'); });
+        });
+        const d = total(s.pred);
+        bump(den, String(d));
+        bump(pct, (90 / d * 100).toFixed(1) + '%');
+      }
+      story.addEventListener('story:step', (e) => show(e.detail.step));
+      show(Number(story.dataset.step || 0));
+    })();
   </script>
 </body>
 </html>
