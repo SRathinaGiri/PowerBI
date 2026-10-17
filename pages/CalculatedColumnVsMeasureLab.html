@@ -6,6 +6,8 @@
   <title>Calculated Column vs Measure | Power BI</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
 
     * { box-sizing: border-box; }
@@ -342,6 +344,62 @@
     .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
     h1 { font-family: var(--font-display); letter-spacing: -.02em; }
     .eyebrow { color: var(--accent-2); }
+  
+    /* ---------- Analogy scene: date of birth vs age ---------- */
+    .age-stage { min-height: 360px; }
+    .age-stage > * { position: absolute; transition: opacity .6s var(--ease-out), transform .8s var(--ease-spring); }
+    .id-card { left: 6%; top: 50px; width: 46%; max-width: 300px; border-radius: 16px; overflow: visible;
+      background: linear-gradient(135deg, #fdfaf2, #f2ead6); color: #1b2333; box-shadow: var(--shadow-lg); border: 1px solid #d9cba6; }
+    :root[data-theme="dark"] .id-card { background: linear-gradient(135deg, #2a3142, #222838); color: #eef3ff; border-color: #3b4560; }
+    .id-top { padding: 8px 14px; font: 800 .72rem/1 var(--font); letter-spacing: .18em; color: #fff; background: #1d6ad6; border-radius: 16px 16px 0 0; }
+    .id-body { display: flex; gap: 14px; padding: 14px; align-items: center; }
+    .id-photo { width: 64px; height: 76px; border-radius: 10px; display: grid; place-items: center; font-size: 40px; background: rgb(29 106 214 / .12); flex: none; }
+    .id-name { font: 700 1.05rem var(--font-display); }
+    .id-label { margin-top: 8px; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+    .id-dob { font: 800 1.25rem var(--mono); }
+    .id-stamp { position: absolute; right: -10px; top: 46px; padding: 4px 10px; border: 3px solid #16a34a; color: #16a34a; border-radius: 8px;
+      font: 900 .9rem var(--font); transform: rotate(-12deg) scale(2.2); opacity: 0; transition: transform .5s var(--ease-spring), opacity .3s ease; background: rgb(255 255 255 / .6); }
+    :root[data-theme="dark"] .id-stamp { background: rgb(0 0 0 / .4); color: #4ade80; border-color: #4ade80; }
+    .story[data-step="0"] .id-stamp, .story[data-step="2"] .id-stamp { opacity: 1; transform: rotate(-12deg) scale(1); }
+    .tag { position: absolute; padding: 5px 12px; border-radius: 999px; font: 700 .78rem var(--font); white-space: nowrap; box-shadow: var(--shadow); }
+    .tag-col { left: 14px; bottom: -16px; background: var(--accent-2); color: #2b1c00; }
+    .tag-measure { right: 12px; top: -14px; background: var(--accent-3); color: #032417; }
+
+    .calendar { right: 8%; top: 34px; width: 120px; text-align: center; border-radius: 14px; overflow: hidden; background: var(--panel-solid);
+      box-shadow: var(--shadow-lg); border: 1px solid var(--border); opacity: 0; transform: translateY(-20px) scale(.9); }
+    .cal-top { height: 14px; background: #e5484d; display: flex; justify-content: space-around; align-items: center; }
+    .cal-top i { width: 8px; height: 8px; border-radius: 50%; background: var(--panel-solid); }
+    .cal-month { padding-top: 8px; font: 700 .85rem var(--font); color: #e5484d; }
+    .cal-day { font: 800 2.6rem/1.1 var(--font-display); color: var(--ink); }
+    .cal-day.flip { animation: flip .6s var(--ease-out); }
+    @keyframes flip { 0% { transform: rotateX(0); } 45% { transform: rotateX(90deg); opacity: .2; } 100% { transform: rotateX(0); } }
+    .cal-sub { padding-bottom: 8px; font-size: .72rem; color: var(--muted); }
+
+    .age-bubble { right: 6%; top: 190px; width: 44%; max-width: 270px; padding: 16px 18px 14px; border-radius: 18px; background: var(--panel-solid);
+      border: 2px solid var(--accent-3); box-shadow: var(--shadow-lg); opacity: 0; transform: scale(.7); transform-origin: 80% 0%; }
+    .age-q { font-style: italic; color: var(--muted); }
+    .age-v { margin-top: 4px; font: 600 1.05rem var(--font); color: var(--ink); }
+    .age-v b { font: 800 2.2rem var(--font-display); color: var(--accent-3); display: inline-block; }
+    .age-v b.tick { animation: tick .55s var(--ease-spring); }
+    @keyframes tick { 0% { transform: translateY(-14px) scale(1.3); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+    .family { left: 5%; right: 5%; bottom: 18px; border-radius: 14px; overflow: hidden; background: var(--panel-solid); border: 1px solid var(--border);
+      box-shadow: var(--shadow); opacity: 0; transform: translateY(30px); }
+    .fam-row { display: grid; grid-template-columns: 1fr 1.2fr 1fr; padding: 7px 14px; border-top: 1px solid var(--border); font-size: .9rem; }
+    .fam-row span:nth-child(2) { font-family: var(--mono); }
+    .fam-row span:nth-child(3) { text-align: right; font-weight: 700; color: var(--accent-3); }
+    .fam-head { border-top: 0; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: rgb(var(--fg-rgb) / .04); }
+    .fam-head span:nth-child(3) { color: var(--muted); }
+    .fam-total { font-weight: 700; background: rgb(var(--accent-3-rgb) / .1); }
+    .fam-total .muted { font-family: var(--font); font-weight: 500; color: var(--muted); }
+
+    /* step layouts */
+    .story[data-step="1"] .calendar, .story[data-step="2"] .calendar, .story[data-step="3"] .calendar { opacity: 1; transform: none; }
+    .story[data-step="1"] .age-bubble, .story[data-step="2"] .age-bubble { opacity: 1; transform: none; }
+    .story[data-step="3"] .id-card { opacity: 0; transform: translateY(-30px) scale(.9); }
+    .story[data-step="3"] .calendar { transform: translate(-150%, 0) scale(.85); }
+    .story[data-step="3"] .family { opacity: 1; transform: none; }
+    @media (max-width: 560px) { .id-card { width: 60%; } .age-bubble { width: 56%; } }
   </style>
 </head>
 <body>
@@ -362,6 +420,60 @@
       <p>A <strong>measure</strong> is computed at query time and changes with slicers, filters, and visuals.</p>
     </div>
   </header>
+
+  <section id="analogy" class="story srg-reveal" data-story data-delay="4200" aria-labelledby="age-story-title">
+    <header class="story-head">
+      <p class="story-kicker">Real-world analogy</p>
+      <h2 id="age-story-title">Date of birth vs age</h2>
+      <p>A calculated column is like the date of birth printed on an ID card: worked out once and stored. A measure is like age: worked out fresh every time you ask.</p>
+    </header>
+    <div class="story-body">
+      <div class="story-stage age-stage" aria-hidden="true">
+        <div class="id-card">
+          <div class="id-top">IDENTITY CARD</div>
+          <div class="id-body">
+            <div class="id-photo">👩🏽</div>
+            <div class="id-fields">
+              <div class="id-name">Meera R.</div>
+              <div class="id-label">Date of birth</div>
+              <div class="id-dob">15-08-1990</div>
+            </div>
+          </div>
+          <div class="id-stamp">Stored ✓</div>
+          <div class="tag tag-col">Calculated column</div>
+        </div>
+
+        <div class="calendar">
+          <div class="cal-top"><i></i><i></i></div>
+          <div class="cal-month" id="cal-month">Jan 2025</div>
+          <div class="cal-day" id="cal-day">01</div>
+          <div class="cal-sub">Today</div>
+        </div>
+
+        <div class="age-bubble">
+          <div class="age-q">“How old is Meera?”</div>
+          <div class="age-v"><b id="age-value">34</b> years</div>
+          <div class="tag tag-measure">Measure</div>
+        </div>
+
+        <div class="family">
+          <div class="fam-row fam-head"><span>Name</span><span>DOB (column)</span><span>Age (measure)</span></div>
+          <div class="fam-row"><span>Meera</span><span>15-08-1990</span><span class="fam-age" data-dob="1990-08-15">–</span></div>
+          <div class="fam-row"><span>Arjun</span><span>02-03-1985</span><span class="fam-age" data-dob="1985-03-02">–</span></div>
+          <div class="fam-row"><span>Kavya</span><span>23-11-2001</span><span class="fam-age" data-dob="2001-11-23">–</span></div>
+          <div class="fam-row fam-total"><span>Average age</span><span class="muted">same DOBs, new date</span><span id="fam-avg">–</span></div>
+        </div>
+      </div>
+      <div class="story-side">
+        <ol class="story-steps">
+          <li><strong>Date of birth = calculated column.</strong> Worked out once, printed on every card (row), stored in the model.</li>
+          <li><strong>Age = measure.</strong> Nobody prints it. You calculate it when someone asks.</li>
+          <li><strong>Ask again later.</strong> The calendar moves, so the age changes. The DOB never does.</li>
+          <li><strong>Many people, one question.</strong> “Average age” is recalculated for whoever is in the report, as of today.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
 
   <main class="layout">
     <aside class="sidebar">
@@ -481,6 +593,8 @@
           <span class="tiny-tag alt">Practical guidance</span>
         </div>
 
+        <details class="story-more">
+          <summary>Explain more</summary>
         <div class="guide-grid">
           <div class="guide-card">
             <h3>Use a calculated column when</h3>
@@ -537,6 +651,7 @@ DIVIDE(
           use a <strong>calculated column</strong>. If the answer should change based on filters, visuals,
           or report selections, use a <strong>measure</strong>.
         </div>
+        </details>
       </section>
     </section>
   </main>
@@ -692,6 +807,52 @@ DIVIDE(
       channelFilter.value = "All";
       syncFilters();
     });
+  
+    // ---- Analogy scene: date of birth (stored column) vs age (measure) ----
+    (function () {
+      const story = document.getElementById('analogy');
+      if (!story) return;
+      const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      // Completed years on `on` (ISO dates, local calendar; no time-of-day involved).
+      function ageOn(dobIso, on) {
+        const [y, m, d] = dobIso.split('-').map(Number);
+        let age = on.getFullYear() - y;
+        if (on.getMonth() + 1 < m || (on.getMonth() + 1 === m && on.getDate() < d)) age -= 1;
+        return age;
+      }
+      const monthEl = document.getElementById('cal-month');
+      const dayEl = document.getElementById('cal-day');
+      const ageEl = document.getElementById('age-value');
+      const avgEl = document.getElementById('fam-avg');
+      const famAges = Array.from(story.querySelectorAll('.fam-age'));
+      let timers = [];
+
+      function setDate(on) {
+        monthEl.textContent = `${MONTHS[on.getMonth()]} ${on.getFullYear()}`;
+        dayEl.textContent = String(on.getDate()).padStart(2, '0');
+        dayEl.classList.remove('flip'); void dayEl.offsetWidth; dayEl.classList.add('flip');
+        const a = ageOn('1990-08-15', on);
+        if (ageEl.textContent !== String(a)) { ageEl.textContent = a; ageEl.classList.remove('tick'); void ageEl.offsetWidth; ageEl.classList.add('tick'); }
+        const ages = famAges.map(el => { const v = ageOn(el.dataset.dob, on); el.textContent = v; return v; });
+        avgEl.textContent = (ages.reduce((s, v) => s + v, 0) / ages.length).toFixed(1);
+      }
+
+      function show(step) {
+        timers.forEach(clearTimeout); timers = [];
+        if (step <= 1) setDate(new Date(2025, 0, 1));
+        if (step === 2) {
+          setDate(new Date(2025, 0, 1));
+          timers.push(setTimeout(() => setDate(new Date(2026, 0, 1)), 900));
+          timers.push(setTimeout(() => setDate(new Date(2026, 7, 20)), 2100));
+        }
+        if (step === 3) {
+          [new Date(2024, 0, 1), new Date(2025, 0, 1), new Date(2026, 0, 1), new Date(2027, 0, 1)]
+            .forEach((d, i) => timers.push(setTimeout(() => setDate(d), 300 + i * 900)));
+        }
+      }
+      story.addEventListener('story:step', (e) => show(e.detail.step));
+      show(Number(story.dataset.step || 0));
+    })();
   </script>
 </body>
 </html>

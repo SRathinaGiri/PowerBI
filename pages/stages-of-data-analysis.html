@@ -6,6 +6,8 @@
   <title>Stages of Data Analysis</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
     body {
       margin: 0;
@@ -91,6 +93,105 @@
     }
     img:hover { transform: scale(1.01); box-shadow: var(--shadow-lg); }
     a { color: var(--accent); }
+  
+    /* ---------- Analogy scene: maps → GPS ---------- */
+    .container { max-width: 1240px; }
+    .story { width: 100%; }
+    .nav-stage { min-height: 380px; display: flex; flex-direction: column; }
+    .nav-stage svg { flex: 1 1 auto; min-height: 300px; }
+    .era { opacity: 0; transform: scale(.86) translateY(14px); transform-box: fill-box; transform-origin: center;
+           transition: opacity .55s var(--ease-out), transform .8s var(--ease-spring); pointer-events: none; }
+    .story[data-step="0"] .era-0, .story[data-step="1"] .era-1, .story[data-step="2"] .era-2,
+    .story[data-step="3"] .era-3, .story[data-step="4"] .era-4 { opacity: 1; transform: none; }
+
+    /* shared strokes */
+    .era path, .era line, .era rect, .era ellipse, .era circle { stroke-linejoin: round; stroke-linecap: round; }
+
+    /* 1 paper map */
+    .paper-panel { fill: #fdf6e3; stroke: #c9b78f; stroke-width: 1.5; }
+    .paper-panel.alt { fill: #f5ecd2; }
+    :root[data-theme="dark"] .paper-panel { fill: #2b2a22; stroke: #6b6248; }
+    :root[data-theme="dark"] .paper-panel.alt { fill: #24231d; }
+    .xt-head { fill: rgb(var(--accent-2-rgb) / .25); }
+    .xt-lines line { stroke: rgb(var(--fg-rgb) / .35); stroke-width: 1; }
+    .xt-t { font: 700 11px var(--font); fill: var(--ink); text-anchor: middle; }
+    .xt-n { font: 600 12px var(--mono); fill: var(--ink); text-anchor: middle; opacity: 0; }
+    .story[data-step="0"] .xt-n { animation: ink-in .5s var(--ease-out) forwards; }
+    .story[data-step="0"] .xt-n:nth-of-type(n+7) { animation-delay: .3s; }
+    .story[data-step="0"] .xt-n:nth-of-type(n+10) { animation-delay: .6s; }
+    .story[data-step="0"] .xt-n:nth-of-type(n+13) { animation-delay: .9s; }
+    @keyframes ink-in { to { opacity: 1; } }
+    .pencil { fill: var(--accent-2); stroke: rgb(var(--fg-rgb) / .5); stroke-width: 1; }
+    .story[data-step="0"] .pencil { animation: scribble 1.6s ease-in-out infinite; transform-box: fill-box; }
+    @keyframes scribble { 50% { transform: translate(-60px, -20px); } }
+
+    /* 2 atlas */
+    .book { fill: var(--panel-solid); stroke: rgb(var(--fg-rgb) / .3); stroke-width: 1.5; }
+    .spine { stroke: rgb(var(--fg-rgb) / .3); stroke-width: 2; }
+    .map-blobs path { fill: rgb(var(--accent-3-rgb) / .25); stroke: rgb(var(--accent-3-rgb) / .7); stroke-width: 1.2; }
+    .idx-h { font: 800 12px var(--font); letter-spacing: .2em; fill: var(--muted); }
+    .idx text { font: 500 12px var(--mono); fill: var(--ink); }
+    .idx-mark { fill: rgb(var(--accent-rgb) / .16); stroke: var(--accent); stroke-width: 1.2; }
+    .idx-arrow { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 90; stroke-dashoffset: 90; }
+    .hit { fill: var(--accent); opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .story[data-step="1"] .idx-arrow { animation: draw 1s .6s var(--ease-out) forwards; }
+    .story[data-step="1"] .hit { animation: ping 1.4s 1.4s ease-out infinite; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes ping { 0% { opacity: .9; transform: scale(.6); } 100% { opacity: 0; transform: scale(2.6); } }
+
+    /* 3 globe */
+    .globe { fill: rgb(var(--accent-rgb) / .14); stroke: var(--accent); stroke-width: 2; }
+    .m, .lat { fill: none; stroke: rgb(var(--accent-rgb) / .55); stroke-width: 1.3; }
+    .axis, .stand { stroke: rgb(var(--fg-rgb) / .45); stroke-width: 3; }
+    .story[data-step="2"] .m { animation: spin 3.2s linear infinite; }
+    .story[data-step="2"] .m2 { animation-delay: -1.07s; }
+    .story[data-step="2"] .m3 { animation-delay: -2.13s; }
+    @keyframes spin { 0% { rx: 104px; } 25% { rx: 52px; } 50% { rx: 2px; } 75% { rx: 52px; } 100% { rx: 104px; } }
+
+    /* 4 phone map */
+    .phone { fill: #1d2433; stroke: #0b0f17; stroke-width: 2; }
+    .screen { fill: #e9f1e4; }
+    :root[data-theme="dark"] .screen { fill: #1f2d27; }
+    .road { fill: none; stroke: #f2c94c; stroke-width: 9; }
+    .road.thin { stroke: rgb(var(--fg-rgb) / .35); stroke-width: 5; }
+    .zoomable { transform-box: fill-box; transform-origin: center; }
+    .story[data-step="3"] .zoomable { animation: pinch 3s var(--ease-out) infinite; }
+    @keyframes pinch { 0%, 20% { transform: scale(1); } 55%, 80% { transform: scale(1.35); } 100% { transform: scale(1); } }
+    .pin path { fill: #e5484d; }
+    .pin-dot { fill: #fff; }
+    .story[data-step="3"] .pin { animation: drop .8s var(--ease-spring) both; }
+    @keyframes drop { from { transform: translateY(-60px); opacity: 0; } }
+    .fingers circle { fill: rgb(var(--fg-rgb) / .22); stroke: rgb(var(--fg-rgb) / .4); }
+    .story[data-step="3"] .fingers circle:first-child { animation: fl 3s var(--ease-out) infinite; }
+    .story[data-step="3"] .fingers circle:last-child { animation: fr 3s var(--ease-out) infinite; }
+    @keyframes fl { 0%, 20% { transform: translateX(22px); } 55%, 80% { transform: translateX(-6px); } }
+    @keyframes fr { 0%, 20% { transform: translateX(-22px); } 55%, 80% { transform: translateX(6px); } }
+
+    /* 5 voice GPS */
+    .route { fill: none; stroke: #2fbf71; stroke-width: 8; stroke-dasharray: 14 10; }
+    .route-jam { fill: none; stroke: #e5484d; stroke-width: 8; opacity: .85; }
+    .story[data-step="4"] .route { animation: march 1s linear infinite; }
+    @keyframes march { to { stroke-dashoffset: -24; } }
+    .me { fill: #2f80ed; stroke: #fff; stroke-width: 3; }
+    .bubble-bg { fill: var(--panel-solid); stroke: var(--accent); stroke-width: 1.5; }
+    .bubble-t { font: 700 15px var(--font); fill: var(--ink); }
+    .bubble-s { font: 500 12.5px var(--font); fill: var(--muted); }
+    .bubble { transform-box: fill-box; transform-origin: 0% 100%; }
+    .story[data-step="4"] .bubble { animation: pop .6s .5s var(--ease-spring) both; }
+    @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+    .sparkle path { fill: var(--accent-2); transform-box: fill-box; transform-origin: center; }
+    .story[data-step="4"] .sparkle path { animation: twinkle 1.6s ease-in-out infinite; }
+    @keyframes twinkle { 50% { transform: scale(.6) rotate(45deg); opacity: .5; } }
+
+    /* timeline under the scene */
+    .nav-timeline { list-style: none; display: flex; justify-content: space-between; gap: 6px; margin: 0; padding: 4px 20px 16px; position: relative; }
+    .nav-timeline::before { content: ""; position: absolute; left: 34px; right: 34px; top: 11px; height: 2px; background: rgb(var(--fg-rgb) / .12); }
+    .tl { position: relative; display: grid; justify-items: center; gap: 6px; flex: 1; font-size: .78rem; font-weight: 600; color: var(--muted); text-align: center; }
+    .tl b { width: 16px; height: 16px; border-radius: 50%; background: var(--panel-solid); border: 2px solid rgb(var(--fg-rgb) / .25); transition: background .4s ease, border-color .4s ease, transform .5s var(--ease-spring); z-index: 1; }
+    .story[data-step="0"] .tl-0 b, .story[data-step="1"] .tl-1 b, .story[data-step="2"] .tl-2 b, .story[data-step="3"] .tl-3 b, .story[data-step="4"] .tl-4 b { background: var(--accent); border-color: var(--accent); transform: scale(1.35); }
+    .story[data-step="0"] .tl-0, .story[data-step="1"] .tl-1, .story[data-step="2"] .tl-2, .story[data-step="3"] .tl-3, .story[data-step="4"] .tl-4 { color: var(--ink); }
+    .story[data-step="1"] .tl-0 b, .story[data-step="2"] .tl:nth-child(-n+2) b, .story[data-step="3"] .tl:nth-child(-n+3) b, .story[data-step="4"] .tl:nth-child(-n+4) b { background: rgb(var(--accent-rgb) / .35); border-color: var(--accent); }
+    @media (max-width: 560px) { .tl span { font-size: .66rem; } }
   </style>
 </head>
 <body>
@@ -98,12 +199,130 @@
     <header class="srg-enter">
     <p class="eyebrow">Foundations</p>
     <h1>Stages of Data Analysis</h1>
-    <p class="lead">
-      The evolution of analytics tooling shows how teams moved from manual summaries to intelligent, automated insights. Each milestone below marks a leap that brought richer context, faster exploration, and smarter decisions to business intelligence.
-    </p>
+    <p class="lead">Five leaps, from hand-made summaries to insights that find you.</p>
     </header>
 
-    <section class="stage srg-reveal">
+    <section class="story srg-reveal" data-story aria-labelledby="stages-story-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="stages-story-title">How we learned to find our way</h2>
+        <p>Data analysis grew up the same way navigation did: from a paper map you read by hand to a voice that warns you before you hit traffic.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage nav-stage" aria-hidden="true">
+          <svg viewBox="0 0 600 340" role="presentation">
+            <!-- 1. Paper map = cross tab -->
+            <g class="era era-0">
+              <g class="paper">
+                <path class="paper-panel" d="M150 70 L250 58 L250 250 L150 262 Z"/>
+                <path class="paper-panel alt" d="M250 58 L350 70 L350 262 L250 250 Z"/>
+                <path class="paper-panel" d="M350 70 L450 58 L450 250 L350 262 Z"/>
+                <g class="xt">
+                  <rect x="178" y="98" width="244" height="26" class="xt-head"/>
+                  <g class="xt-lines">
+                    <line x1="178" y1="124" x2="422" y2="124"/><line x1="178" y1="152" x2="422" y2="152"/>
+                    <line x1="178" y1="180" x2="422" y2="180"/><line x1="178" y1="208" x2="422" y2="208"/>
+                    <line x1="240" y1="98" x2="240" y2="222"/><line x1="300" y1="98" x2="300" y2="222"/><line x1="360" y1="98" x2="360" y2="222"/>
+                  </g>
+                  <text x="270" y="116" class="xt-t">North</text><text x="330" y="116" class="xt-t">South</text><text x="391" y="116" class="xt-t">East</text>
+                  <text x="208" y="142" class="xt-t">Tea</text><text x="208" y="170" class="xt-t">Rice</text><text x="208" y="198" class="xt-t">Oil</text>
+                  <text x="270" y="142" class="xt-n">42</text><text x="330" y="142" class="xt-n">35</text><text x="391" y="142" class="xt-n">28</text>
+                  <text x="270" y="170" class="xt-n">51</text><text x="330" y="170" class="xt-n">47</text><text x="391" y="170" class="xt-n">39</text>
+                  <text x="270" y="198" class="xt-n">18</text><text x="330" y="198" class="xt-n">22</text><text x="391" y="198" class="xt-n">16</text>
+                </g>
+                <path class="pencil" d="M440 214 l26 -26 l8 8 l-26 26 z M440 214 l-6 14 l14 -6"/>
+              </g>
+            </g>
+
+            <!-- 2. Atlas with index = pivot table -->
+            <g class="era era-1">
+              <path class="book" d="M120 74 Q210 60 300 80 L300 268 Q210 248 120 262 Z"/>
+              <path class="book" d="M300 80 Q390 60 480 74 L480 262 Q390 248 300 268 Z"/>
+              <line x1="300" y1="80" x2="300" y2="268" class="spine"/>
+              <g class="map-blobs">
+                <path d="M150 110 q30 -16 60 0 q24 14 50 -4 l18 36 q-40 30 -80 14 q-34 -10 -48 -46z"/>
+                <path d="M160 190 q36 -10 70 6 q20 10 46 0 l-4 40 q-50 10 -90 -4 q-20 -16 -22 -42z"/>
+              </g>
+              <circle cx="232" cy="148" r="9" class="hit"/>
+              <text x="320" y="104" class="idx-h">INDEX</text>
+              <g class="idx">
+                <text x="320" y="132">Chennai ........ 12</text>
+                <text x="320" y="156" class="idx-on">Kochi .......... 18</text>
+                <text x="320" y="180">Madurai ........ 21</text>
+                <text x="320" y="204">Mysuru ......... 27</text>
+                <text x="320" y="228">Pune ........... 34</text>
+              </g>
+              <rect x="314" y="142" width="152" height="20" rx="6" class="idx-mark"/>
+              <path d="M314 152 C 280 152, 270 150, 244 148" class="idx-arrow"/>
+            </g>
+
+            <!-- 3. Globe = data cube -->
+            <g class="era era-2">
+              <circle cx="300" cy="166" r="104" class="globe"/>
+              <g class="meridians">
+                <ellipse cx="300" cy="166" rx="104" ry="104" class="m m1"/>
+                <ellipse cx="300" cy="166" rx="70" ry="104" class="m m2"/>
+                <ellipse cx="300" cy="166" rx="34" ry="104" class="m m3"/>
+              </g>
+              <ellipse cx="300" cy="126" rx="96" ry="14" class="lat"/>
+              <ellipse cx="300" cy="166" rx="104" ry="18" class="lat"/>
+              <ellipse cx="300" cy="206" rx="96" ry="14" class="lat"/>
+              <path d="M300 62 L300 52" class="axis"/><path d="M300 270 L300 280" class="axis"/>
+              <path d="M240 290 L360 290" class="stand"/>
+            </g>
+
+            <!-- 4. Phone map = interactive BI -->
+            <g class="era era-3">
+              <rect x="226" y="40" width="148" height="264" rx="22" class="phone"/>
+              <rect x="236" y="62" width="128" height="214" rx="8" class="screen"/>
+              <clipPath id="phone-screen"><rect x="236" y="62" width="128" height="214" rx="8"/></clipPath>
+              <g clip-path="url(#phone-screen)"><g class="zoomable">
+                <path d="M236 120 L364 160" class="road"/>
+                <path d="M270 62 L300 276" class="road"/>
+                <path d="M236 230 C 290 200, 320 230, 364 200" class="road thin"/>
+                <path d="M330 62 L350 276" class="road thin"/>
+                <g class="pin"><path d="M296 150 c0 -14 22 -14 22 0 c0 10 -11 22 -11 22 c0 0 -11 -12 -11 -22z"/><circle cx="307" cy="150" r="4" class="pin-dot"/></g>
+              </g></g>
+              <g class="fingers"><circle cx="264" cy="236" r="9"/><circle cx="338" cy="236" r="9"/></g>
+            </g>
+
+            <!-- 5. Voice GPS = AI-enabled BI -->
+            <g class="era era-4">
+              <rect x="176" y="40" width="148" height="264" rx="22" class="phone"/>
+              <rect x="186" y="62" width="128" height="214" rx="8" class="screen"/>
+              <path d="M200 262 C 220 220, 240 210, 250 170 S 280 110, 300 80" class="route"/>
+              <path d="M250 170 C 262 150, 268 130, 296 120" class="route-jam"/>
+              <circle cx="250" cy="170" r="6" class="me"/>
+              <g class="bubble">
+                <path d="M340 92 h170 a14 14 0 0 1 14 14 v52 a14 14 0 0 1 -14 14 h-150 l-20 18 v-18 a14 14 0 0 1 -14 -14 v-52 a14 14 0 0 1 14 -14z" class="bubble-bg"/>
+                <text x="356" y="120" class="bubble-t">🔊 Traffic ahead.</text>
+                <text x="356" y="144" class="bubble-s">Faster route saves 9 min</text>
+              </g>
+              <g class="sparkle"><path d="M480 210 l6 16 l16 6 l-16 6 l-6 16 l-6 -16 l-16 -6 l16 -6z"/></g>
+            </g>
+          </svg>
+
+          <ol class="nav-timeline">
+            <li class="tl tl-0"><b></b><span>Cross tab</span></li>
+            <li class="tl tl-1"><b></b><span>Pivot</span></li>
+            <li class="tl tl-2"><b></b><span>Data cube</span></li>
+            <li class="tl tl-3"><b></b><span>Interactive BI</span></li>
+            <li class="tl tl-4"><b></b><span>AI-enabled BI</span></li>
+          </ol>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Paper map → Cross tab.</strong> A fixed grid you read by hand. New question? Draw a new map.</li>
+            <li><strong>Atlas index → Pivot table.</strong> Look up what you need and jump straight to it.</li>
+            <li><strong>Globe → Data cube.</strong> Every angle is pre-built. Just turn it.</li>
+            <li><strong>Phone map → Interactive BI.</strong> Pinch, zoom and tap. You explore it yourself.</li>
+            <li><strong>Voice GPS → AI-enabled BI.</strong> It warns you <em>before</em> you hit the jam.</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>Explain more</summary>
+    <section class="stage">
       <span class="stage-num">01</span>
       <h2>Cross Tabs to Pivot Tables</h2>
       <p>
@@ -117,7 +336,7 @@
       <figure><img src="../assets/images/Stages_of_DataAnalysis.png" alt="Diagram showing the stages of data analysis from business question to insight"></figure>
     </section>
 
-    <section class="stage srg-reveal">
+    <section class="stage">
       <span class="stage-num">02</span>
       <h2>Interactive BI to AI-Enabled Insights</h2>
       <p>
@@ -128,6 +347,8 @@
         <li><strong>AI-Enabled BI:</strong> Natural language queries, anomaly detection, and predictive insights surface patterns proactively so teams act before trends fade.</li>
       </ol>
       <figure><img src="../assets/images/Stages_of_DataAnalysis1.png" alt="Flow diagram depicting data preparation, modeling, and storytelling stages"></figure>
+    </section>
+      </details>
     </section>
   </div>
 </body>

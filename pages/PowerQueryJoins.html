@@ -6,6 +6,8 @@
   <title>Purchases vs Payments Join Visualizer</title>
   <link rel="stylesheet" href="../assets/site.css" />
   <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
   <style>
     /* Page palette: joins use an orange "result" highlight. */
     :root { --join: rgb(234 88 12); --join-rgb: 234 88 12; --join-ink: #9a3412; --viz-bg: #fffdf2; }
@@ -172,6 +174,29 @@
       .layout { grid-template-columns: 1fr; }
       .tables-row { grid-template-columns: 1fr; }
     }
+  
+    /* ---------- Analogy scene: wedding guest lists ---------- */
+    .story-head h2 { color: var(--ink); }
+    .venn-stage { min-height: 380px; }
+    .venn-svg { position: absolute; inset: 0 0 40px 0; height: calc(100% - 40px) !important; }
+    .rg { fill: rgb(var(--join-rgb) / .0); transition: fill .5s ease; }
+    .rg.on { fill: rgb(var(--join-rgb) / .32); }
+    .ring { fill: none; stroke-width: 2.5; }
+    .ring-a { stroke: #db2777; }
+    .ring-b { stroke: #2563eb; }
+    .v-title { font: 700 14px var(--font); fill: var(--ink); text-anchor: middle; }
+    .guests { position: absolute; inset: 0 0 40px 0; }
+    .guest { position: absolute; translate: -50% -50%; padding: 4px 10px 4px 8px; border-radius: 999px; white-space: nowrap;
+      font: 600 .82rem var(--font); color: var(--ink); background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow);
+      transition: opacity .4s ease, transform .5s var(--ease-spring), border-color .3s ease, background .3s ease; }
+    .guest i { font-style: normal; display: inline-block; width: 0; overflow: hidden; vertical-align: bottom; transition: width .3s ease; }
+    .guest.in { border-color: rgb(var(--join-rgb) / .8); background: color-mix(in srgb, var(--panel-solid) 80%, rgb(var(--join-rgb))); transform: scale(1.06); }
+    .guest.in i { width: 1.3em; }
+    .guest.out { opacity: .28; transform: scale(.92); }
+    .venn-badge { position: absolute; left: 50%; bottom: 10px; translate: -50% 0; padding: 6px 14px; border-radius: 999px; white-space: nowrap;
+      font: 600 .88rem var(--font); background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--muted); }
+    .venn-badge #venn-join { color: var(--join); font-weight: 800; }
+    .venn-badge b { color: var(--ink); }
   </style>
 </head>
 <body>
@@ -179,6 +204,45 @@
   <h1>Purchases vs. Payments</h1>
   <p class="subtitle">Visualizing accounting data relationships with Power Query Joins</p>
 </header>
+
+<section id="analogy" class="story srg-reveal" data-story data-delay="3800" aria-labelledby="join-story-title">
+  <header class="story-head">
+    <p class="story-kicker">Real-world analogy</p>
+    <h2 id="join-story-title">Two wedding guest lists</h2>
+    <p>The bride's family and the groom's family each send a guest list. Every join is just a rule for <em>whose invitations get printed</em>.</p>
+  </header>
+  <div class="story-body">
+    <div class="story-stage venn-stage" id="venn-stage" aria-hidden="true">
+      <svg viewBox="0 0 600 340" class="venn-svg">
+        <defs>
+          <clipPath id="vA"><circle cx="235" cy="170" r="128"/></clipPath>
+          <mask id="vNotB"><rect width="600" height="340" fill="#fff"/><circle cx="365" cy="170" r="128" fill="#000"/></mask>
+          <mask id="vNotA"><rect width="600" height="340" fill="#fff"/><circle cx="235" cy="170" r="128" fill="#000"/></mask>
+        </defs>
+        <circle cx="235" cy="170" r="128" class="rg rg-l" mask="url(#vNotB)"/>
+        <circle cx="365" cy="170" r="128" class="rg rg-m" clip-path="url(#vA)"/>
+        <circle cx="365" cy="170" r="128" class="rg rg-r" mask="url(#vNotA)"/>
+        <circle cx="235" cy="170" r="128" class="ring ring-a"/>
+        <circle cx="365" cy="170" r="128" class="ring ring-b"/>
+        <text x="150" y="30" class="v-title">👰🏽 Bride's list</text>
+        <text x="450" y="30" class="v-title">🤵🏽 Groom's list</text>
+      </svg>
+      <div class="guests" id="venn-guests"></div>
+      <div class="venn-badge"><span id="venn-join">Two lists</span> · Invitations: <b id="venn-count">8 names</b></div>
+    </div>
+    <div class="story-side">
+      <ol class="story-steps">
+        <li><strong>Two lists.</strong> Deepak and Esha appear on both. They are the “matching keys”.</li>
+        <li><strong>Inner join:</strong> only guests on <em>both</em> lists.</li>
+        <li><strong>Left anti:</strong> bride's side only, nobody the groom also invited.</li>
+        <li><strong>Right anti:</strong> groom's side only.</li>
+        <li><strong>Left outer:</strong> the whole bride's list, with groom's details where they match.</li>
+        <li><strong>Right outer:</strong> the whole groom's list.</li>
+        <li><strong>Full outer:</strong> everyone, with shared guests printed only once.</li>
+      </ol>
+    </div>
+  </div>
+</section>
 
 <div class="layout">
   
@@ -456,6 +520,55 @@
 
   updateVisuals('inner');
 
+
+  // ---- Analogy scene: two wedding guest lists as joins ----
+  (function () {
+    const story = document.getElementById('analogy');
+    const host = document.getElementById('venn-guests');
+    if (!story || !host) return;
+    // side: L = bride only, M = both lists, R = groom only. x/y are % of the scene.
+    const GUESTS = [
+      { n: 'Anita', s: 'L', x: 24, y: 30 }, { n: 'Bala', s: 'L', x: 20, y: 50 }, { n: 'Chitra', s: 'L', x: 26, y: 70 },
+      { n: 'Deepak', s: 'M', x: 50, y: 40 }, { n: 'Esha', s: 'M', x: 50, y: 62 },
+      { n: 'Farhan', s: 'R', x: 75, y: 30 }, { n: 'Gopal', s: 'R', x: 80, y: 50 }, { n: 'Hari', s: 'R', x: 74, y: 70 }
+    ];
+    const els = GUESTS.map(g => {
+      const d = document.createElement('div');
+      d.className = 'guest';
+      d.style.left = g.x + '%';
+      d.style.top = g.y + '%';
+      d.innerHTML = `<i>✉️</i>${g.n}`;
+      host.appendChild(d);
+      return d;
+    });
+    const regions = { L: story.querySelector('.rg-l'), M: story.querySelector('.rg-m'), R: story.querySelector('.rg-r') };
+    const STEPS = [
+      { name: 'Two lists', keep: null },
+      { name: 'Inner join', keep: ['M'] },
+      { name: 'Left anti join', keep: ['L'] },
+      { name: 'Right anti join', keep: ['R'] },
+      { name: 'Left outer join', keep: ['L', 'M'] },
+      { name: 'Right outer join', keep: ['M', 'R'] },
+      { name: 'Full outer join', keep: ['L', 'M', 'R'] }
+    ];
+    const joinEl = document.getElementById('venn-join');
+    const countEl = document.getElementById('venn-count');
+    function show(step) {
+      const s = STEPS[step];
+      joinEl.textContent = s.name;
+      Object.entries(regions).forEach(([k, r]) => r.classList.toggle('on', !!s.keep && s.keep.includes(k)));
+      let n = 0;
+      els.forEach((e, i) => {
+        const inn = !!s.keep && s.keep.includes(GUESTS[i].s);
+        e.classList.toggle('in', inn);
+        e.classList.toggle('out', !!s.keep && !inn);
+        if (inn) n++;
+      });
+      countEl.textContent = s.keep ? `${n} printed` : `${GUESTS.length} names`;
+    }
+    story.addEventListener('story:step', (e) => show(e.detail.step));
+    show(Number(story.dataset.step || 0));
+  })();
 </script>
 
 </body>
