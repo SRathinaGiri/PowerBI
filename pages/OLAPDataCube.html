@@ -598,7 +598,12 @@
         .drilling-visuals-container { flex-wrap: wrap !important; align-items: center !important; }
         .drilled-view { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: min(560px, 100%); }
         .drilled-view[hidden] { display: none; }
-        #drilled-stage { height: 260px; }
+        #drilled-stage { height: 260px; transition: height .5s var(--ease-out); }
+        #drilled-stage.two-tier { height: 380px; }
+        .box.picked .bface { filter: brightness(1.15) saturate(1.15); box-shadow: 0 0 0 3px rgb(var(--accent-2-rgb) / .9) inset; }
+        /* Fade the faces, not the box: opacity on a preserve-3d element flattens it. */
+        .box.muted-box .bface { opacity: .45; transition: opacity .4s ease; }
+        .box.muted-box:hover .bface { opacity: .8; }
         #drilled-table-container { width: min(520px, 100%); }
         #drilled-data-table, #detailed-data-table { width: 100%; border-collapse: collapse; }
         #drilled-data-table th, #drilled-data-table td { border: 1px solid var(--border-strong); padding: 8px 10px; text-align: center; }
@@ -633,7 +638,8 @@
         .level-stepper .step.active { background: var(--accent); color: var(--on-accent); border-color: transparent; box-shadow: 0 6px 16px rgb(var(--accent-rgb) / .3); }
         .level-stepper .step-arrow { color: var(--muted); }
         .rolling-visuals-container { flex-direction: column !important; align-items: center !important; gap: 18px !important; width: 100%; }
-        .roll-stage { height: 500px; }
+        .roll-stage { height: 440px; }
+        .box.tier-below .bface { filter: saturate(.85); opacity: .8; }
         #detailed-table-container { flex: none !important; width: min(1100px, 100%) !important; max-width: 100% !important; }
         .table-scroll { overflow-x: auto; }
         #detailed-data-table th, #detailed-data-table td { border: 1px solid var(--border-strong); padding: 7px 9px; text-align: center; white-space: nowrap; font-size: .9rem; }
@@ -641,6 +647,20 @@
         #detailed-data-table thead th.total-cell { color: #fff !important; }
         .cell-label { display: block; font-size: .72rem; color: var(--muted); }
         #detailed-data-table tbody th[class*="-color"], #drilled-data-table tbody th[class*="-color"] { color: #fff; }
+    
+        /* --- Phone layout: stack cube + table, shrink 3D scenes, scroll wide tables in place --- */
+        @media (max-width: 640px) {
+            .visuals-container, .drilling-visuals-container, .rolling-visuals-container, #diced-cube-visuals, #sliced-cube-visuals, .slicing-ui, .dicing-ui {
+                flex-direction: column !important; align-items: center !important; gap: 16px !important; width: 100%; }
+            .cube-container { zoom: .68; margin-top: 10px; }
+            .box-stage { zoom: .62; }
+            .table-container { width: 100% !important; max-width: 100% !important; flex: none !important; overflow-x: auto; padding: 14px; }
+            .slicing-radios { grid-template-columns: 1fr; justify-items: stretch; }
+            .slicing-controls, .dicing-controls, .rolling-controls, .cube-controls { flex-wrap: wrap; justify-content: center; }
+            .description, .puzzle-box { width: 100%; }
+            .page h2 { font-size: 1.5rem; }
+            #rolled-up-cube-container { margin: 0; flex: none; }
+        }
     </style>
 </head>
 <body>
@@ -850,7 +870,7 @@
         <div id="rolling" class="page">
             <h2>Rolling Up</h2>
             <div class="description">
-                <p><strong>Rolling Up</strong> is the reverse of drilling: detail is aggregated into broader groups. Watch <strong>Months merge into Quarters, then into Years</strong> (or <strong>Addresses → Streets → Regions</strong>). The Total column never changes, because rolling up only regroups the same sales. Drag the blocks to rotate; double-click to reset. ⬆️</p>
+                <p><strong>Rolling Up</strong> is the reverse of drilling: detail is aggregated into broader groups. Watch small <strong>Month</strong> cubes merge into <strong>Quarter</strong> cubes, then into one <strong>Year</strong> cube, with each level staying visible (or <strong>Addresses → Streets → Regions</strong>). The Total column never changes, because rolling up only regroups the same sales. Drag the blocks to rotate; double-click to reset. ⬆️</p>
             </div>
             <div class="rolling-controls">
                 <div class="seg" role="radiogroup" aria-label="Hierarchy to roll up">
@@ -874,6 +894,7 @@
                         <option value="2">Delhi</option>
                     </select>
                 </label>
+                <label class="roll-filter" id="roll-focus-label">Tiers for year <select id="roll-focus"></select></label>
                 <label class="roll-filter" id="roll-year-filter" hidden>Year
                     <select id="roll-year">
                         <option value="all">All years</option>
@@ -1760,7 +1781,7 @@
             renderDrill(true);
         }
 
-        function drillInto(i) { if (drillPath && drillPath.child === null) { drillPath.child = i; renderDrill(true); } }
+        function drillInto(i) { if (drillPath && drillPath.child !== i) { drillPath.child = i; renderDrill(true); } }
 
         function drillUp() {
             if (!drillPath) return;
@@ -1785,6 +1806,7 @@
             document.getElementById('drill-up-btn').disabled = !drillPath;
             if (!drillPath) {
                 view.hidden = true;
+                document.getElementById('drilled-cube').dataset.level = '0'; // next drill fans out of the cell again
                 crumb.innerHTML = '<span class="crumb now">👆 Click any cell of the cube to drill down</span>';
                 return;
             }
@@ -1809,27 +1831,48 @@
             const total = sum(members.map(m => m.value));
             const colorClass = dp.colorClass;
             const world = document.getElementById('drilled-cube');
+            const motion = animate && !reduceMotion();
+            const prevLevel = world.dataset.level ? Number(world.dataset.level) : 0;
             world.innerHTML = '';
-            const s = 84, gap = 16, n = members.length;
-            members.forEach((m, i) => {
-                const x = (i - (n - 1) / 2) * (s + gap);
-                const box = makeBox({
-                    w: s, h: s, d: s, x, y: 0, label: m.label, value: m.value, colorClass,
-                    tooltip: `${names[level]}: ${m.full || m.label}\nProduct: ${dp.product}\n${isTime ? 'Region: ' + dp.region : 'Year: ' + dp.year}\nSales: ${m.value}`
-                });
-                if (level === 1) {
-                    box.classList.add('drillable');
-                    box.addEventListener('click', () => drillInto(i));
-                }
+            world.dataset.level = String(level);
+            document.getElementById('drilled-stage').classList.toggle('two-tier', level === 2);
+            const tip = (lvl, m) => `${names[lvl]}: ${m.full || m.label}\nProduct: ${dp.product}\n${isTime ? 'Region: ' + dp.region : 'Year: ' + dp.year}\nSales: ${m.value}`;
+
+            // Tier 1 (quarters / streets) stays on screen even after drilling deeper,
+            // so you can see which block was broken open.
+            const mid = drillMembers({ ...dp, child: null });
+            const S1 = 84, G1 = 16, Y1 = level === 2 ? -78 : 0;
+            const midX = (i) => (i - (mid.length - 1) / 2) * (S1 + G1);
+            mid.forEach((m, i) => {
+                const box = makeBox({ w: S1, h: S1, d: S1, x: midX(i), y: Y1, label: m.label, value: m.value, colorClass, tooltip: tip(1, m) });
+                box.classList.add('drillable');
+                if (level === 2) box.classList.add(i === dp.child ? 'picked' : 'muted-box');
+                box.addEventListener('click', () => drillInto(i));
                 world.appendChild(box);
-                if (animate && !reduceMotion()) {
-                    // Members fan out of the clicked cell, like slicing it open.
-                    box.animate(
-                        [{ transform: 'translate3d(0px, 0px, 0px) scale(.3)', opacity: 0 }, { transform: box.style.transform, opacity: 1 }],
-                        { duration: 650, delay: i * 70, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }
-                    );
+                if (motion && prevLevel === 0) {
+                    // Quarters fan out of the clicked cube cell.
+                    box.animate([{ transform: 'translate3d(0px, 0px, 0px) scale(.3)', opacity: 0 }, { transform: box.style.transform, opacity: 1 }],
+                        { duration: 650, delay: i * 70, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' });
+                } else if (motion && prevLevel === 2 && level === 1) {
+                    box.animate([{ transform: `translate3d(${midX(i)}px, -78px, 0px)` }, { transform: box.style.transform }],
+                        { duration: 500, easing: 'cubic-bezier(.22,1,.36,1)' });
                 }
             });
+
+            // Tier 2 (months / addresses): smaller cubes in the same colour, split
+            // out of the picked block.
+            if (level === 2) {
+                const S2 = 60, G2 = 14, Y2 = 72;
+                members.forEach((m, i) => {
+                    const x = (i - (members.length - 1) / 2) * (S2 + G2);
+                    const box = makeBox({ w: S2, h: S2, d: S2, x, y: Y2, label: m.label, value: m.value, colorClass, tooltip: tip(2, m) });
+                    world.appendChild(box);
+                    if (motion) {
+                        box.animate([{ transform: `translate3d(${midX(dp.child)}px, ${Y1}px, 0px) scale(.4)`, opacity: 0 }, { transform: box.style.transform, opacity: 1 }],
+                            { duration: 700, delay: 120 + i * 90, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' });
+                    }
+                });
+            }
 
             const scope = level === 1 ? `${names[0]} ${parentLabel}` : `${names[1]} ${midLabels[dp.child]}`;
             document.getElementById('drilled-title').innerHTML = `${plural(names[level])} of <strong>${scope}</strong> <span class="muted">(${ctx})</span>`;
@@ -1838,8 +1881,8 @@
                 members.map(m => `<tr><th class="${colorClass}">${m.full || m.label}</th><td>${m.value}</td><td>${(m.value / total * 100).toFixed(1)}%</td></tr>`).join('') +
                 `<tr><th>Total</th><td class="total-cell">${total}</td><td class="total-cell">100%</td></tr>`;
             document.getElementById('drill-hint').innerHTML = level === 1
-                ? `The total <strong>${total}</strong> equals the cube cell you clicked. Click a ${names[1].toLowerCase()} block to drill into its ${plural(names[2]).toLowerCase()}.`
-                : `The total <strong>${total}</strong> equals ${names[1]} ${midLabels[dp.child]}. This is the lowest level; use <strong>⬆ Drill up</strong> to go back.`;
+                ? `The total <strong>${total}</strong> equals the cube cell you clicked. Click a ${names[1].toLowerCase()} block to break it into ${plural(names[2]).toLowerCase()}.`
+                : `The total <strong>${total}</strong> equals ${names[1]} ${midLabels[dp.child]} (the highlighted block above). Click another ${names[1].toLowerCase()} to compare, or <strong>⬆ Drill up</strong>.`;
             view.hidden = false;
         }
 
@@ -1847,7 +1890,7 @@
         // Leaves (months / addresses) sit in rows (years / regions). A parent
         // block spans exactly the width of its children, so rolling up is the
         // children physically sliding together into one block.
-        const ROLL = { dim: 'time', level: 0 };
+        const ROLL = { dim: 'time', level: 0, focus: 0 };
         let rollBusy = false;
         let rollBound = false;
 
@@ -1890,91 +1933,99 @@
             };
         }
 
-        // Cube edge per level (leaf → mid → top): a rolled-up member is a
-        // bigger cube, the way a drilled member is a smaller one.
-        const ROLL_SIZE = [38, 66, 104];
-        const ROLL_GAP = [8, 18, 0];
-        const ROLL_ROW_GAP = 22;
+        // Roll-up pyramid for one focus member (a year or a region): months at the
+        // bottom, quarters above them, the year on top. Lower tiers stay visible,
+        // so you can see which small cubes were merged into each bigger one.
+        const TIER = [
+            { s: 36, y: 128 },   // months / addresses
+            { s: 62, y: 26 },    // quarters / streets
+            { s: 100, y: -100 }  // year / region
+        ];
+        const LEAF_GAP = 6;
 
-        function rollLayout(model, lvl) {
-            const s = ROLL_SIZE[lvl], g = ROLL_GAP[lvl], nRows = model.rows.length;
-            return model.rows.map((row, ri) => {
-                const groups = row.groups[lvl];
-                const y = (ri - (nRows - 1) / 2) * (s * 1.3 + ROLL_ROW_GAP); // room for the tilted top faces
-                return groups.map((grp, i) => ({ grp, s, y, x: (i - (groups.length - 1) / 2) * (s + g) }));
-            });
+        function tierCells(row, t) {
+            const n = row.leaves.length;
+            const leafX = (i) => (i - (n - 1) / 2) * (TIER[0].s + LEAF_GAP);
+            return row.groups[t].map(g => ({
+                g,
+                // Centre each block over the children it was built from.
+                x: (leafX(g.start) + leafX(g.start + g.count - 1)) / 2,
+                y: TIER[t].y,
+                s: TIER[t].s
+            }));
         }
-
-        const contains = (outer, inner) => outer.dataset.row === inner.dataset.row &&
-            +inner.dataset.start >= +outer.dataset.start && +inner.dataset.start < +outer.dataset.start + +outer.dataset.count;
-        const boxAt = (b, scale) => `translate3d(${b.dataset.x}px, ${b.dataset.y}px, 0px) scale(${scale})`;
 
         function renderRoll(fromLevel) {
             hideTooltip(); // the hovered block may be about to disappear
             const model = rollModel();
             const lvl = ROLL.level;
+            const focus = Math.min(ROLL.focus, model.rows.length - 1);
+            const row = model.rows[focus];
             const world = document.getElementById('rolled-up-cube');
-            const old = Array.from(world.children).filter(b => !b.dataset.leaving);
-            const fresh = [];
+            world.innerHTML = '';
+            const motion = fromLevel !== undefined && fromLevel !== lvl && !reduceMotion();
+            const tip = (t, g) => `${model.rowName}: ${row.label}\n${model.names[t]}: ${g.full || g.label}\nSales: ${g.value}`;
 
-            rollLayout(model, lvl).forEach((cells, ri) => {
-                const row = model.rows[ri];
-                cells.forEach(({ grp, s, x, y }) => {
-                    const box = makeBox({
-                        w: s, h: s, d: s, x, y, label: grp.label, value: grp.value, colorClass: row.colorClass,
-                        tooltip: `${model.rowName}: ${row.label}\n${model.names[lvl]}: ${grp.full || grp.label}\nSales: ${grp.value}`
-                    });
-                    Object.assign(box.dataset, { row: ri, start: grp.start, count: grp.count, x, y, s });
-                    fresh.push(box);
-                });
-            });
-
-            const animate = fromLevel !== undefined && fromLevel !== lvl && old.length && !reduceMotion();
-            if (animate && lvl > fromLevel) {
-                // Roll up: children fly into their parent's spot and are absorbed,
-                // then the parent cube grows out of them.
-                old.forEach(b => {
-                    const parent = fresh.find(n => contains(n, b));
-                    b.dataset.leaving = '1';
-                    b.animate(
-                        [{ transform: b.style.transform, opacity: 1 },
-                         { transform: boxAt(parent, 0.55), opacity: 0 }],
-                        { duration: 560, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }
-                    ).finished.then(() => b.remove(), () => b.remove());
-                });
-                fresh.forEach(n => {
-                    world.appendChild(n);
-                    n.animate(
-                        [{ transform: boxAt(n, 0.35), opacity: 0 }, { transform: n.style.transform, opacity: 1 }],
-                        { duration: 520, delay: 380, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards' }
-                    );
-                });
-            } else if (animate) {
-                // Drill back down: the parent shrinks away and its children fan out of it.
-                old.forEach(b => {
-                    b.dataset.leaving = '1';
-                    b.animate([{ transform: b.style.transform, opacity: 1 }, { transform: boxAt(b, 0.6), opacity: 0 }],
-                        { duration: 260, fill: 'forwards' }).finished.then(() => b.remove(), () => b.remove());
-                });
-                fresh.forEach((n, i) => {
-                    const parent = old.find(o => contains(o, n));
-                    world.appendChild(n);
-                    if (parent) {
-                        n.animate(
-                            [{ transform: boxAt(parent, 0.3), opacity: 0 }, { transform: n.style.transform, opacity: 1 }],
-                            { duration: 620, delay: 120 + (i % 12) * 25, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }
-                        );
+            const cellsByTier = [0, 1, 2].map(t => tierCells(row, t));
+            for (let t = 0; t <= lvl; t++) {
+                cellsByTier[t].forEach(({ g, x, y, s }) => {
+                    const box = makeBox({ w: s, h: s, d: s, x, y, label: g.label, value: g.value, colorClass: row.colorClass, tooltip: tip(t, g) });
+                    box.classList.add(t === lvl ? 'tier-now' : 'tier-below');
+                    world.appendChild(box);
+                    if (motion && lvl > fromLevel && t === lvl) {
+                        box.animate([{ transform: `translate3d(${x}px, ${y}px, 0px) scale(.3)`, opacity: 0 }, { transform: box.style.transform, opacity: 1 }],
+                            { duration: 560, delay: 420, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards' });
                     }
                 });
-            } else {
-                world.innerHTML = '';
-                fresh.forEach(n => world.appendChild(n));
+            }
+
+            if (motion && lvl > fromLevel) {
+                // Copies of each child fly up into their parent and are absorbed.
+                for (let t = fromLevel; t < lvl; t++) {
+                    const parents = cellsByTier[t + 1];
+                    cellsByTier[t].forEach(({ g, x, y, s }) => {
+                        const par = parents.find(p => g.start >= p.g.start && g.start < p.g.start + p.g.count);
+                        const ghost = makeBox({ w: s, h: s, d: s, x, y, label: g.label, value: g.value, colorClass: row.colorClass });
+                        ghost.dataset.leaving = '1';
+                        world.appendChild(ghost);
+                        ghost.animate([{ transform: ghost.style.transform, opacity: 1 },
+                                       { transform: `translate3d(${par.x}px, ${par.y}px, 0px) scale(.5)`, opacity: 0 }],
+                            { duration: 640, delay: (t - fromLevel) * 300, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' })
+                            .finished.then(() => ghost.remove(), () => ghost.remove());
+                    });
+                }
+            } else if (motion) {
+                // Drilling back down: the removed tier shrinks back into its children.
+                for (let t = fromLevel; t > lvl; t--) {
+                    cellsByTier[t].forEach(({ g, x, y, s }) => {
+                        const ghost = makeBox({ w: s, h: s, d: s, x, y, label: g.label, value: g.value, colorClass: row.colorClass });
+                        ghost.dataset.leaving = '1';
+                        world.appendChild(ghost);
+                        ghost.animate([{ transform: ghost.style.transform, opacity: 1 },
+                                       { transform: `translate3d(${x}px, ${TIER[t - 1].y}px, 0px) scale(.3)`, opacity: 0 }],
+                            { duration: 480, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' })
+                            .finished.then(() => ghost.remove(), () => ghost.remove());
+                    });
+                }
             }
 
             renderRollTable(model);
             renderRollStepper(model);
+            syncRollFocus(model);
             document.getElementById('roll-up-btn').disabled = lvl === 2;
             document.getElementById('roll-down-btn').disabled = lvl === 0;
+        }
+
+        // "Tiers for" selector: which year (Time) or region (Region) the pyramid shows.
+        function syncRollFocus(model) {
+            const sel = document.getElementById('roll-focus');
+            const labels = model.rows.map(r => r.label);
+            if (sel.dataset.dim !== ROLL.dim) {
+                sel.innerHTML = labels.map((l, i) => `<option value="${i}">${l}</option>`).join('');
+                sel.dataset.dim = ROLL.dim;
+            }
+            sel.value = String(ROLL.focus);
+            document.getElementById('roll-focus-label').firstChild.textContent = `Tiers for ${model.rowName.toLowerCase()} `;
         }
 
         function renderRollTable(model) {
@@ -2027,10 +2078,12 @@
             document.querySelectorAll('input[name="rollup-option"]').forEach(r => r.addEventListener('change', () => {
                 ROLL.dim = r.value;
                 ROLL.level = 0;
+                ROLL.focus = 0;
                 syncRollFilters();
                 renderRoll();
             }));
             ['roll-product', 'roll-region', 'roll-year'].forEach(id => document.getElementById(id).addEventListener('change', () => renderRoll()));
+            document.getElementById('roll-focus').addEventListener('change', (e) => { ROLL.focus = Number(e.target.value); renderRoll(); });
             document.getElementById('roll-up-btn').addEventListener('click', () => setRollLevel(ROLL.level + 1));
             document.getElementById('roll-down-btn').addEventListener('click', () => setRollLevel(ROLL.level - 1));
         }
@@ -2046,6 +2099,7 @@
             document.querySelector('input[name="rollup-option"][value="time"]').checked = true;
             ROLL.dim = 'time';
             ROLL.level = 0;
+            ROLL.focus = 0;
             ['roll-product', 'roll-region', 'roll-year'].forEach(id => { document.getElementById(id).value = 'all'; });
             syncRollFilters();
             const world = document.getElementById('rolled-up-cube');
