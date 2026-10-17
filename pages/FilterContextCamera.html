@@ -4,48 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Filter Context Spotlight – Camera Analogy</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <style>
-    :root {
-      --bg:#0b1220;
-      --panel:#0f172a;
-      --ink:#e5edff;
-      --muted:#9fb3c8;
-      --accent:#60a5fa;
-      --accent-2:#a78bfa;
-      --accent-3:#34d399;
-      --warn:#fbbf24;
-    }
+    /* Page palette: this lesson's secondary accent is violet. */
+    :root { --accent-2: var(--violet); }
 
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: radial-gradient(1200px 820px at 70% 15%, #1b2744 0%, #0b1220 55%, #050914 100%);
       color: var(--ink);
-      font: 16px/1.4 "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      font: 16px/1.45 var(--font);
       min-height: 100vh;
     }
 
     header {
-      padding: 18px 20px 8px;
+      padding: 22px 20px 10px;
       text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(6px);
-      background: linear-gradient(180deg, rgba(11,18,32,.92), rgba(11,18,32,.35) 70%, rgba(11,18,32,0));
-      border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    header h1 { margin: .2rem 0 .35rem; font-size: clamp(22px, 3vw, 34px); }
+    header h1 { margin: .2rem 0 .4rem; font: 700 clamp(24px, 3.4vw, 40px)/1.15 var(--font-display); letter-spacing: -.02em; }
     header p { margin: 0; color: var(--muted); }
-    .back-row { display: flex; justify-content: flex-start; margin-bottom: .4rem; }
-    .back-link { 
-      display: inline-flex; align-items: center; gap: .45rem; 
-      padding: .55rem 1.1rem; border-radius: 999px; 
-      background: rgba(96,165,250,.15); color: #dbeafe; 
-      text-decoration: none; font-weight: 700; letter-spacing: .01em;
-      transition: background .2s ease, transform .2s ease;
-    }
-    .back-link:hover { background: rgba(96,165,250,.25); transform: translateY(-2px); }
 
     .wrap {
       max-width: 1400px;
@@ -58,44 +36,42 @@
     @media (max-width: 1024px) { .wrap { grid-template-columns: 1fr; } }
 
     .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 18px;
-      padding: 14px 16px;
-      box-shadow: 0 12px 32px rgba(0,0,0,.35);
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
     .panel h2 { margin: .2rem 0 8px; font-size: 18px; }
     .panel p { margin: 0 0 10px; color: var(--muted); }
-    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(255,255,255,.12); background: rgba(96,165,250,.15); color: #dbeafe; font-weight: 700; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border:1px solid rgb(var(--fg-rgb) / .12); background: rgb(var(--accent-rgb) / .15); color: var(--accent-ink); font-weight: 700; }
     .control { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin: 8px 0; }
     
     select, button {
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.15);
+      background: var(--control-bg);
+      border: 1px solid var(--border-strong);
+      font-family: inherit;
       color: var(--ink);
       padding: 8px 10px;
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
     }
-    /* Dropdown Options Dark Theme Fix */
-    select option {
-      background-color: var(--panel);
-      color: var(--ink);
-    }
 
-    button { transition: transform .15s ease, background .15s ease; }
-    button:hover { transform: translateY(-1px); background: rgba(96,165,250,.15); }
+    button { transition: transform .25s var(--ease-spring), background .2s ease; }
+    button:active { transform: scale(.96); }
+    button:hover { transform: translateY(-1px); background: rgb(var(--accent-rgb) / .15); }
     .ghost { color: var(--muted); font-weight: 500; }
 
     .stage {
       position: relative;
       min-height: 720px;
       border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: radial-gradient(120% 80% at 50% 0%, rgba(96,165,250,.18), rgba(96,165,250,.04)), linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      border: 1px solid rgb(var(--fg-rgb) / .08);
+      background: radial-gradient(120% 80% at 50% 0%, rgb(var(--accent-rgb) / .18), rgb(var(--accent-rgb) / .04)), linear-gradient(180deg, rgb(var(--fg-rgb) / .04), rgb(var(--fg-rgb) / .01));
       overflow: hidden;
-      box-shadow: 0 14px 42px rgba(0,0,0,.4);
+      box-shadow: var(--shadow-lg);
       padding: 230px 16px 20px;
       display: flex;
       flex-direction: column;
@@ -122,10 +98,10 @@
       position: relative;
       padding: 18px; 
       border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.1);
-      background: rgba(255,255,255,.02);
-      box-shadow: 0 8px 18px rgba(0,0,0,.2);
-      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, filter .18s ease;
+      border: 1px solid rgb(var(--fg-rgb) / .1);
+      background: rgb(var(--fg-rgb) / .02);
+      box-shadow: var(--shadow);
+      transition: transform .45s var(--ease-spring), box-shadow .3s ease, opacity .35s ease, filter .35s ease, border-color .3s ease;
       display: grid;
       grid-template-columns: auto 1fr;
       gap: 14px;
@@ -136,15 +112,15 @@
       border-radius: 18px;
       display: grid; place-items: center;
       font-size: 32px;
-      background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.2), rgba(255,255,255,.05));
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: inset 0 6px 12px rgba(0,0,0,.35);
+      background: radial-gradient(circle at 40% 35%, rgb(var(--fg-rgb) / .2), rgb(var(--fg-rgb) / .05));
+      border: 1px solid rgb(var(--fg-rgb) / .1);
+      box-shadow: inset 0 6px 12px rgb(var(--shade-rgb) / .18);
     }
     .person h3 { margin: 0 0 4px; font-size: 17px; }
     .person p { margin: 0; font-size: 13px; color: var(--muted); }
-    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 10px; font-size: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); margin-top: 8px; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 10px; font-size: 12px; background: rgb(var(--fg-rgb) / .05); border: 1px solid rgb(var(--fg-rgb) / .1); margin-top: 8px; }
     
-    .person.lit { box-shadow: 0 12px 28px rgba(52, 211, 153, .35); transform: translateY(-4px); border-color: rgba(52,211,153,.55); }
+    .person.lit { box-shadow: 0 12px 28px rgb(var(--accent-3-rgb) / .35); transform: translateY(-4px); border-color: rgb(var(--accent-3-rgb) / .55); }
     .person.dim { opacity: .35; filter: grayscale(70%); }
 
     /* .BEAM class REMOVED */
@@ -153,10 +129,11 @@
       position: absolute;
       top: 12px; left: 12px; right: 12px;
       padding: 10px 12px;
-      background: rgba(15,23,42,.85);
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 10px 22px rgba(0,0,0,.4);
+      background: color-mix(in srgb, var(--panel-solid) 88%, transparent);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
       display: grid;
       grid-template-columns: auto 1fr;
       align-items: flex-start;
@@ -168,7 +145,7 @@
     .camera strong { color: var(--ink); }
     .camera .content { display: flex; flex-direction: column; gap: 6px; }
     .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: auto; }
-    .stat { flex: 1 1 140px; background: rgba(0,0,0,.35); padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); }
+    .stat { flex: 1 1 140px; background: var(--panel); padding: 10px 12px; border-radius: 12px; border: 1px solid rgb(var(--fg-rgb) / .1); }
     .stat label { display: block; font-size: 12px; color: var(--muted); }
     .stat span { display: block; font-size: 22px; font-weight: 800; }
 
@@ -176,9 +153,9 @@
       margin-top: 12px;
       padding: 12px;
       border-radius: 12px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: inset 0 10px 22px rgba(0,0,0,.3);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
+      box-shadow: inset 0 10px 22px rgb(var(--shade-rgb) / .14);
     }
     .snapshot .title { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 13px; }
     
@@ -197,12 +174,13 @@
       width: 46px;
       height: 46px;
       border-radius: 12px;
-      background: linear-gradient(140deg, rgba(52,211,153,.15), rgba(96,165,250,.15));
-      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(140deg, rgb(var(--accent-3-rgb) / .15), rgb(var(--accent-rgb) / .15));
+      border: 1px solid rgb(var(--fg-rgb) / .12);
       font-size: 24px;
       position: relative;
-      color: #fff;
-      box-shadow: 0 8px 18px rgba(0,0,0,.28);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+      animation: cam-snap .5s var(--ease-spring) both;
       flex-shrink: 0;
     }
     .snap-chip small {
@@ -216,11 +194,12 @@
     }
 
     .legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 0; }
-    .legend .item { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); font-size: 12px; color: var(--muted); }
+    .legend .item { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgb(var(--fg-rgb) / .08); background: rgb(var(--fg-rgb) / .04); font-size: 12px; color: var(--muted); }
     .dot { width: 12px; height: 12px; border-radius: 50%; }
 
-    .scenario { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px; border-radius: 12px; border: 1px dashed rgba(255,255,255,.15); margin: 10px 0; }
-    .scenario button { width: 100%; background: linear-gradient(180deg, rgba(96,165,250,.18), rgba(96,165,250,.05)); color: #dbeafe; }
+    .scenario { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 10px; border-radius: 12px; border: 1px dashed rgb(var(--fg-rgb) / .15); margin: 10px 0; }
+    .scenario button { width: 100%; background: linear-gradient(180deg, rgb(var(--accent-rgb) / .18), rgb(var(--accent-rgb) / .05)); color: var(--accent-ink); }
+    @keyframes cam-snap { from { opacity: 0; transform: scale(.4) rotate(-8deg); } }
     .scenario small { color: var(--muted); }
 
     @media (max-width: 720px) {
@@ -231,11 +210,8 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="back-row">
-      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-    </div>
-    <h1>Filter Context Spotlight – Camera Analogy</h1>
+  <header class="srg-enter">
+<h1>Filter Context Spotlight – Camera Analogy</h1>
     <p>Imagine <strong>Total Sales = SUM(SalesTable[Sales])</strong> as a camera. The filter context is the spotlight deciding which people step into frame.</p>
   </header>
 

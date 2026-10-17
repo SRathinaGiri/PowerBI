@@ -61,6 +61,15 @@ An animated percentage-of-total lab that shows how each function chooses a diffe
 
 Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
 
+🧭 Navigation, Themes & Learning Order
+
+Every page loads two shared files:
+
+* `assets/site.css` — design tokens for **light and dark themes** (follows the OS setting; the sun/moon toggle remembers your choice), plus shared motion (page transitions, scroll reveals; all respect *reduce motion*).
+* `assets/site.js` — the sticky lesson bar with **Home**, **Previous / Next (with topic names)**, a jump-to-any-lesson menu, and an "Up next" card at the end of each page.
+
+The learning path is defined once in the `LESSONS` array in `assets/site.js`: Foundations (Stages of Data Analysis → OLTP vs OLAP → Data Cube Operations → 5D Datacube) → Power Query Joins → Star Schema → DAX (Row vs Filter Context → Calculated Column vs Measure → SUM vs SUMX → Filter Context Camera → Water Plant → Context Transition → ALL family → Date Train) → Choose the Right Chart. To reorder or add a lesson, edit that array (and the matching card on `index.html`).
+
 🚀 How to Use
 
 Just Browse to this page: https://srathinagiri.github.io/PowerBI/index.html

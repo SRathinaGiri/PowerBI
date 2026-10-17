@@ -4,108 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Purchases vs Payments Join Visualizer</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <style>
-    :root {
-      --bg: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-      --panel: #ffffff;
-      --ink: #0f172a;
-      --muted: #64748b;
-      --shadow: rgba(15, 23, 42, 0.08);
-      --border: #e2e8f0;
-    }
+    /* Page palette: joins use an orange "result" highlight. */
+    :root { --join: rgb(234 88 12); --join-rgb: 234 88 12; --join-ink: #9a3412; --viz-bg: #fffdf2; }
+    :root[data-theme="dark"] { --join: rgb(251 146 60); --join-rgb: 251 146 60; --join-ink: #ffd8b5; --viz-bg: rgb(255 200 120 / .05); }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
+      font-family: var(--font);
       color: var(--ink);
       min-height: 100vh;
-      padding-bottom: 3rem;
     }
     header {
       text-align: center;
-      padding: 2rem 1rem 1.5rem;
+      padding: 2.2rem 1rem 1.6rem;
     }
-    h1 { margin: 0; font-size: 2.2rem; color: #1e293b; }
-    .subtitle { margin-top: 0.5rem; color: var(--muted); font-size: 1.1rem; }
-    
+    h1 { margin: 0; font: 700 clamp(1.8rem, 3.4vw, 2.6rem)/1.15 var(--font-display); letter-spacing: -.02em; color: var(--ink); }
+    .subtitle { margin-top: 0.6rem; color: var(--muted); font-size: 1.1rem; }
+
     /* MAIN LAYOUT GRID */
     .layout {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 1.5rem;
       display: grid;
-      /* Split top section into two equal halves */
       grid-template-columns: 1fr 1fr;
       gap: 1.5rem;
       align-items: stretch;
     }
 
     .panel {
-      background: var(--panel);
-      border-radius: 16px;
-      box-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -1px var(--shadow);
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+      backdrop-filter: blur(10px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
       border: 1px solid var(--border);
       padding: 1.5rem;
       height: 100%;
     }
 
     /* --- LEFT COLUMN: Controls + SQL --- */
-    .controls-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
+    .controls-panel { display: flex; flex-direction: column; gap: 1.5rem; }
 
     .field { display: flex; flex-direction: column; gap: 0.5rem; }
-    label { color: var(--muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    
+    label { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
     select {
       padding: 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      border: 1px solid var(--border-strong);
+      font: inherit;
       font-size: 1rem;
-      background: #f8fafc;
-      color: #334155;
+      background: var(--control-bg);
+      color: var(--ink);
       cursor: pointer;
       width: 100%;
+      transition: border-color .2s ease, box-shadow .2s ease;
     }
-    select:focus { outline: 2px solid #2563eb; border-color: transparent; }
+    select:hover { border-color: rgb(var(--accent-rgb) / .5); }
+    select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgb(var(--accent-rgb) / .18); }
 
     /* Logic Box */
     .question-box {
-      background: #eff6ff;
-      border-left: 4px solid #3b82f6;
-      padding: 1rem;
-      border-radius: 0 8px 8px 0;
+      background: rgb(var(--accent-rgb) / .08);
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1.1rem;
+      border-radius: 0 12px 12px 0;
     }
-    .question-text { font-weight: 700; color: #1e3a8a; margin: 0 0 0.25rem 0; font-size: 1.1rem; }
-    .answer-text { color: #334155; line-height: 1.5; margin: 0; font-size: 0.95rem; }
-    
+    .question-text { font-weight: 700; color: var(--accent-ink); margin: 0 0 0.25rem 0; font-size: 1.1rem; }
+    .answer-text { color: var(--ink); opacity: .85; line-height: 1.55; margin: 0; font-size: 0.95rem; }
+
     .pill {
       display: inline-block;
-      background: #fff7ed;
-      color: #c2410c;
-      padding: 0.25rem 0.75rem;
+      background: rgb(var(--join-rgb) / .12);
+      color: var(--join-ink);
+      padding: 0.3rem 0.8rem;
       border-radius: 99px;
       font-weight: 700;
       font-size: 0.85rem;
-      border: 1px solid #ffedd5;
+      border: 1px solid rgb(var(--join-rgb) / .25);
       margin-top: 0.75rem;
     }
 
     /* SQL Box */
-    .sql-wrapper h3 { margin: 0 0 0.5rem 0; font-size: 0.9rem; color: var(--muted); text-transform: uppercase; }
+    .sql-wrapper h3 { margin: 0 0 0.5rem 0; font-size: 0.8rem; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
     .sql-container {
-      background: #1e293b;
-      color: #e2e8f0;
-      padding: 1rem;
-      border-radius: 8px;
-      font-family: 'Cascadia Code', Consolas, monospace;
+      background: var(--code-bg);
+      color: var(--code-ink);
+      padding: 1rem 1.1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-family: var(--mono);
       font-size: 0.9rem;
-      line-height: 1.4;
+      line-height: 1.5;
       white-space: pre-wrap;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
     }
 
     /* --- RIGHT COLUMN: Venn Visual --- */
@@ -114,29 +108,22 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background-color: #FFFDE7; 
-      border-color: rgba(0,0,0,0.05);
+      background: radial-gradient(600px 300px at 50% 0%, rgb(var(--join-rgb) / .08), transparent 70%), var(--viz-bg);
     }
 
-    svg { 
-      width: 100%; 
-      height: 100%;
-      max-height: 400px;
-      display: block; 
-    }
+    svg { width: 100%; height: 100%; max-height: 400px; display: block; }
 
     /* SVG Styles */
-    .circle-base { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 6, 4; }
-    .svg-label { font-family: sans-serif; font-weight: 700; fill: #64748b; font-size: 16px; text-transform: uppercase; pointer-events: none; user-select: none; }
-    .highlight-shape { fill: rgba(249, 115, 22, 0.85); opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
-    .highlight-shape.active { opacity: 1; }
+    .circle-base { fill: var(--panel-solid); stroke: var(--muted); stroke-width: 2; stroke-dasharray: 6, 4; }
+    .svg-label { font-family: var(--font); font-weight: 700; fill: var(--muted); font-size: 16px; text-transform: uppercase; pointer-events: none; user-select: none; }
+    .highlight-shape { fill: rgb(var(--join-rgb) / .85); opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(.94); transition: opacity 0.45s var(--ease-out), transform .6s var(--ease-spring); pointer-events: none; }
+    .highlight-shape.active { opacity: 1; transform: scale(1); }
 
-    .legend { margin-top: 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; color: #64748b; font-weight: 500; }
+    .legend { margin-top: 1rem; display: flex; gap: 1.5rem; font-size: 0.9rem; color: var(--muted); font-weight: 500; }
     .legend-item { display: flex; align-items: center; gap: 0.5rem; }
     .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot.white { background: #fff; border: 1px dashed #94a3b8; }
-    .dot.orange { background: rgba(249, 115, 22, 0.85); }
-
+    .dot.white { background: var(--panel-solid); border: 1px dashed var(--muted); }
+    .dot.orange { background: rgb(var(--join-rgb) / .85); }
 
     /* --- BOTTOM SECTION: TABLES --- */
     .tables-row {
@@ -149,57 +136,46 @@
 
     .table-card {
       background: var(--panel);
-      border-radius: 12px;
+      border-radius: var(--radius);
       border: 1px solid var(--border);
       padding: 1.25rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      box-shadow: var(--shadow);
     }
-    
-    .table-card h3 { margin: 0 0 1rem 0; font-size: 1.1rem; color: #334155; }
+    .table-card h3 { margin: 0 0 1rem 0; font-size: 1.1rem; color: var(--ink); }
 
     /* Result Table (Full Width) */
-    .result-row {
-      grid-column: 1 / -1;
-      margin-top: 1.5rem;
-    }
+    .result-row { grid-column: 1 / -1; margin-top: 1.5rem; }
     .result-card {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid #fed7aa;
+      background: radial-gradient(700px 200px at 0% 0%, rgb(var(--join-rgb) / .08), transparent 70%), var(--panel);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgb(var(--join-rgb) / .35);
       padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
+      box-shadow: 0 10px 30px rgb(var(--join-rgb) / .10);
     }
-    .result-card h3 { color: #c2410c; margin: 0 0 1rem 0; font-size: 1.25rem; }
+    .result-card h3 { color: var(--join); margin: 0 0 1rem 0; font-size: 1.25rem; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 0.75rem; border-bottom: 2px solid #e2e8f0; }
-    td { padding: 0.75rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    th { background: rgb(var(--fg-rgb) / .05); color: var(--muted); font-weight: 600; text-align: left; padding: 0.75rem; border-bottom: 2px solid var(--border); }
+    td { padding: 0.75rem; border-bottom: 1px solid var(--border); color: var(--ink); }
     tr:last-child td { border-bottom: none; }
-    
-    .result-table th { background: #ffedd5; color: #9a3412; border-bottom: 2px solid #fdba74; }
+    tbody tr { transition: background .2s ease; }
+    tbody tr:hover { background: rgb(var(--fg-rgb) / .03); }
+    .result-table tbody tr { animation: srg-rise .45s var(--ease-out) both; }
+    .result-table tbody tr:nth-child(2) { animation-delay: .04s; }
+    .result-table tbody tr:nth-child(3) { animation-delay: .08s; }
+    .result-table tbody tr:nth-child(4) { animation-delay: .12s; }
+    .result-table tbody tr:nth-child(n+5) { animation-delay: .16s; }
+
+    .result-table th { background: rgb(var(--join-rgb) / .12); color: var(--join-ink); border-bottom: 2px solid rgb(var(--join-rgb) / .45); }
 
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
       .tables-row { grid-template-columns: 1fr; }
     }
-    .back-row { display: flex; justify-content: flex-start; margin-bottom: .4rem; }
-    .back-link { 
-      display: inline-flex; align-items: center; gap: .45rem; 
-      padding: .55rem 1.1rem; border-radius: 999px; 
-      background: rgba(96,165,250,.15); color: #10b981; 
-      text-decoration: none; font-weight: 700; letter-spacing: .01em;
-      transition: background .2s ease, transform .2s ease;
-    }
-    .back-link:hover { background: rgba(96,165,250,.25); transform: translateY(-2px); }
-    
   </style>
 </head>
 <body>
-    <div class="back-row">
-      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-    </div>
-
-<header>
+<header class="srg-enter">
   <h1>Purchases vs. Payments</h1>
   <p class="subtitle">Visualizing accounting data relationships with Power Query Joins</p>
 </header>

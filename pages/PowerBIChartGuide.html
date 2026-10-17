@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Power BI Chart Selection Guide</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js" referrerpolicy="no-referrer"></script>
   <style>
     :root {
@@ -152,28 +154,18 @@
       .layout { grid-template-columns: 1fr; }
       .sidebar { position: static; }
     }
-    .back-row { display: flex; justify-content: flex-start; margin-bottom: .4rem; }
-    .back-link { 
-      display: inline-flex; align-items: center; gap: .45rem; 
-      padding: .55rem 1.1rem; border-radius: 999px; 
-      background: rgba(96,165,250,.15); color: #10b981; 
-      text-decoration: none; font-weight: 700; letter-spacing: .01em;
-      transition: background .2s ease, transform .2s ease;
-    }
-    .back-link:hover { background: rgba(96,165,250,.25); transform: translateY(-2px); }
+
+
+
     
   </style>
 </head>
 <body>
-  <header>
+  <header class="srg-enter">
     <h1>Choose the Right Power BI Chart</h1>
     <p class="subtitle">Pick a chart to see when to use it, common scenarios, and a live animated example powered by Apache ECharts.</p>
   </header>
-    <div class="back-row">
-      <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-    </div>
-
-  <div class="layout">
+<div class="layout">
     <aside class="panel sidebar">
       <h2>Chart Library</h2>
       <div id="chartList"></div>
@@ -249,14 +241,14 @@
             grid: { left: 120, right: 60, top: 50, bottom: 50 },
             xAxis: {
               type: 'value',
-              axisLine: { lineStyle: { color: '#94a3b8' } },
-              splitLine: { lineStyle: { color: '#e2e8f0' } }
+              axisLine: { lineStyle: { color: ui.axis } },
+              splitLine: { lineStyle: { color: ui.grid } }
             },
             yAxis: {
               type: 'category',
               data: sorted.map((d) => d.name),
               inverse: true,
-              axisLine: { lineStyle: { color: '#94a3b8' } },
+              axisLine: { lineStyle: { color: ui.axis } },
               axisLabel: { interval: 0 }
             },
             series: [
@@ -313,7 +305,7 @@
           legend: { data: ['Actual', 'Budget'] },
           grid: { left: 50, right: 20, top: 50, bottom: 40 },
           xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'] },
-          yAxis: { type: 'value', axisLine: { lineStyle: { color: '#94a3b8' } }, splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          yAxis: { type: 'value', axisLine: { lineStyle: { color: ui.axis } }, splitLine: { lineStyle: { color: ui.grid } } },
           series: [
             { name: 'Actual', type: 'bar', data: [120, 132, 101, 134, 180, 190], itemStyle: { color: '#2563eb' } },
             { name: 'Budget', type: 'bar', data: [110, 122, 120, 140, 160, 175], itemStyle: { color: '#10b981' } }
@@ -342,7 +334,7 @@
           tooltip: { trigger: 'axis' },
           grid: { left: 50, right: 20, top: 30, bottom: 40 },
           xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'] },
-          yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          yAxis: { type: 'value', splitLine: { lineStyle: { color: ui.grid } } },
           series: [{
             type: 'line',
             data: [320, 340, 360, 330, 370, 420, 440, 460],
@@ -380,7 +372,7 @@
           tooltip: { trigger: 'axis' },
           grid: { left: 50, right: 30, top: 30, bottom: 40 },
           xAxis: { type: 'category', data: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'] },
-          yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          yAxis: { type: 'value', splitLine: { lineStyle: { color: ui.grid } } },
           series: [
             {
               name: 'Opened',
@@ -433,9 +425,9 @@
               { name: 'Category C', value: 260, children: [ { name: 'Brand C1', value: 140 }, { name: 'Brand C2', value: 120 } ] }
             ],
             leafDepth: 2,
-            label: { formatter: '{b}', color: '#0f172a' },
+            label: { formatter: '{b}', color: ui.ink },
             breadcrumb: { show: false },
-            itemStyle: { borderColor: '#e2e8f0', borderWidth: 1 },
+            itemStyle: { borderColor: ui.grid, borderWidth: 1 },
           }]
         })
       },
@@ -527,7 +519,7 @@
             tooltip: { trigger: 'axis' },
             grid: { left: 60, right: 20, top: 40, bottom: 40 },
             xAxis: { type: 'category', data: labels },
-            yAxis: { type: 'value', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: ui.grid } } },
             series: [
               {
                 name: 'Base',
@@ -576,8 +568,8 @@
           animationDuration: 800,
           tooltip: { trigger: 'item', formatter: ({ data }) => `Spend: $${data[0]}K\nRevenue: $${data[1]}K` },
           grid: { left: 60, right: 30, top: 30, bottom: 50 },
-          xAxis: { name: 'Marketing Spend', splitLine: { lineStyle: { color: '#e2e8f0' } } },
-          yAxis: { name: 'Revenue', splitLine: { lineStyle: { color: '#e2e8f0' } } },
+          xAxis: { name: 'Marketing Spend', splitLine: { lineStyle: { color: ui.grid } } },
+          yAxis: { name: 'Revenue', splitLine: { lineStyle: { color: ui.grid } } },
           series: [{
             type: 'scatter',
             symbolSize: val => Math.sqrt(val[0] + val[1]),
@@ -599,7 +591,17 @@
     const chartTips = document.getElementById('chartTips');
     const chartHelper = document.getElementById('chartHelper');
 
-    const chartInstance = echarts.init(document.getElementById('chart'));
+    // Axis/grid colours read from the active theme each time an option is built.
+    const isDark = () => window.SRG && SRG.theme() === 'dark';
+    const ui = {
+      get grid() { return isDark() ? 'rgba(255,255,255,0.08)' : '#e2e8f0'; },
+      get axis() { return isDark() ? '#64748b' : '#94a3b8'; },
+      get ink() { return isDark() ? '#eef5ff' : '#0f172a'; }
+    };
+    const chartEl = document.getElementById('chart');
+    const initChart = () => echarts.init(chartEl, isDark() ? 'dark' : null);
+    let chartInstance = initChart();
+    let currentChart = null;
 
     function renderPills(container, items) {
       container.innerHTML = '';
@@ -634,8 +636,11 @@
       renderList(chartUseCases, chart.useCases);
       renderList(chartTips, chart.tips);
 
+      currentChart = chart;
+      const panel = document.querySelector('.main-panel');
+      panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');
       chartInstance.clear();
-      chartInstance.setOption(chart.option());
+      chartInstance.setOption({ backgroundColor: 'transparent', ...chart.option() });
     }
 
     function initSidebar() {
@@ -653,6 +658,11 @@
     loadChart(charts[0]);
 
     window.addEventListener('resize', () => chartInstance.resize());
+    if (window.SRG) SRG.onThemeChange(() => {
+      chartInstance.dispose();
+      chartInstance = initChart();
+      if (currentChart) loadChart(currentChart);
+    });
   </script>
 </body>
 </html>

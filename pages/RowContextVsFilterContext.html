@@ -4,20 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Row Context vs Filter Context | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <style>
-    :root {
-      --bg: #07111d;
-      --panel: rgba(13, 24, 44, 0.9);
-      --panel-soft: rgba(255, 255, 255, 0.04);
-      --ink: #eef4ff;
-      --muted: #a6b8d1;
-      --accent: #64b5ff;
-      --accent-2: #ffd166;
-      --accent-3: #62e6b4;
-      --danger: #ff7b7b;
-      --border: rgba(255, 255, 255, 0.1);
-      --shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
-    }
 
     * { box-sizing: border-box; }
     body {
@@ -25,10 +14,6 @@
       min-height: 100vh;
       font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 10% 10%, rgba(100, 181, 255, 0.18), transparent 28%),
-        radial-gradient(circle at 88% 12%, rgba(98, 230, 180, 0.12), transparent 22%),
-        linear-gradient(180deg, #06101c, #091526 42%, #030812);
     }
 
     code { font-family: Consolas, "Courier New", monospace; }
@@ -39,19 +24,6 @@
       grid-template-columns: 1.4fr .9fr;
       gap: 18px;
       align-items: stretch;
-    }
-    .back-row { margin-bottom: 10px; }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      text-decoration: none;
-      color: #dcecff;
-      font-weight: 700;
-      background: rgba(100, 181, 255, 0.14);
-      border: 1px solid rgba(100, 181, 255, 0.2);
     }
     .eyebrow {
       margin: 0 0 8px;
@@ -72,7 +44,7 @@
       font-size: 1.03rem;
     }
     .hero-card, .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
       border: 1px solid var(--border);
       border-radius: 24px;
       box-shadow: var(--shadow);
@@ -82,8 +54,8 @@
       display: grid;
       gap: 10px;
       background:
-        linear-gradient(135deg, rgba(255, 209, 102, .18), rgba(98, 230, 180, .08)),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+        linear-gradient(135deg, rgb(var(--accent-2-rgb) / .18), rgb(var(--accent-3-rgb) / .08)),
+        linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
     }
     .hero-card h2 {
       margin: 0;
@@ -95,7 +67,7 @@
     .hero-card code {
       font-size: 1rem;
       line-height: 1.6;
-      color: #fff;
+      color: var(--ink-strong);
     }
     .hero-card p { margin: 0; color: var(--muted); }
 
@@ -108,7 +80,7 @@
     .panel { padding: 18px; }
     .sidebar {
       position: sticky;
-      top: 12px;
+      top: calc(var(--srg-bar-h) + 12px);
       height: fit-content;
       display: grid;
       gap: 16px;
@@ -127,14 +99,10 @@
       width: 100%;
       border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      background: var(--control-bg);
       color: var(--ink);
       padding: 12px 14px;
       font: inherit;
-    }
-    select option {
-      background: #0c1730;
-      color: #eef4ff;
     }
     button {
       cursor: pointer;
@@ -143,17 +111,17 @@
     }
     button:hover { transform: translateY(-1px); filter: brightness(1.05); }
     .scenario-btn {
-      background: linear-gradient(135deg, rgba(100,181,255,.22), rgba(100,181,255,.07));
+      background: linear-gradient(135deg, rgb(var(--accent-rgb) / .22), rgb(var(--accent-rgb) / .07));
     }
     .reset-btn {
-      background: linear-gradient(135deg, rgba(255,209,102,.2), rgba(255,209,102,.08));
-      color: #fff0c6;
+      background: linear-gradient(135deg, rgb(var(--accent-2-rgb) / .2), rgb(var(--accent-2-rgb) / .08));
+      color: var(--accent-2-ink);
     }
     .mini-note {
       padding: 14px;
       border-radius: 18px;
       background: var(--panel-soft);
-      border: 1px solid rgba(255,255,255,.07);
+      border: 1px solid rgb(var(--fg-rgb) / .07);
       color: var(--muted);
     }
     .mini-note ul {
@@ -168,8 +136,8 @@
     .status-card {
       padding: 14px 12px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(100,181,255,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(100,181,255,.14);
+      background: linear-gradient(180deg, rgb(var(--accent-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-rgb) / .14);
     }
     .status-card label {
       display: block;
@@ -188,9 +156,9 @@
       font-size: .84rem;
       font-weight: 700;
     }
-    .badge.row { background: rgba(255,209,102,.16); color: #ffe7ab; }
-    .badge.filter { background: rgba(98,230,180,.16); color: #d6ffee; }
-    .badge.none { background: rgba(255,123,123,.14); color: #ffd4d4; }
+    .badge.row { background: rgb(var(--accent-2-rgb) / .16); color: var(--accent-2-ink); }
+    .badge.filter { background: rgb(var(--accent-3-rgb) / .16); color: var(--accent-3-ink); }
+    .badge.none { background: rgb(var(--danger-rgb) / .14); color: var(--danger-ink); }
     .narration {
       color: var(--muted);
       line-height: 1.65;
@@ -213,12 +181,12 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: .75rem;
-      color: #dcecff;
-      background: rgba(100,181,255,.14);
+      color: var(--accent-ink);
+      background: rgb(var(--accent-rgb) / .14);
     }
     .tiny-tag.alt {
-      background: rgba(98,230,180,.14);
-      color: #d6ffee;
+      background: rgb(var(--accent-3-rgb) / .14);
+      color: var(--accent-3-ink);
     }
 
     .table-header, .sales-row {
@@ -241,22 +209,22 @@
     .sales-row {
       padding: 14px 12px;
       border-radius: 18px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.06);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .06);
       transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
     .sales-row.active {
       transform: translateX(6px);
-      border-color: rgba(255,209,102,.55);
-      box-shadow: 0 14px 28px rgba(255,209,102,.16);
+      border-color: rgb(var(--accent-2-rgb) / .55);
+      box-shadow: 0 14px 28px rgb(var(--accent-2-rgb) / .16);
     }
     .sales-row.dim {
       opacity: .42;
       filter: grayscale(.7);
     }
     .sales-row.visible-filter {
-      border-color: rgba(98,230,180,.45);
-      box-shadow: 0 14px 28px rgba(98,230,180,.14);
+      border-color: rgb(var(--accent-3-rgb) / .45);
+      box-shadow: 0 14px 28px rgb(var(--accent-3-rgb) / .14);
     }
     .sales-row strong { font-size: .98rem; }
     .muted { color: var(--muted); }
@@ -269,16 +237,16 @@
     .compare-card {
       padding: 18px;
       border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
+      background: rgb(var(--fg-rgb) / .03);
     }
     .compare-card.row-card {
-      background: linear-gradient(180deg, rgba(255,209,102,.11), rgba(255,255,255,.03));
-      border-color: rgba(255,209,102,.2);
+      background: linear-gradient(180deg, rgb(var(--accent-2-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-2-rgb) / .2);
     }
     .compare-card.filter-card {
-      background: linear-gradient(180deg, rgba(98,230,180,.11), rgba(255,255,255,.03));
-      border-color: rgba(98,230,180,.2);
+      background: linear-gradient(180deg, rgb(var(--accent-3-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-3-rgb) / .2);
     }
     .compare-card h3 {
       margin: 0 0 10px;
@@ -297,12 +265,12 @@
       margin-top: 14px;
       padding: 14px 16px;
       border-radius: 18px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
       color: var(--muted);
       line-height: 1.6;
     }
-    .formula-strip code { color: #fff; }
+    .formula-strip code { color: var(--ink-strong); }
 
     @media (max-width: 1120px) {
       .layout { grid-template-columns: 1fr; }
@@ -316,15 +284,21 @@
       .hero, .layout { padding-left: 14px; padding-right: 14px; }
       .table-header, .sales-row { grid-template-columns: 1fr; }
     }
+  
+    /* Motion polish */
+    .chip:last-child { animation: lab-pop .45s var(--ease-spring) both; }
+    @keyframes lab-pop { from { opacity: 0; transform: translateY(6px) scale(.9); } }
+    .panel, .hero-card { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .result-card, .guide-card, .kpi { transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease; }
+    .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    h1 { font-family: var(--font-display); letter-spacing: -.02em; }
+    .eyebrow { color: var(--accent-2); }
   </style>
 </head>
 <body>
-  <header class="hero">
+  <header class="hero srg-enter">
     <div>
-      <div class="back-row">
-        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-      </div>
-      <p class="eyebrow">Foundations First</p>
+<p class="eyebrow">Foundations First</p>
       <h1>What Is Row Context? How Is It Different From Filter Context?</h1>
       <p class="subtitle">
         Use the same sales table in two different ways. First, watch DAX focus on a single row.
@@ -399,7 +373,7 @@
     </aside>
 
     <section class="content">
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>Sales Table</h2>
           <span class="tiny-tag">Gold = row context, Green = filter context</span>
@@ -416,7 +390,7 @@
         <div id="salesBody" class="sales-body"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>Difference in plain words</h2>
           <span class="tiny-tag alt">Foundation for context transition</span>

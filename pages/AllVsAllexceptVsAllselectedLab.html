@@ -4,20 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ALL vs ALLEXCEPT vs ALLSELECTED | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <style>
-    :root {
-      --bg: #07111d;
-      --panel: rgba(12, 24, 43, 0.9);
-      --panel-soft: rgba(255,255,255,.04);
-      --ink: #eef5ff;
-      --muted: #a8bad4;
-      --accent: #69b8ff;
-      --accent-2: #ffd166;
-      --accent-3: #66e6b3;
-      --accent-4: #ff9b8a;
-      --border: rgba(255,255,255,.1);
-      --shadow: 0 20px 48px rgba(0,0,0,.34);
-    }
 
     * { box-sizing: border-box; }
     body {
@@ -25,10 +14,6 @@
       min-height: 100vh;
       font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 14% 10%, rgba(105,184,255,.18), transparent 28%),
-        radial-gradient(circle at 88% 14%, rgba(102,230,179,.12), transparent 24%),
-        linear-gradient(180deg, #06101b, #091425 42%, #030812);
     }
 
     code { font-family: Consolas, "Courier New", monospace; }
@@ -39,19 +24,6 @@
       grid-template-columns: 1.45fr .95fr;
       gap: 18px;
       align-items: stretch;
-    }
-    .back-row { margin-bottom: 10px; }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      text-decoration: none;
-      color: #dcecff;
-      font-weight: 700;
-      background: rgba(105,184,255,.14);
-      border: 1px solid rgba(105,184,255,.2);
     }
     .eyebrow {
       margin: 0 0 8px;
@@ -72,7 +44,7 @@
       font-size: 1.03rem;
     }
     .hero-card, .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
       border: 1px solid var(--border);
       border-radius: 24px;
       box-shadow: var(--shadow);
@@ -82,8 +54,8 @@
       display: grid;
       gap: 10px;
       background:
-        linear-gradient(135deg, rgba(105,184,255,.18), rgba(102,230,179,.08)),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+        linear-gradient(135deg, rgb(var(--accent-rgb) / .18), rgb(var(--accent-3-rgb) / .08)),
+        linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
     }
     .hero-card h2 {
       margin: 0;
@@ -93,7 +65,7 @@
       color: var(--accent-3);
     }
     .hero-card code {
-      color: #fff;
+      color: var(--ink-strong);
       font-size: .98rem;
       line-height: 1.6;
     }
@@ -107,7 +79,7 @@
     }
     .sidebar {
       position: sticky;
-      top: 12px;
+      top: calc(var(--srg-bar-h) + 12px);
       height: fit-content;
       display: grid;
       gap: 16px;
@@ -125,14 +97,10 @@
       width: 100%;
       border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      background: var(--control-bg);
       color: var(--ink);
       padding: 12px 14px;
       font: inherit;
-    }
-    select option {
-      background: #0c1730;
-      color: #eef4ff;
     }
     button {
       cursor: pointer;
@@ -140,13 +108,13 @@
       transition: transform .18s ease, filter .18s ease;
     }
     button:hover { transform: translateY(-1px); filter: brightness(1.05); }
-    .scenario-btn { background: linear-gradient(135deg, rgba(105,184,255,.22), rgba(105,184,255,.08)); }
-    .reset-btn { background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(255,209,102,.08)); color: #fff0c5; }
+    .scenario-btn { background: linear-gradient(135deg, rgb(var(--accent-rgb) / .22), rgb(var(--accent-rgb) / .08)); }
+    .reset-btn { background: linear-gradient(135deg, rgb(var(--accent-2-rgb) / .22), rgb(var(--accent-2-rgb) / .08)); color: var(--accent-2-ink); }
     .mini-note {
       padding: 14px 16px;
       border-radius: 18px;
       background: var(--panel-soft);
-      border: 1px solid rgba(255,255,255,.07);
+      border: 1px solid rgb(var(--fg-rgb) / .07);
       color: var(--muted);
       line-height: 1.65;
     }
@@ -163,9 +131,9 @@
       font-size: .84rem;
       font-weight: 700;
     }
-    .badge.all { background: rgba(105,184,255,.16); color: #d7ecff; }
-    .badge.allexcept { background: rgba(102,230,179,.16); color: #d7ffee; }
-    .badge.allselected { background: rgba(255,155,138,.16); color: #ffe0da; }
+    .badge.all { background: rgb(var(--accent-rgb) / .16); color: var(--accent-ink); }
+    .badge.allexcept { background: rgb(var(--accent-3-rgb) / .16); color: var(--accent-3-ink); }
+    .badge.allselected { background: rgb(var(--accent-4-rgb) / .16); color: var(--accent-4-ink); }
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(2,1fr);
@@ -174,8 +142,8 @@
     .kpi {
       padding: 14px 12px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(105,184,255,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(105,184,255,.14);
+      background: linear-gradient(180deg, rgb(var(--accent-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-rgb) / .14);
     }
     .kpi label {
       margin: 0 0 4px;
@@ -199,12 +167,12 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: .75rem;
-      color: #dcecff;
-      background: rgba(105,184,255,.14);
+      color: var(--accent-ink);
+      background: rgb(var(--accent-rgb) / .14);
     }
     .tiny-tag.alt {
-      background: rgba(102,230,179,.14);
-      color: #d7ffee;
+      background: rgb(var(--accent-3-rgb) / .14);
+      color: var(--accent-3-ink);
     }
     .market-grid {
       display: grid;
@@ -214,14 +182,14 @@
     .market-card {
       padding: 16px;
       border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
       transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
     }
     .market-card.active {
       transform: translateY(-4px);
-      box-shadow: 0 14px 26px rgba(105,184,255,.16);
-      border-color: rgba(105,184,255,.38);
+      box-shadow: 0 14px 26px rgb(var(--accent-rgb) / .16);
+      border-color: rgb(var(--accent-rgb) / .38);
     }
     .market-card.dim {
       opacity: .32;
@@ -251,9 +219,9 @@
       padding: 7px 10px;
       border-radius: 999px;
       font-size: .8rem;
-      background: rgba(255,255,255,.06);
-      color: #e8f2ff;
-      border: 1px solid rgba(255,255,255,.09);
+      background: rgb(var(--fg-rgb) / .06);
+      color: var(--ink);
+      border: 1px solid rgb(var(--fg-rgb) / .09);
     }
     .results-grid {
       display: grid;
@@ -263,8 +231,8 @@
     .result-card {
       padding: 18px;
       border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
     }
     .result-card h3 {
       margin: 0 0 10px;
@@ -281,16 +249,16 @@
       font-size: clamp(1.5rem, 2.7vw, 2.2rem);
     }
     .result-card.all-card {
-      background: linear-gradient(180deg, rgba(105,184,255,.11), rgba(255,255,255,.03));
-      border-color: rgba(105,184,255,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-rgb) / .18);
     }
     .result-card.allexcept-card {
-      background: linear-gradient(180deg, rgba(102,230,179,.11), rgba(255,255,255,.03));
-      border-color: rgba(102,230,179,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-3-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-3-rgb) / .18);
     }
     .result-card.allselected-card {
-      background: linear-gradient(180deg, rgba(255,155,138,.11), rgba(255,255,255,.03));
-      border-color: rgba(255,155,138,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-4-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-4-rgb) / .18);
     }
     .guide-grid {
       display: grid;
@@ -300,8 +268,8 @@
     .guide-card {
       padding: 18px;
       border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
     }
     .guide-card p, .guide-card li {
       color: var(--muted);
@@ -315,9 +283,9 @@
       margin-top: 12px;
       padding: 14px 16px;
       border-radius: 16px;
-      background: rgba(4,11,22,.78);
-      border: 1px solid rgba(105,184,255,.16);
-      color: #f4f8ff;
+      background: var(--code-bg);
+      border: 1px solid rgb(var(--accent-rgb) / .16);
+      color: var(--code-ink);
       overflow-x: auto;
       white-space: pre-wrap;
       line-height: 1.6;
@@ -326,8 +294,8 @@
       margin-top: 16px;
       padding: 16px 18px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,209,102,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,209,102,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-2-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-2-rgb) / .18);
       color: var(--muted);
       line-height: 1.7;
     }
@@ -344,15 +312,21 @@
       .hero, .layout { padding-left: 14px; padding-right: 14px; }
       .market-grid, .kpi-grid { grid-template-columns: 1fr; }
     }
+  
+    /* Motion polish */
+    .chip:last-child { animation: lab-pop .45s var(--ease-spring) both; }
+    @keyframes lab-pop { from { opacity: 0; transform: translateY(6px) scale(.9); } }
+    .panel, .hero-card { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .result-card, .guide-card, .kpi { transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease; }
+    .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    h1 { font-family: var(--font-display); letter-spacing: -.02em; }
+    .eyebrow { color: var(--accent-2); }
   </style>
 </head>
 <body>
-  <header class="hero">
+  <header class="hero srg-enter">
     <div>
-      <div class="back-row">
-        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-      </div>
-      <p class="eyebrow">Filter Context Shaping</p>
+<p class="eyebrow">Filter Context Shaping</p>
       <h1>ALL vs ALLEXCEPT vs ALLSELECTED</h1>
       <p class="subtitle">
         See how each function changes the denominator in percentage-of-total calculations.
@@ -436,7 +410,7 @@
     </aside>
 
     <section class="content">
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>Visual Rows</h2>
           <span class="tiny-tag">Bright card = current matrix row</span>
@@ -444,7 +418,7 @@
         <div id="marketGrid" class="market-grid"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>Percentage Denominators</h2>
           <span class="tiny-tag alt">Same numerator, different total universe</span>
@@ -471,7 +445,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>When to use which</h2>
           <span class="tiny-tag alt">Practical report patterns</span>

@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive OLAP Data Cube</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
     <style>
         /* General page styling */
         body {
-            font-family: sans-serif;
+            font-family: var(--font);
             margin: 0;
             padding: 0;
-            background-color: #2c3e50;
-            color: #ecf0f1;
+            color: var(--ink);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -21,14 +22,13 @@
         .header {
             width: 100%;
             text-align: center;
-            padding: 20px;
-            background-color: #34495e;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 32px 20px 4px;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 2.5rem;
+            font: 700 clamp(2rem, 4.4vw, 3rem)/1.1 var(--font-display);
+            letter-spacing: -.025em;
         }
 
         /* Navigation menu styling */
@@ -36,8 +36,7 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-            padding: 20px;
-            background-color: #2c3e50;
+            padding: 16px 20px 8px;
         }
 
         .nav-menu button {
@@ -85,13 +84,15 @@
 
         .page h2 {
             font-size: 2rem;
-            color: #f1c40f;
+            color: var(--accent-2);
             margin-bottom: 20px;
         }
 
         .description {
-            background-color: #34495e;
-            padding: 15px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 16px 18px;
             border-radius: 8px;
             width: 80%;
             max-width: 600px;
@@ -132,25 +133,9 @@
             position: relative;
         }
 
-        .back-link {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px 18px;
-            border-radius: 999px;
-            background: rgba(52, 152, 219, 0.2);
-            color: #ecf0f1;
-            text-decoration: none;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
 
-        .back-link:hover {
-            background: rgba(52, 152, 219, 0.35);
-            transform: translateY(-2px);
-        }
+
+
 
         #olap-cube, #diced-cube-container, #sliced-cube-container, #drilling-cube, #rolling-cube, #rolled-up-cube {
             width: 300px;
@@ -184,7 +169,7 @@
             color: white;
             backface-visibility: hidden;
             box-shadow: 0 0 5px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgb(var(--fg-rgb) / 0.4);
             transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
         }
 
@@ -246,8 +231,10 @@
         /* Tooltip styling */
         .tooltip {
             position: absolute;
-            background-color: rgba(52, 73, 94, 0.95);
-            color: white;
+            background-color: color-mix(in srgb, var(--panel-solid) 94%, transparent);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            color: var(--ink);
             padding: 10px;
             border-radius: 5px;
             font-size: 0.9em;
@@ -271,10 +258,11 @@
 
         /* New styles for the table */
         .table-container {
-            background-color: #34495e;
+            background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+            border: 1px solid var(--border);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
             width: 400px;
         }
 
@@ -287,7 +275,7 @@
 
         .table-header h3 {
             margin: 0;
-            color: #f1c40f;
+            color: var(--accent-2);
         }
 
         #pivot-table-btn {
@@ -311,7 +299,7 @@
         }
 
         #data-table th, #data-table td, #sliced-data-table th, #sliced-data-table td, #diced-data-table th, #diced-data-table td, #detailed-data-table th, #detailed-data-table td {
-            border: 1px solid #4a6681;
+            border: 1px solid var(--border-strong);
             padding: 10px;
             text-align: center;
         }
@@ -325,11 +313,11 @@
         }
 
         #data-table tbody td, #sliced-data-table tbody td, #diced-data-table tbody td, #detailed-data-table tbody td {
-            color: #ecf0f1;
+            color: var(--ink);
         }
 
         .table-corner {
-            background-color: #2c3e50 !important;
+            background-color: var(--panel-solid) !important;
         }
 
         .total-cell {
@@ -354,9 +342,9 @@
         .slicing-controls select {
             padding: 8px;
             border-radius: 5px;
-            background-color: #34495e;
-            color: #ecf0f1;
-            border: 1px solid #4a6681;
+            background-color: var(--control-bg);
+            color: var(--ink);
+            border: 1px solid var(--border-strong);
         }
 
         .slicing-controls button {
@@ -533,17 +521,33 @@
           justify-items:start;                    /* <- align each column left */
         }
         .slice-col{ text-align:left; }
-        .slice-col h4{margin:0 0 8px;font-weight:600;color:#f1c40f}
+        .slice-col h4{margin:0 0 8px;font-weight:600;color: var(--accent-2)}
         .slice-col label{
           display:flex; align-items:center; gap:8px;  /* tidy bullet+text */
         }
-    </style>
+    
+        /* --- Theme polish (shared design system) --- */
+        .nav-menu { flex-wrap: wrap; gap: 6px; width: fit-content; max-width: calc(100% - 24px); margin: 12px auto 0; padding: 6px;
+            border-radius: 999px; background: color-mix(in srgb, var(--panel-solid) 80%, transparent); border: 1px solid var(--border); box-shadow: var(--shadow);
+            position: sticky; top: calc(var(--srg-bar-h) + 8px); z-index: 900; backdrop-filter: blur(14px) saturate(1.5); }
+        .nav-menu button { background: transparent; color: var(--muted); border-radius: 999px; padding: 8px 18px; font: 600 .95rem var(--font);
+            transition: background .2s ease, color .2s ease, transform .25s var(--ease-spring); }
+        .nav-menu button:hover { background: rgb(var(--fg-rgb) / .06); color: var(--ink); }
+        .nav-menu button.active { background: var(--accent); color: var(--on-accent); box-shadow: 0 6px 16px rgb(var(--accent-rgb) / .3); }
+        .page.active { animation: srg-rise .55s var(--ease-out) both; }
+        .page h2 { font-family: var(--font-display); letter-spacing: -.02em; }
+        .description, .puzzle-box { border-radius: var(--radius); }
+        .puzzle-box { box-shadow: 0 10px 24px rgb(230 126 34 / .25); }
+        .cube-controls button, #pivot-table-btn, .slicing-controls button, .dicing-controls button { border-radius: 12px !important; font-family: var(--font);
+            transition: transform .25s var(--ease-spring), background-color .2s ease, filter .2s ease !important; }
+        .cube-controls button:hover, #pivot-table-btn:hover, .slicing-controls button:hover, .dicing-controls button:hover { transform: translateY(-2px); }
+        .cube-controls button:active, #pivot-table-btn:active, .slicing-controls button:active, .dicing-controls button:active { transform: scale(.96); }
+        :root:not([data-theme="dark"]) .small-cube .face { border-color: rgb(255 255 255 / .7); }
+        </style>
 </head>
 <body>
 
-    <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-
-    <div class="header">
+<div class="header srg-enter">
         <h1>Interactive OLAP Data Cube</h1>
         <p class="attribution">Designed and Developed by S. Rathinagiri and Gemini</p>
     </div>

@@ -4,272 +4,352 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Power BI Custom Visuals & Infographics | CA Rathinagiri</title>
+  <meta name="description" content="Open-source Power BI custom visuals and animated infographics that explain data modeling, DAX and Power Query concepts.">
+  <link rel="stylesheet" href="assets/site.css" />
+  <script src="assets/site.js"></script>
   <style>
-    :root {
-      --bg: linear-gradient(180deg, #f8fbff 0%, #eef2ff 100%);
-      --panel: #ffffff;
-      --ink: #1f2933;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --muted: #475569;
-      --shadow: rgba(15, 23, 42, 0.1);
-      --border: rgba(37, 99, 235, 0.12);
-    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: var(--font); color: var(--ink); line-height: 1.6; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 32px); }
 
-    * {
-      box-sizing: border-box;
-    }
+    .eyebrow { margin: 0 0 .6rem; font: 700 .76rem/1 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+    h2 { margin: 0 0 .5rem; font: 700 clamp(1.7rem, 3vw, 2.3rem)/1.15 var(--font-display); letter-spacing: -.02em; color: var(--ink); }
+    .section-lead { margin: 0 0 2rem; max-width: 72ch; color: var(--muted); font-size: 1.05rem; }
+    section { margin: 0 0 5.5rem; scroll-margin-top: calc(var(--srg-bar-h) + 24px); }
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      line-height: 1.6;
-    }
+    /* ---------- Hero ---------- */
+    .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: clamp(24px, 5vw, 64px); align-items: center; padding: clamp(48px, 9vw, 104px) 0 clamp(48px, 7vw, 88px); }
+    .hero h1 { margin: 0 0 1.1rem; font: 800 clamp(2.4rem, 5.6vw, 4.2rem)/1.04 var(--font-display); letter-spacing: -.035em; }
+    .hero h1 .grad { background: linear-gradient(110deg, var(--accent) 10%, var(--accent-3) 55%, var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 200% 100%; animation: grad-shift 8s ease-in-out infinite alternate; }
+    @keyframes grad-shift { to { background-position: 100% 0; } }
+    .hero-lead { margin: 0 0 1.8rem; max-width: 56ch; color: var(--muted); font-size: 1.12rem; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero-stats { list-style: none; display: flex; flex-wrap: wrap; gap: 28px; margin: 2.2rem 0 0; padding: 1.4rem 0 0; border-top: 1px solid var(--border); }
+    .hero-stats li { display: grid; }
+    .hero-stats strong { font: 800 1.8rem/1 var(--font-display); color: var(--ink); }
+    .hero-stats span { color: var(--muted); font-size: .9rem; }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2rem;
+    /* Decorative "report" that assembles itself */
+    .hero-art { position: relative; min-height: 340px; perspective: 1200px; }
+    .viz-card {
+      position: absolute; inset: 20px 10px 30px 10px;
+      padding: 20px; border-radius: 24px;
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+      border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(12px);
+      transform: rotateY(-12deg) rotateX(6deg);
+      animation: float 7s ease-in-out infinite;
+      display: grid; grid-template-rows: auto 1fr auto; gap: 14px;
     }
-
-    header {
-      text-align: center;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 3rem;
+    @keyframes float { 50% { transform: rotateY(-8deg) rotateX(4deg) translateY(-10px); } }
+    .viz-top { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: .9rem; color: var(--muted); }
+    .viz-top i { width: 10px; height: 10px; border-radius: 50%; background: rgb(var(--fg-rgb) / .15); }
+    .viz-top i:first-child { background: #f2c811; }
+    .viz-top span { margin-left: 8px; }
+    .viz-bars { display: flex; align-items: flex-end; gap: 10px; padding: 8px 4px 0; border-bottom: 2px solid var(--border-strong); }
+    .viz-bars b {
+      flex: 1; height: var(--h); border-radius: 8px 8px 2px 2px;
+      background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent-3)));
+      transform-origin: bottom; animation: grow 1.1s var(--ease-spring) both;
     }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      color: var(--ink);
+    .viz-bars b:nth-child(2) { animation-delay: .08s; } .viz-bars b:nth-child(3) { animation-delay: .16s; }
+    .viz-bars b:nth-child(4) { animation-delay: .24s; } .viz-bars b:nth-child(5) { animation-delay: .32s; background: linear-gradient(180deg, var(--accent-2), color-mix(in srgb, var(--accent-2) 60%, var(--accent-4))); }
+    .viz-bars b:nth-child(6) { animation-delay: .40s; }
+    @keyframes grow { from { transform: scaleY(0); } }
+    .viz-kpis { display: flex; gap: 12px; }
+    .viz-kpis span { flex: 1; padding: 10px 12px; border-radius: 14px; background: var(--panel-soft); border: 1px solid var(--border); font-size: .8rem; color: var(--muted); }
+    .viz-kpis em { display: block; font: 800 1.15rem/1.2 var(--font-display); font-style: normal; color: var(--ink); }
+    .viz-chip {
+      position: absolute; padding: 8px 14px; border-radius: 999px;
+      font: 700 .85rem/1 var(--mono); color: var(--ink);
+      background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow);
+      animation: bob 6s ease-in-out infinite;
     }
+    .viz-chip.c1 { top: 0; right: 4%; color: var(--accent-3-ink); animation-delay: -1s; }
+    .viz-chip.c2 { bottom: 6px; left: 0; font-family: var(--font); animation-delay: -3s; }
+    .viz-chip.c3 { top: 42%; right: -8px; color: var(--accent-ink); animation-delay: -4.5s; }
+    @keyframes bob { 50% { transform: translateY(-12px); } }
 
-    header p {
-      color: var(--muted);
-      font-size: 1.2rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    section {
-      margin-bottom: 4rem;
-    }
-
-    h2 {
-      font-size: 2rem;
-      color: var(--accent);
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 0.5rem;
-      display: inline-block;
-    }
-
-    .card-grid {
-      display: grid;
-      gap: 1.5rem;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1.75rem;
-      box-shadow: 0 12px 24px var(--shadow);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
-    }
-
-    .card-img-container {
-      width: 100%;
-      height: 200px;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 1rem;
-      border: 1px solid var(--border);
-      background-color: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .card h3 {
-      font-size: 1.4rem;
-      margin-top: 0;
-      margin-bottom: 0.75rem;
-      color: var(--ink);
-    }
-
-    .card p {
-      color: var(--muted);
-      font-size: 1rem;
-      flex-grow: 1;
-      margin-bottom: 1.5rem;
-    }
-
-    .card-meta {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 1rem;
-      padding: 0.75rem;
-      background-color: #f8fafc;
-      border-radius: 6px;
-      border: 1px dashed var(--border);
-    }
-
-    .card-meta span {
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-
-    .card-meta strong {
-      color: var(--ink);
-    }
-
-    .card-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: auto;
-    }
-
+    /* ---------- Buttons ---------- */
     .btn {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: background-color 0.2s, color 0.2s;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: .6rem 1.1rem; border-radius: 12px;
+      font-weight: 600; font-size: .95rem; text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform .3s var(--ease-spring), background-color .2s ease, box-shadow .3s ease, border-color .2s ease, color .2s ease;
     }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: scale(.97); }
+    .btn-lg { padding: .85rem 1.4rem; font-size: 1.02rem; border-radius: 14px; }
+    .btn-primary { background: var(--accent); color: var(--on-accent); box-shadow: 0 8px 22px rgb(var(--accent-rgb) / .28); }
+    .btn-primary:hover { box-shadow: 0 12px 30px rgb(var(--accent-rgb) / .38); }
+    .btn-secondary { background: rgb(var(--accent-rgb) / .08); color: var(--accent-ink); border-color: rgb(var(--accent-rgb) / .3); }
+    .btn-secondary:hover { background: rgb(var(--accent-rgb) / .14); }
+    .btn-outline { color: var(--muted); border-color: var(--border-strong); }
+    .btn-outline:hover { color: var(--ink); background: rgb(var(--fg-rgb) / .05); }
 
-    .btn-primary {
-      background-color: var(--accent);
-      color: white;
-      border: 1px solid var(--accent);
+    /* ---------- Learning path ---------- */
+    .track { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 28px 0; border-top: 1px solid var(--border); }
+    .track-head { position: sticky; top: calc(var(--srg-bar-h) + 20px); align-self: start; }
+    .track-head h3 { margin: 0 0 .3rem; font: 700 1.2rem/1.2 var(--font-display); }
+    .track-head p { margin: 0; color: var(--muted); font-size: .92rem; }
+    .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+    .lesson {
+      position: relative; display: grid; grid-template-rows: auto auto 1fr auto; gap: 6px;
+      padding: 20px 20px 18px; border-radius: 20px; text-decoration: none; color: var(--ink);
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      overflow: hidden; isolation: isolate;
+      transition: transform .45s var(--ease-out), box-shadow .45s var(--ease-out), border-color .3s ease;
     }
+    .lesson::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0;
+      background: radial-gradient(360px 160px at var(--mx, 50%) var(--my, 0%), rgb(var(--accent-rgb) / .16), transparent 70%);
+      transition: opacity .35s ease;
+    }
+    .lesson:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: rgb(var(--accent-rgb) / .4); }
+    .lesson:hover::before { opacity: 1; }
+    .lesson:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .lesson-num { position: absolute; top: 16px; right: 18px; font: 700 .8rem/1 var(--mono); color: var(--muted); opacity: .7; }
+    .lesson-icon { font-size: 1.6rem; line-height: 1; margin-bottom: 4px; transition: transform .5s var(--ease-spring); }
+    .lesson:hover .lesson-icon { transform: scale(1.18) rotate(-6deg); }
+    .lesson strong { font: 700 1.08rem/1.3 var(--font-display); padding-right: 24px; }
+    .lesson-blurb { color: var(--muted); font-size: .92rem; line-height: 1.5; }
+    .lesson-go { margin-top: 8px; font-weight: 700; font-size: .88rem; color: var(--accent); }
+    .lesson-go span { display: inline-block; transition: transform .3s var(--ease-spring); }
+    .lesson:hover .lesson-go span { transform: translateX(4px); }
 
-    .btn-primary:hover {
-      background-color: var(--accent-hover);
-      text-decoration: none;
+    /* ---------- Cards (visuals, PQ, tutorials) ---------- */
+    .card-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .card {
+      display: flex; flex-direction: column;
+      padding: 1.6rem; border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      transition: transform .45s var(--ease-out), box-shadow .45s var(--ease-out);
     }
+    .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .card h3 { margin: 0 0 .6rem; font: 700 1.3rem/1.25 var(--font-display); color: var(--ink); }
+    .card p { margin: 0 0 1.4rem; flex-grow: 1; color: var(--muted); }
+    .card-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: auto; }
 
-    .btn-secondary {
-      background-color: transparent;
-      color: var(--accent);
-      border: 1px solid var(--accent);
-    }
-
-    .btn-secondary:hover {
-      background-color: rgba(37, 99, 235, 0.05);
-      text-decoration: none;
-    }
-
-    .btn-outline {
-      background-color: transparent;
-      color: var(--muted);
-      border: 1px solid var(--muted);
-    }
-
-    .btn-outline:hover {
-      background-color: #f1f5f9;
-      color: var(--ink);
-    }
-
-    .card-link {
-      display: inline-block;
-      margin-top: 1rem;
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .card-link:hover {
-      text-decoration: underline;
-    }
+    .card.feature { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2.2rem; align-items: center; }
+    .card.feature:nth-child(even) .feature-media { order: 2; }
+    .card.feature:hover { transform: none; }
+    .card-img-container { width: 100%; border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: var(--panel-soft); box-shadow: var(--shadow); }
+    .card-img { display: block; width: 100%; height: auto; object-fit: contain; transition: transform .8s var(--ease-out); }
+    .card.feature:hover .card-img { transform: scale(1.03); }
+    .feature-title { font-size: 1.7rem !important; color: var(--ink) !important; }
+    .feature-copy { font-size: 1.05rem; margin-bottom: 1rem !important; }
+    .card-meta { margin: 0 0 1.2rem; padding: .8rem 1rem; border-radius: 12px; background: var(--panel-soft); border: 1px dashed var(--border-strong); font-size: .9rem; color: var(--muted); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem 1rem; }
+    .card-meta strong { color: var(--ink); }
 
     .download-section {
-      text-align: center;
-      padding: 3rem;
-      background: var(--panel);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      box-shadow: 0 12px 24px var(--shadow);
+      text-align: center; padding: 3rem 1.5rem; border-radius: var(--radius-lg);
+      background: radial-gradient(600px 240px at 50% 0%, rgb(var(--accent-rgb) / .14), transparent 70%), linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+    }
+    .download-section h3 { margin: 0 0 .4rem; font: 700 1.5rem/1.2 var(--font-display); }
+    .download-section p { margin: 0 0 1.4rem; color: var(--muted); }
+
+    footer { margin-top: 4rem; padding: 2rem 0 3rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); }
+    .social-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; margin: 1rem 0; }
+    .social-links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .social-links a:hover { text-decoration: underline; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-art { min-height: 300px; }
+      .track { grid-template-columns: 1fr; gap: 14px; }
+      .track-head { position: static; }
+      .card.feature { grid-template-columns: 1fr; }
+      .card.feature:nth-child(even) .feature-media { order: 0; }
+    }
+    @media (max-width: 520px) {
+      .card-meta { grid-template-columns: 1fr; }
+      .viz-chip.c3 { display: none; }
     }
 
-    footer {
-      margin-top: 4rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .social-links {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .social-links a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .social-links a:hover {
-      text-decoration: underline;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 1.5rem;
-      }
-      h1 {
-        font-size: 2rem;
-      }
-      .card-grid {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Power BI Projects by CA Rathinagiri</h1>
-      <p>Chartered Accountant, FinTech Professional, and Educator sharing open-source custom visuals and animated infographics to demystify complex Power BI concepts.</p>
+    <header class="hero">
+      <div class="hero-copy srg-enter">
+        <p class="eyebrow">CA Rathinagiri · Power BI</p>
+        <h1>Learn Power BI by <span class="grad">watching it think</span></h1>
+        <p class="hero-lead">Chartered Accountant, FinTech Professional, and Educator sharing open-source custom visuals and animated infographics to demystify complex Power BI concepts.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="pages/stages-of-data-analysis.html">Start the learning path <span aria-hidden="true">→</span></a>
+          <a class="btn btn-secondary btn-lg" href="#custom-visuals">Custom visuals</a>
+        </div>
+        <ul class="hero-stats" aria-label="Collection at a glance">
+          <li><strong>15</strong><span>interactive lessons</span></li>
+          <li><strong>4</strong><span>open-source tools</span></li>
+          <li><strong>4</strong><span>case studies</span></li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="viz-card">
+          <div class="viz-top"><i></i><i></i><i></i><span>Sales by Region</span></div>
+          <div class="viz-bars"><b style="--h:62%"></b><b style="--h:88%"></b><b style="--h:46%"></b><b style="--h:74%"></b><b style="--h:95%"></b><b style="--h:58%"></b></div>
+          <div class="viz-kpis"><span><em>₹ 4.2 Cr</em>Revenue</span><span><em>+18%</em>YoY</span></div>
+        </div>
+        <div class="viz-chip c1">CALCULATE()</div>
+        <div class="viz-chip c2">⭐ Star schema</div>
+        <div class="viz-chip c3">SUMX</div>
+      </div>
     </header>
 
+    <section id="infographics">
+      <p class="eyebrow">Learning path · 15 lessons</p>
+      <h2>Animated Infographics &amp; Labs</h2>
+      <p class="section-lead">Each lesson turns one Power BI idea into an interactive analogy. Follow them in order, or jump to any topic. Every page has Previous / Next buttons and a light/dark switch.</p>
+      <div class="track srg-reveal">
+        <div class="track-head"><h3>Foundations</h3><p>Why analytics data is shaped the way it is.</p></div>
+        <div class="lesson-grid">
+          <a class="lesson" href="pages/stages-of-data-analysis.html">
+            <span class="lesson-num">01</span>
+            <span class="lesson-icon" aria-hidden="true">📈</span>
+            <strong>Stages of Data Analysis</strong>
+            <span class="lesson-blurb">Step through the iterative stages of data analysis with illustrated diagrams that connect business questions to measurable insights.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/OLAPConcept.html">
+            <span class="lesson-num">02</span>
+            <span class="lesson-icon" aria-hidden="true">🗄️</span>
+            <strong>OLTP vs OLAP</strong>
+            <span class="lesson-blurb">An interactive infographic that visually demonstrates OLTP vs OLAP at a glance and why columnstore databases are used in analytics.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/OLAPDataCube.html">
+            <span class="lesson-num">03</span>
+            <span class="lesson-icon" aria-hidden="true">🧊</span>
+            <strong>OLAP Data Cube Operations</strong>
+            <span class="lesson-blurb">Pivoting, dicing, slicing, drilling down and rolling up through dynamic 3D cube animations linked with tabular data.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/5d-datacube/index.html">
+            <span class="lesson-num">04</span>
+            <span class="lesson-icon" aria-hidden="true">🌐</span>
+            <strong>5D Sales Datacube</strong>
+            <span class="lesson-blurb">Build intuition from 0D to 5D: one sales total, a timeline, matrix, cube, logistics colours and a fully interactive datacube.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+      </div>
+      <div class="track srg-reveal">
+        <div class="track-head"><h3>Power Query</h3><p>Combine and shape data before it reaches the model.</p></div>
+        <div class="lesson-grid">
+          <a class="lesson" href="pages/PowerQueryJoins.html">
+            <span class="lesson-num">05</span>
+            <span class="lesson-icon" aria-hidden="true">🔗</span>
+            <strong>Power Query Joins Playground</strong>
+            <span class="lesson-blurb">Experiment with left, right, full, inner and anti joins between purchases and payments with live Venn diagrams.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+      </div>
+      <div class="track srg-reveal">
+        <div class="track-head"><h3>Data Modeling</h3><p>Relationships decide how filters travel.</p></div>
+        <div class="lesson-grid">
+          <a class="lesson" href="pages/StarSchema.html">
+            <span class="lesson-num">06</span>
+            <span class="lesson-icon" aria-hidden="true">⭐</span>
+            <strong>Star Schema Filter Flow</strong>
+            <span class="lesson-blurb">How filters cascade from dimension tables to the central fact table, including bidirectional relationships.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+      </div>
+      <div class="track srg-reveal">
+        <div class="track-head"><h3>DAX</h3><p>Evaluation contexts, iterators and filter control.</p></div>
+        <div class="lesson-grid">
+          <a class="lesson" href="pages/RowContextVsFilterContext.html">
+            <span class="lesson-num">07</span>
+            <span class="lesson-icon" aria-hidden="true">🧭</span>
+            <strong>Row Context vs Filter Context</strong>
+            <span class="lesson-blurb">The foundational difference between the current row and the visible rows, before moving on to context transition.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/CalculatedColumnVsMeasureLab.html">
+            <span class="lesson-num">08</span>
+            <span class="lesson-icon" aria-hidden="true">🧮</span>
+            <strong>Calculated Column vs Measure</strong>
+            <span class="lesson-blurb">Stored row-by-row model values versus dynamic report-time calculations that change with filter context.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/SumVsSumXLab.html">
+            <span class="lesson-num">09</span>
+            <span class="lesson-icon" aria-hidden="true">➕</span>
+            <strong>SUM vs SUMX Lab</strong>
+            <span class="lesson-blurb">Plain aggregation versus row-by-row iteration using an order-lines scenario with quantity, price and discount.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/FilterContextCamera.html">
+            <span class="lesson-num">10</span>
+            <span class="lesson-icon" aria-hidden="true">📸</span>
+            <strong>Filter Context Camera</strong>
+            <span class="lesson-blurb">The SUM measure acts like a camera while report, page, visual and slicer filters decide who steps into the spotlight.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/DAXFilterHierarchy.html">
+            <span class="lesson-num">11</span>
+            <span class="lesson-icon" aria-hidden="true">💧</span>
+            <strong>DAX Filter Context Water Plant</strong>
+            <span class="lesson-blurb">The DAX filter context hierarchy as a water plant, and how CALCULATE() changes the flow (except RLS).</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/ContextTransitionLab.html">
+            <span class="lesson-num">12</span>
+            <span class="lesson-icon" aria-hidden="true">🔄</span>
+            <strong>Context Transition Lab</strong>
+            <span class="lesson-blurb">Row context becomes filter context through a commission example comparing a plain SUM with CALCULATE.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/AllVsAllexceptVsAllselectedLab.html">
+            <span class="lesson-num">13</span>
+            <span class="lesson-icon" aria-hidden="true">🎯</span>
+            <strong>ALL vs ALLEXCEPT vs ALLSELECTED</strong>
+            <span class="lesson-blurb">Grand totals, grouped subtotals and selected totals in an animated percent-of-total scenario.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+          <a class="lesson" href="pages/DateFilterContextTrain.html">
+            <span class="lesson-num">14</span>
+            <span class="lesson-icon" aria-hidden="true">🚆</span>
+            <strong>Date Filter Context Train</strong>
+            <span class="lesson-blurb">Time intelligence as a train yard: current, previous and next period calculations stay on track.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+      </div>
+      <div class="track srg-reveal">
+        <div class="track-head"><h3>Visualization</h3><p>Turn the numbers into the right picture.</p></div>
+        <div class="lesson-grid">
+          <a class="lesson" href="pages/PowerBIChartGuide.html">
+            <span class="lesson-num">15</span>
+            <span class="lesson-icon" aria-hidden="true">📊</span>
+            <strong>Choose the Right Power BI Chart</strong>
+            <span class="lesson-blurb">Browse chart types, learn when to use them, and preview animated examples for Power BI storytelling.</span>
+            <span class="lesson-go">Open lesson <span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
     <section id="custom-visuals">
+      <p class="eyebrow">Open source</p>
       <h2>Custom Visuals Gallery</h2>
-      <p style="margin-bottom: 2rem;">Explore my open-source custom visuals designed to extend Power BI's capabilities.</p>
+      <p class="section-lead">Explore my open-source custom visuals designed to extend Power BI's capabilities.</p>
 
       <div class="card-grid">
-        <div class="card" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
-          <div class="card-img-container" style="height: auto; margin: 0; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <img src="https://raw.githubusercontent.com/SRathinaGiri/BarRacingImage/main/ScreenShot01.jpg" alt="Bar Racing Image Power BI visual" class="card-img" style="object-fit: contain;">
+        <div class="card feature srg-reveal">
+          <div class="card-img-container feature-media">
+            <img src="https://raw.githubusercontent.com/SRathinaGiri/BarRacingImage/main/ScreenShot01.jpg" alt="Bar Racing Image Power BI visual" class="card-img" loading="lazy">
           </div>
           <div>
-            <h3 style="font-size: 1.8rem; color: var(--accent);">Bar Racing Image</h3>
-            <p style="font-size: 1.1rem;">A Microsoft Store-approved Power BI custom visual for animated bar racing charts with optional category images. It supports category, measure, play-axis animation, embedded image URIs, tooltips, controls, and context menus.</p>
+            <h3 class="feature-title">Bar Racing Image</h3>
+            <p class="feature-copy">A Microsoft Store-approved Power BI custom visual for animated bar racing charts with optional category images. It supports category, measure, play-axis animation, embedded image URIs, tooltips, controls, and context menus.</p>
 
             <div class="card-meta">
               <span><strong>Status:</strong> Live in Microsoft Store</span>
@@ -278,7 +358,7 @@
               <span><strong>Source Code:</strong> Open source repository</span>
             </div>
 
-            <div class="card-actions" style="margin-top: 1.5rem;">
+            <div class="card-actions">
               <a href="https://marketplace.microsoft.com/en-us/product/power-bi-visuals/rathinagiri.barracingimage?tab=Overview" class="btn btn-primary" target="_blank">Microsoft Store</a>
               <a href="https://github.com/SRathinaGiri/BarRacingImage" class="btn btn-primary" target="_blank">View Source Code</a>
               <a href="https://github.com/SRathinaGiri/BarRacingImage/raw/main/submission/barRacing19740418.1.2.0.0.pbiviz" class="btn btn-secondary">Download Visual</a>
@@ -289,13 +369,13 @@
           </div>
         </div>
 
-        <div class="card" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
-          <div class="card-img-container" style="height: auto; margin: 0; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <img src="https://raw.githubusercontent.com/SRathinaGiri/FlowTank/main/FlowTankScreenshot.png" alt="FlowTank Power BI visual" class="card-img" style="object-fit: contain;">
+        <div class="card feature srg-reveal">
+          <div class="card-img-container feature-media">
+            <img src="https://raw.githubusercontent.com/SRathinaGiri/FlowTank/main/FlowTankScreenshot.png" alt="FlowTank Power BI visual" class="card-img" loading="lazy">
           </div>
           <div>
-            <h3 style="font-size: 1.8rem; color: var(--accent);">FlowTank</h3>
-            <p style="font-size: 1.1rem;">A Microsoft AppSource-approved Power BI custom visual for comparing inflows, outflows, source/application of funds, and net balance in a tank-style business view. It supports Direction-based classification, native Power BI tooltips, cross-filtering, configurable labels, and formatting options.</p>
+            <h3 class="feature-title">FlowTank</h3>
+            <p class="feature-copy">A Microsoft AppSource-approved Power BI custom visual for comparing inflows, outflows, source/application of funds, and net balance in a tank-style business view. It supports Direction-based classification, native Power BI tooltips, cross-filtering, configurable labels, and formatting options.</p>
 
             <div class="card-meta">
               <span><strong>Status:</strong> Live in Microsoft AppSource</span>
@@ -304,7 +384,7 @@
               <span><strong>Source Code:</strong> Open source repository</span>
             </div>
 
-            <div class="card-actions" style="margin-top: 1.5rem;">
+            <div class="card-actions">
               <a href="https://marketplace.microsoft.com/en-us/product/power-bi-visuals/rathinagiri.flowtank?tab=Overview" class="btn btn-primary" target="_blank">Microsoft AppSource</a>
               <a href="https://github.com/SRathinaGiri/FlowTank" class="btn btn-primary" target="_blank">View Source Code</a>
               <a href="https://github.com/SRathinaGiri/FlowTank/raw/main/sample-data/flowtank_sample.pbix" class="btn btn-secondary">Sample PBIX</a>
@@ -314,13 +394,13 @@
           </div>
         </div>
 
-        <div class="card" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
-          <div class="card-img-container" style="height: auto; margin: 0; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <img src="CustomVisuals/dataCube/Screenshot01.png" alt="DataCube 3D Visual" class="card-img" style="object-fit: contain;">
+        <div class="card feature srg-reveal">
+          <div class="card-img-container feature-media">
+            <img src="CustomVisuals/dataCube/Screenshot01.png" alt="DataCube 3D Visual" class="card-img" loading="lazy">
           </div>
           <div>
-            <h3 style="font-size: 1.8rem; color: var(--accent);">DataCube 3D</h3>
-            <p style="font-size: 1.1rem;">An interactive, open-source 3D visual for Power BI that helps users visualize multidimensional data. Explore Data Cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations.</p>
+            <h3 class="feature-title">DataCube 3D</h3>
+            <p class="feature-copy">An interactive, open-source 3D visual for Power BI that helps users visualize multidimensional data. Explore Data Cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations.</p>
 
             <div class="card-meta">
               <span><strong>Status:</strong> Free & Open Source</span>
@@ -328,7 +408,7 @@
               <span><strong>Source Code:</strong> Included in this repository</span>
             </div>
 
-            <div class="card-actions" style="margin-top: 1.5rem;">
+            <div class="card-actions">
               <a href="https://marketplace.microsoft.com/en-us/product/rathinagiri.datacube?tab=Overview" class="btn btn-primary" target="_blank">Microsoft Store</a>
               <a href="https://github.com/SRathinaGiri/PowerBI/tree/main/CustomVisuals/dataCube" class="btn btn-primary" target="_blank">View Source Code</a>
               <a href="CustomVisuals/dataCube/PRIVACY.md" class="btn btn-secondary">Privacy Policy</a>
@@ -337,20 +417,20 @@
           </div>
         </div>
 
-        <div class="card" style="grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; margin-top: 1.5rem;">
-          <div class="card-img-container" style="height: auto; margin: 0; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <img src="https://raw.githubusercontent.com/SRathinaGiri/PowerBIThemeMaker/main/screenshots/preview_page.png" alt="Power BI Theme Maker" class="card-img" style="object-fit: contain;">
+        <div class="card feature srg-reveal">
+          <div class="card-img-container feature-media">
+            <img src="https://raw.githubusercontent.com/SRathinaGiri/PowerBIThemeMaker/main/screenshots/preview_page.png" alt="Power BI Theme Maker" class="card-img" loading="lazy">
           </div>
           <div>
-            <h3 style="font-size: 1.8rem; color: var(--accent);">Power BI Theme Maker</h3>
-            <p style="font-size: 1.1rem;">A single-file HTML application for generating, customizing, and validating Power BI JSON themes. Visually design themes, preview them in real-time, and export the resulting JSON configuration for direct import into Power BI.</p>
+            <h3 class="feature-title">Power BI Theme Maker</h3>
+            <p class="feature-copy">A single-file HTML application for generating, customizing, and validating Power BI JSON themes. Visually design themes, preview them in real-time, and export the resulting JSON configuration for direct import into Power BI.</p>
 
             <div class="card-meta">
               <span><strong>Status:</strong> Free & Open Source</span>
               <span><strong>Hosting:</strong> GitHub</span>
             </div>
 
-            <div class="card-actions" style="margin-top: 1.5rem;">
+            <div class="card-actions">
                <a href="https://github.com/SRathinaGiri/PowerBIThemeMaker" class="btn btn-primary" target="_blank">View Project</a>
                <a href="https://github.com/SRathinaGiri/PowerBIThemeMaker/blob/main/PowerBI%20Theme%20Maker.html" class="btn btn-secondary" target="_blank">View HTML Source</a>
             </div>
@@ -360,23 +440,24 @@
     </section>
 
     <section id="power-query">
+      <p class="eyebrow">Practice</p>
       <h2>Power Query</h2>
-      <p style="margin-bottom: 2rem;">Explore exercises and mind maps to master data transformation with Power Query.</p>
+      <p class="section-lead">Explore exercises and mind maps to master data transformation with Power Query.</p>
 
       <div class="card-grid">
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Power Query Exercises</h3>
           <p>Practice data shaping and transformation with a set of Power Query exercises along with sample data in Excel.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Power%20Query/PowerQueryExercises.pdf" class="btn btn-primary" target="_blank">View Exercises (PDF)</a>
             <a href="Power%20Query/Power_Query_Exercises.xlsx" class="btn btn-outline" download>Sample Data (Excel)</a>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Time Intelligence Mind Map</h3>
           <p>A comprehensive mind map detailing Time Intelligence functions and concepts in Power BI.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Power%20Query/Time%20Intelligence%20in%20Power%20BI.pdf" class="btn btn-primary" target="_blank">View Mind Map (PDF)</a>
             <a href="Power%20Query/Time%20Intelligence%20in%20Power%20BI.mm" class="btn btn-outline" download>Download .mm File</a>
           </div>
@@ -384,156 +465,60 @@
       </div>
     </section>
 
-    <section id="infographics">
-      <h2>Infographics & Reports</h2>
-      <p style="margin-bottom: 2rem;">A collection of interactive, animated infographics designed to demystify complex concepts and make them easy to learn.</p>
-
-      <div class="card-grid">
-        <div class="card">
-          <h3>OLAP vs OLTP</h3>
-          <p>An interactive infographic that visually demonstrates OLTP vs OLAP: at a Glance and why Columnstore databases are used in analytics.</p>
-          <a href="pages/OLAPConcept.html" class="card-link">View Infographic &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>OLAP - Data Cube Operations</h3>
-          <p>An interactive infographic that visually demonstrates OLAP data cube operations—Pivoting, Dicing, Slicing, Drilling Down, and Rolling up—through dynamic 3D cube animations linked with tabular data.</p>
-          <a href="pages/OLAPDataCube.html" class="card-link">View Infographic &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>5D Sales Datacube</h3>
-          <p>Build intuition from 0D to 5D: move from one sales total to a timeline, matrix, cube, logistics colors, and a fully interactive slicable/diceable sales datacube.</p>
-          <a href="pages/5d-datacube/index.html" class="card-link">Open the 5D Datacube &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Star Schema Filter Flow</h3>
-          <p>This visual demonstrates how filters cascade from dimension tables to the central fact table, including bidirectional relationships.</p>
-          <a href="pages/StarSchema.html" class="card-link">View Infographic &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>DAX Filter Context Water Plant</h3>
-          <p>An interactive model that explains the DAX filter context hierarchy and how CALCULATE() can modify the flow of filters.</p>
-          <a href="pages/DAXFilterHierarchy.html" class="card-link">View Infographic &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Filter Context Camera</h3>
-          <p>See the SUM measure act like a camera while report, page, visual, and slicer filters choreograph who steps into the spotlight.</p>
-          <a href="pages/FilterContextCamera.html" class="card-link">Open the Camera Page &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Row Context vs Filter Context</h3>
-          <p>Learn the foundational difference between “current row” and “visible rows” before moving on to context transition.</p>
-          <a href="pages/RowContextVsFilterContext.html" class="card-link">Open the Foundation Page &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Context Transition Lab</h3>
-          <p>See row context become filter context through a commission example that compares a plain SUM with CALCULATE-wrapped evaluation.</p>
-          <a href="pages/ContextTransitionLab.html" class="card-link">Open the Context Transition Lab &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>SUM vs SUMX Lab</h3>
-          <p>Compare plain aggregation with row-by-row iteration using a practical order-lines scenario with quantity, price, and discount.</p>
-          <a href="pages/SumVsSumXLab.html" class="card-link">Open the SUM vs SUMX Lab &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Calculated Column vs Measure</h3>
-          <p>See the difference between stored row-by-row model values and dynamic report-time calculations that change with filter context.</p>
-          <a href="pages/CalculatedColumnVsMeasureLab.html" class="card-link">Open the Column vs Measure Lab &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>ALL vs ALLEXCEPT vs ALLSELECTED</h3>
-          <p>Compare grand totals, grouped subtotals, and selected totals using an animated percent-of-total sales scenario.</p>
-          <a href="pages/AllVsAllexceptVsAllselectedLab.html" class="card-link">Open the Filter-Shaping Lab &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Date Filter Context Train</h3>
-          <p>Explore how DAX date intelligence functions stay on track using a train yard animation that demonstrates current, previous, and next period calculations.</p>
-          <a href="pages/DateFilterContextTrain.html" class="card-link">View Animation &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Stages of Data Analysis</h3>
-          <p>Step through the iterative stages of data analysis with illustrated diagrams that connect business questions to measurable insights.</p>
-          <a href="pages/stages-of-data-analysis.html" class="card-link">Explore the Stages &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Choose the Right Power BI Chart</h3>
-          <p>Browse chart types, learn when to use them, and generate animated ECharts previews for Power BI storytelling.</p>
-          <a href="pages/PowerBIChartGuide.html" class="card-link">Open the Chart Guide &rarr;</a>
-        </div>
-
-        <div class="card">
-          <h3>Power Query Joins Playground</h3>
-          <p>Experiment with Left/Right/Full, Inner, and Anti joins using Orders, Customers, and Products linked with live Venn diagrams.</p>
-          <a href="pages/PowerQueryJoins.html" class="card-link">Explore Joins &rarr;</a>
-        </div>
-      </div>
-    </section>
-
     <section id="tutorials">
-      <h2>Tutorials & Case Studies</h2>
-      <p style="margin-bottom: 2rem;">Hands-on case studies and real-world scenarios to elevate your Power BI data modeling and analytics skills.</p>
+      <p class="eyebrow">Hands-on</p>
+      <h2>Tutorials &amp; Case Studies</h2>
+      <p class="section-lead">Hands-on case studies and real-world scenarios to elevate your Power BI data modeling and analytics skills.</p>
 
       <div class="card-grid">
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Power BI Case Study 01</h3>
           <p>A comprehensive data analysis case study covering modeling, DAX, and report creation.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Tutorials/Power%20BI%20Case%20Study%2001.pdf" class="btn btn-primary" target="_blank">View Case Study (PDF)</a>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Power BI Case Study 02</h3>
           <p>An advanced case study focusing on complex scenarios and in-depth data transformation.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Tutorials/Power%20BI%20Case%20Study%2002.pdf" class="btn btn-primary" target="_blank">View Case Study (PDF)</a>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Case Study 01 (Purchase Data)</h3>
           <p>A focused case study applying analytics to real-world purchasing data records.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Tutorials/Case%20Study_01.pdf" class="btn btn-primary" target="_blank">View Case Study (PDF)</a>
             <a href="Tutorials/purchase.txt" class="btn btn-outline" download>Purchase Data (TXT)</a>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Case Study 02 (Form 26AS)</h3>
           <p>Practical real-world examples reconciling and analyzing Form 26AS tax statements.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Tutorials/Case%20Study%2002.pdf" class="btn btn-primary" target="_blank">View Case Study (PDF)</a>
             <a href="Tutorials/FORM%2026AS.txt" class="btn btn-outline" download>Form 26AS Data (TXT)</a>
           </div>
         </div>
 
-        <div class="card">
+        <div class="card srg-reveal">
           <h3>Case Study Source Data</h3>
           <p>Download the source data required to complete the exercises in Power BI Case Studies 1 & 2.</p>
-          <div class="card-actions" style="margin-top: 1rem;">
+          <div class="card-actions">
             <a href="Tutorials/Power%20BI%20Cast%20Study%20SourceData.zip" class="btn btn-primary" download>Download Sample Data (ZIP)</a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="download-section">
+    <section class="download-section srg-reveal">
       <h3>Power BI Practice Workbook</h3>
       <p>Download the companion Power BI workbook to experiment with the scenarios covered in these visuals.</p>
-      <a href="assets/resources/PBI.xlsx" class="btn btn-primary" download style="margin-top: 1rem; font-size: 1.1rem; padding: 0.75rem 1.5rem;">Download PBI.xlsx &darr;</a>
+      <a href="assets/resources/PBI.xlsx" class="btn btn-primary" download>Download PBI.xlsx &darr;</a>
     </section>
 
     <footer>
@@ -545,14 +530,15 @@
       </div>
     </footer>
   </div>
-
-  <style>
-    /* Add specific media query for the DataCube featured card to ensure responsiveness */
-    @media (max-width: 900px) {
-      .card[style*="grid-column: 1 / -1"] {
-        grid-template-columns: 1fr !important;
-      }
-    }
-  </style>
+  <script>
+    // Lesson cards: soft spotlight follows the pointer.
+    document.querySelectorAll('.lesson').forEach(function (card) {
+      card.addEventListener('pointermove', function (e) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  </script>
 </body>
 </html>

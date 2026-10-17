@@ -4,20 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calculated Column vs Measure | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
   <style>
-    :root {
-      --bg: #07111d;
-      --panel: rgba(12, 24, 43, 0.9);
-      --panel-soft: rgba(255, 255, 255, 0.04);
-      --ink: #eef5ff;
-      --muted: #a8bad4;
-      --accent: #69b8ff;
-      --accent-2: #ffd166;
-      --accent-3: #66e6b3;
-      --danger: #ff7b7b;
-      --border: rgba(255, 255, 255, 0.1);
-      --shadow: 0 20px 48px rgba(0, 0, 0, 0.34);
-    }
 
     * { box-sizing: border-box; }
     body {
@@ -25,10 +14,6 @@
       min-height: 100vh;
       font: 16px/1.5 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: var(--ink);
-      background:
-        radial-gradient(circle at 14% 10%, rgba(105,184,255,.18), transparent 28%),
-        radial-gradient(circle at 88% 14%, rgba(102,230,179,.12), transparent 24%),
-        linear-gradient(180deg, #06101b, #091425 42%, #030812);
     }
 
     code { font-family: Consolas, "Courier New", monospace; }
@@ -39,19 +24,6 @@
       grid-template-columns: 1.4fr .95fr;
       gap: 18px;
       align-items: stretch;
-    }
-    .back-row { margin-bottom: 10px; }
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      text-decoration: none;
-      color: #dcecff;
-      font-weight: 700;
-      background: rgba(105,184,255,.14);
-      border: 1px solid rgba(105,184,255,.2);
     }
     .eyebrow {
       margin: 0 0 8px;
@@ -72,7 +44,7 @@
       font-size: 1.03rem;
     }
     .hero-card, .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
       border: 1px solid var(--border);
       border-radius: 24px;
       box-shadow: var(--shadow);
@@ -82,8 +54,8 @@
       display: grid;
       gap: 10px;
       background:
-        linear-gradient(135deg, rgba(105,184,255,.18), rgba(102,230,179,.08)),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+        linear-gradient(135deg, rgb(var(--accent-rgb) / .18), rgb(var(--accent-3-rgb) / .08)),
+        linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
     }
     .hero-card h2 {
       margin: 0;
@@ -93,7 +65,7 @@
       color: var(--accent-3);
     }
     .hero-card code {
-      color: #fff;
+      color: var(--ink-strong);
       font-size: 1rem;
       line-height: 1.6;
     }
@@ -107,7 +79,7 @@
     }
     .sidebar {
       position: sticky;
-      top: 12px;
+      top: calc(var(--srg-bar-h) + 12px);
       height: fit-content;
       display: grid;
       gap: 16px;
@@ -128,14 +100,10 @@
       width: 100%;
       border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      background: var(--control-bg);
       color: var(--ink);
       padding: 12px 14px;
       font: inherit;
-    }
-    select option {
-      background: #0c1730;
-      color: #eef4ff;
     }
     button {
       cursor: pointer;
@@ -144,17 +112,17 @@
     }
     button:hover { transform: translateY(-1px); filter: brightness(1.05); }
     .scenario-btn {
-      background: linear-gradient(135deg, rgba(105,184,255,.22), rgba(105,184,255,.08));
+      background: linear-gradient(135deg, rgb(var(--accent-rgb) / .22), rgb(var(--accent-rgb) / .08));
     }
     .reset-btn {
-      background: linear-gradient(135deg, rgba(255,209,102,.22), rgba(255,209,102,.08));
-      color: #fff0c5;
+      background: linear-gradient(135deg, rgb(var(--accent-2-rgb) / .22), rgb(var(--accent-2-rgb) / .08));
+      color: var(--accent-2-ink);
     }
     .mini-note {
       padding: 14px 16px;
       border-radius: 18px;
       background: var(--panel-soft);
-      border: 1px solid rgba(255,255,255,.07);
+      border: 1px solid rgb(var(--fg-rgb) / .07);
       color: var(--muted);
       line-height: 1.65;
     }
@@ -170,8 +138,8 @@
     .kpi {
       padding: 14px 12px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(105,184,255,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(105,184,255,.14);
+      background: linear-gradient(180deg, rgb(var(--accent-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-rgb) / .14);
     }
     .kpi label {
       margin: 0 0 4px;
@@ -187,9 +155,9 @@
       font-size: .84rem;
       font-weight: 700;
     }
-    .badge.column { background: rgba(255,209,102,.16); color: #ffe7ab; }
-    .badge.measure { background: rgba(102,230,179,.16); color: #d7ffee; }
-    .badge.warn { background: rgba(255,123,123,.16); color: #ffd6d6; }
+    .badge.column { background: rgb(var(--accent-2-rgb) / .16); color: var(--accent-2-ink); }
+    .badge.measure { background: rgb(var(--accent-3-rgb) / .16); color: var(--accent-3-ink); }
+    .badge.warn { background: rgb(var(--danger-rgb) / .16); color: var(--danger-ink); }
 
     .content {
       display: grid;
@@ -207,12 +175,12 @@
       padding: 6px 10px;
       border-radius: 999px;
       font-size: .75rem;
-      color: #dcecff;
-      background: rgba(105,184,255,.14);
+      color: var(--accent-ink);
+      background: rgb(var(--accent-rgb) / .14);
     }
     .tiny-tag.alt {
-      background: rgba(102,230,179,.14);
-      color: #d7ffee;
+      background: rgb(var(--accent-3-rgb) / .14);
+      color: var(--accent-3-ink);
     }
 
     .table-header, .row-card {
@@ -235,14 +203,14 @@
     .row-card {
       padding: 14px 12px;
       border-radius: 18px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.06);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .06);
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, opacity .22s ease;
     }
     .row-card.active {
       transform: translateX(6px);
-      border-color: rgba(255,209,102,.56);
-      box-shadow: 0 14px 28px rgba(255,209,102,.16);
+      border-color: rgb(var(--accent-2-rgb) / .56);
+      box-shadow: 0 14px 28px rgb(var(--accent-2-rgb) / .16);
     }
     .row-card.dim {
       opacity: .38;
@@ -255,9 +223,9 @@
       padding: 7px 10px;
       border-radius: 999px;
       font-size: .84rem;
-      background: rgba(255,209,102,.12);
-      color: #ffeabc;
-      border: 1px solid rgba(255,209,102,.16);
+      background: rgb(var(--accent-2-rgb) / .12);
+      color: var(--accent-2-ink);
+      border: 1px solid rgb(var(--accent-2-rgb) / .16);
     }
 
     .results-grid {
@@ -268,8 +236,8 @@
     .result-card {
       padding: 18px;
       border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
     }
     .result-card h3 {
       margin: 0 0 10px;
@@ -286,16 +254,16 @@
       font-size: clamp(1.55rem, 2.8vw, 2.2rem);
     }
     .result-card.column-card {
-      background: linear-gradient(180deg, rgba(255,209,102,.11), rgba(255,255,255,.03));
-      border-color: rgba(255,209,102,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-2-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-2-rgb) / .18);
     }
     .result-card.measure-card {
-      background: linear-gradient(180deg, rgba(102,230,179,.11), rgba(255,255,255,.03));
-      border-color: rgba(102,230,179,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-3-rgb) / .11), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--accent-3-rgb) / .18);
     }
     .result-card.warn-card {
-      background: linear-gradient(180deg, rgba(255,123,123,.10), rgba(255,255,255,.03));
-      border-color: rgba(255,123,123,.16);
+      background: linear-gradient(180deg, rgb(var(--danger-rgb) / .10), rgb(var(--fg-rgb) / .03));
+      border-color: rgb(var(--danger-rgb) / .16);
     }
     .chip-row {
       display: flex;
@@ -307,9 +275,9 @@
       padding: 7px 10px;
       border-radius: 999px;
       font-size: .8rem;
-      background: rgba(255,255,255,.06);
-      color: #e8f2ff;
-      border: 1px solid rgba(255,255,255,.09);
+      background: rgb(var(--fg-rgb) / .06);
+      color: var(--ink);
+      border: 1px solid rgb(var(--fg-rgb) / .09);
     }
 
     .guide-grid {
@@ -320,8 +288,8 @@
     .guide-card {
       padding: 18px;
       border-radius: 20px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgb(var(--fg-rgb) / .03);
+      border: 1px solid rgb(var(--fg-rgb) / .08);
     }
     .guide-card p, .guide-card li {
       color: var(--muted);
@@ -335,9 +303,9 @@
       margin-top: 12px;
       padding: 14px 16px;
       border-radius: 16px;
-      background: rgba(4, 11, 22, 0.78);
-      border: 1px solid rgba(105,184,255,.16);
-      color: #f4f8ff;
+      background: var(--code-bg);
+      border: 1px solid rgb(var(--accent-rgb) / .16);
+      color: var(--code-ink);
       overflow-x: auto;
       white-space: pre-wrap;
       line-height: 1.6;
@@ -346,8 +314,8 @@
       margin-top: 16px;
       padding: 16px 18px;
       border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,209,102,.12), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,209,102,.18);
+      background: linear-gradient(180deg, rgb(var(--accent-2-rgb) / .12), rgb(var(--fg-rgb) / .03));
+      border: 1px solid rgb(var(--accent-2-rgb) / .18);
       color: var(--muted);
       line-height: 1.7;
     }
@@ -365,15 +333,21 @@
       .table-header, .row-card { grid-template-columns: 1fr; }
       .kpi-grid { grid-template-columns: 1fr; }
     }
+  
+    /* Motion polish */
+    .chip:last-child { animation: lab-pop .45s var(--ease-spring) both; }
+    @keyframes lab-pop { from { opacity: 0; transform: translateY(6px) scale(.9); } }
+    .panel, .hero-card { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+    .result-card, .guide-card, .kpi { transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease; }
+    .result-card:hover, .guide-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    h1 { font-family: var(--font-display); letter-spacing: -.02em; }
+    .eyebrow { color: var(--accent-2); }
   </style>
 </head>
 <body>
-  <header class="hero">
+  <header class="hero srg-enter">
     <div>
-      <div class="back-row">
-        <a class="back-link" href="../index.html">&#8592; Back to Power BI Infographics</a>
-      </div>
-      <p class="eyebrow">Modeling vs Report Logic</p>
+<p class="eyebrow">Modeling vs Report Logic</p>
       <h1>Calculated Column vs Measure</h1>
       <p class="subtitle">
         Use a sales target scenario to see the core difference: a calculated column stores a value
@@ -453,7 +427,7 @@
     </aside>
 
     <section class="content">
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>Salesperson Snapshot</h2>
           <span class="tiny-tag">Gold row = one stored row in the model</span>
@@ -471,7 +445,7 @@
         <div id="tableBody" class="table-body"></div>
       </section>
 
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>Dynamic Measure Results</h2>
           <span class="tiny-tag alt">Same data, filter-responsive answers</span>
@@ -501,7 +475,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel srg-reveal">
         <div class="section-title">
           <h2>When to use which</h2>
           <span class="tiny-tag alt">Practical guidance</span>

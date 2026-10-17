@@ -20893,11 +20893,15 @@ void main() {
   ];
   var scene = new Scene();
   scene.fog = new Fog(462863, 12, 32);
+  // Site theme hook (hand-patched into the build): fade into the page background.
+  var applySiteTheme = (t) => scene.fog.color.set(t === "dark" ? 462863 : 16053495);
+  if (window.SRG) { applySiteTheme(SRG.theme()); SRG.onThemeChange(applySiteTheme); }
   var renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  // Size to the stage, not the window, so the lesson bar doesn't stretch the view.
+  renderer.setSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, false);
   renderer.outputColorSpace = SRGBColorSpace;
-  var camera = new PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+  var camera = new PerspectiveCamera(48, (canvas.clientWidth || window.innerWidth) / (canvas.clientHeight || window.innerHeight), 0.1, 100);
   camera.position.set(7.8, 5.6, 8.4);
   var controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -21610,11 +21614,11 @@ void main() {
     requestAnimationFrame(animate);
   }
   function resize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = canvas.clientWidth || window.innerWidth;
+    const height = canvas.clientHeight || window.innerHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
+    renderer.setSize(width, height, false); // CSS keeps the canvas at 100% of the stage
   }
   window.addEventListener("resize", resize);
   window.addEventListener("hashchange", () => setDimensionLevel(levelFromHash()));

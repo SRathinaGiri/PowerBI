@@ -1,0 +1,364 @@
+/* ==========================================================================
+   Power BI Visual Lessons — shared design system
+   Loaded by every page before its own <style>, so page rules can still
+   override. Theme is driven by <html data-theme="light|dark">, which
+   assets/site.js sets before first paint.
+   Colours with alpha are written as rgb(var(--x-rgb) / a) so one token
+   works for glass surfaces in both themes.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+  --srg-bar-h: 60px;
+
+  /* Foreground channel: glass fills/lines tint toward ink, not white. */
+  --fg-rgb: 15 27 45;
+
+  --bg: #f4f7fb;
+  --page-bg:
+    radial-gradient(1100px 620px at 8% -10%, rgb(var(--accent-rgb) / .10), transparent 60%),
+    radial-gradient(900px 560px at 100% 0%, rgb(var(--accent-3-rgb) / .08), transparent 55%),
+    linear-gradient(180deg, #f7f9fd 0%, #eef2f8 100%);
+  --panel: rgb(255 255 255 / .82);
+  --panel-solid: #ffffff;
+  --panel-soft: rgb(var(--fg-rgb) / .03);
+  --glass-hi: rgb(255 255 255 / .92);
+  --glass-lo: rgb(255 255 255 / .74);
+  --control-bg: #ffffff;
+  --ink: #0f1b2d;
+  --ink-strong: #050b16;
+  --muted: #526179;
+  --border: rgb(var(--fg-rgb) / .10);
+  --border-strong: rgb(var(--fg-rgb) / .18);
+  --shadow: 0 1px 2px rgb(15 27 45 / .05), 0 14px 36px rgb(15 27 45 / .09);
+  --shadow-lg: 0 2px 6px rgb(15 27 45 / .06), 0 28px 64px rgb(15 27 45 / .14);
+  --code-bg: #0f1b2d;
+  --code-ink: #e6efff;
+  --shade-rgb: 15 27 45;      /* inset/drop shading; pair with low alpha */
+
+  /* Accents tuned for ≥4.5:1 text contrast on white. */
+  --accent-rgb: 29 106 214;    --accent: rgb(var(--accent-rgb));
+  --accent-2-rgb: 176 112 6;   --accent-2: rgb(var(--accent-2-rgb));   /* amber */
+  --accent-3-rgb: 5 135 95;    --accent-3: rgb(var(--accent-3-rgb));   /* green */
+  --accent-4-rgb: 201 74 46;   --accent-4: rgb(var(--accent-4-rgb));   /* coral */
+  --danger-rgb: 205 38 38;     --danger: rgb(var(--danger-rgb));
+  --warn-rgb: 194 110 0;       --warn: rgb(var(--warn-rgb));
+  --violet-rgb: 111 66 214;    --violet: rgb(var(--violet-rgb));
+  --cyan-rgb: 8 128 168;       --cyan: rgb(var(--cyan-rgb));
+
+  /* Text on tinted badges/chips. */
+  --accent-ink: #12458f;
+  --accent-2-ink: #7a4b00;
+  --accent-3-ink: #04583e;
+  --accent-4-ink: #8a2c17;
+  --danger-ink: #8f1b1b;
+  --violet-ink: #4a2a9c;
+  --on-accent: #ffffff;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono: "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fg-rgb: 255 255 255;
+
+  --bg: #07111d;
+  --page-bg:
+    radial-gradient(1100px 620px at 8% -10%, rgb(var(--accent-rgb) / .16), transparent 60%),
+    radial-gradient(900px 560px at 100% 0%, rgb(var(--accent-3-rgb) / .10), transparent 55%),
+    linear-gradient(180deg, #06101b 0%, #091425 42%, #030812 100%);
+  --panel: rgb(12 24 43 / .86);
+  --panel-solid: #0d1a2e;
+  --glass-hi: rgb(255 255 255 / .06);
+  --glass-lo: rgb(255 255 255 / .02);
+  --control-bg: rgb(255 255 255 / .05);
+  --ink: #eef5ff;
+  --ink-strong: #ffffff;
+  --muted: #a6b9d3;
+  --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 20px 48px rgb(0 0 0 / .34);
+  --shadow-lg: 0 2px 6px rgb(0 0 0 / .35), 0 32px 72px rgb(0 0 0 / .45);
+  --code-bg: rgb(0 0 0 / .32);
+  --code-ink: #e6efff;
+  --shade-rgb: 0 0 0;
+
+  --accent-rgb: 103 183 255;
+  --accent-2-rgb: 255 209 102;
+  --accent-3-rgb: 96 230 178;
+  --accent-4-rgb: 255 155 138;
+  --danger-rgb: 255 122 122;
+  --warn-rgb: 251 191 36;
+  --violet-rgb: 178 149 247;
+  --cyan-rgb: 125 211 252;
+
+  --accent-ink: #d7ecff;
+  --accent-2-ink: #fff0c5;
+  --accent-3-ink: #d7ffee;
+  --accent-4-ink: #ffe0d9;
+  --danger-ink: #ffd6d6;
+  --violet-ink: #ece4ff;
+  --on-accent: #06101b;
+}
+
+/* ---------- Base ---------- */
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--page-bg);
+  background-attachment: fixed;
+  color: var(--ink);
+}
+::selection { background: rgb(var(--accent-rgb) / .28); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+select option { background: var(--panel-solid); color: var(--ink); }
+
+/* Theme switch: avoid half-transitioned colours during swaps. */
+html.srg-theme-swap *, html.srg-theme-swap *::before, html.srg-theme-swap *::after { transition: none !important; }
+
+/* ---------- Motion ---------- */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: srg-vt-out .28s var(--ease-out) both; }
+::view-transition-new(root) { animation: srg-vt-in .42s var(--ease-out) both; }
+::view-transition-group(srg-bar) { animation-duration: 0s; }
+html.srg-theme-vt::view-transition-old(root),
+html.srg-theme-vt::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+@keyframes srg-vt-out { to { opacity: 0; transform: translateY(-10px) scale(.99); filter: blur(3px); } }
+@keyframes srg-vt-in { from { opacity: 0; transform: translateY(14px) scale(.995); filter: blur(4px); } }
+@keyframes srg-rise { from { opacity: 0; transform: translateY(22px) scale(.985); } }
+@keyframes srg-fade { from { opacity: 0; } }
+
+/* Hero entrance: add .srg-enter to a container; children stagger in. */
+.srg-enter > * { animation: srg-rise .7s var(--ease-out) both; }
+.srg-enter > *:nth-child(2) { animation-delay: .07s; }
+.srg-enter > *:nth-child(3) { animation-delay: .14s; }
+.srg-enter > *:nth-child(4) { animation-delay: .21s; }
+.srg-enter > *:nth-child(n+5) { animation-delay: .28s; }
+
+/* One-shot scroll reveal. Hidden only once site.js has marked the page
+   (html.srg-io), so content is never stuck invisible without JS. */
+html.srg-io .srg-reveal:not(.srg-in) { opacity: 0; transform: translateY(26px) scale(.985); }
+html.srg-io .srg-reveal {
+  transition: opacity .7s var(--ease-out), transform .9s var(--ease-out);
+  transition-delay: var(--srg-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  html.srg-io .srg-reveal { opacity: 1 !important; transform: none !important; }
+  @view-transition { navigation: none; }
+}
+
+/* ==========================================================================
+   Lesson bar (injected by site.js). Every rule is scoped and starts from
+   `all: unset` so page-level `button {…}` / `a {…}` rules can't leak in.
+   ========================================================================== */
+.srg-bar, .srg-bar *, .srg-footer, .srg-footer * { box-sizing: border-box; }
+.srg-bar {
+  position: sticky; top: 0; z-index: 1000;
+  width: 100%; align-self: stretch; flex: 0 0 auto;
+  height: var(--srg-bar-h);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 clamp(10px, 2vw, 22px);
+  font: 500 14px/1.2 var(--font);
+  letter-spacing: 0; text-align: left;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel-solid) 72%, transparent);
+  -webkit-backdrop-filter: saturate(1.6) blur(16px);
+  backdrop-filter: saturate(1.6) blur(16px);
+  border-bottom: 1px solid var(--border);
+  view-transition-name: srg-bar;
+}
+.srg-bar .srg-progress {
+  position: absolute; left: 0; bottom: -1px; height: 2px;
+  width: calc(var(--srg-p, 0) * 100%);
+  background: linear-gradient(90deg, var(--accent), var(--accent-3));
+  border-radius: 0 2px 2px 0;
+  transition: width .6s var(--ease-out);
+}
+.srg-bar .srg-btn, .srg-footer .srg-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 12px;
+  border-radius: 12px;
+  font: 600 14px/1 var(--font);
+  color: var(--ink);
+  cursor: pointer; white-space: nowrap;
+  border: 1px solid transparent;
+  transition: background .2s ease, border-color .2s ease, transform .25s var(--ease-spring), color .2s ease;
+}
+.srg-bar .srg-btn:hover { background: rgb(var(--fg-rgb) / .06); border-color: var(--border); }
+.srg-bar .srg-btn:active { transform: scale(.96); }
+.srg-bar .srg-btn:focus-visible, .srg-footer .srg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.srg-bar .srg-btn[aria-disabled="true"] { opacity: .35; pointer-events: none; }
+.srg-bar svg { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.srg-bar .srg-brand { gap: 10px; padding-left: 6px; }
+.srg-bar .srg-logo {
+  width: 30px; height: 30px; border-radius: 9px; flex: none;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #f2c811, #e8a400);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / .12), 0 4px 12px rgb(232 164 0 / .35);
+}
+.srg-bar .srg-logo i { display: flex; align-items: flex-end; gap: 2px; height: 15px; }
+.srg-bar .srg-logo b { display: block; width: 4px; border-radius: 1.5px; background: #1b1b1b; }
+.srg-bar .srg-logo b:nth-child(1) { height: 7px; opacity: .55; }
+.srg-bar .srg-logo b:nth-child(2) { height: 11px; opacity: .75; }
+.srg-bar .srg-logo b:nth-child(3) { height: 15px; }
+.srg-bar .srg-brand-text { display: grid; gap: 2px; }
+.srg-bar .srg-brand-text small { font: 600 10.5px/1 var(--font); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+.srg-bar .srg-sep { width: 1px; height: 26px; background: var(--border); flex: none; }
+.srg-bar .srg-spacer { flex: 1 1 auto; min-width: 0; }
+
+.srg-bar .srg-where { min-width: 0; max-width: 46ch; gap: 10px; }
+.srg-bar .srg-where .srg-step {
+  flex: none; font: 700 12px/1 var(--mono);
+  padding: 5px 8px; border-radius: 8px;
+  color: var(--accent-ink); background: rgb(var(--accent-rgb) / .14);
+}
+.srg-bar .srg-where .srg-title { overflow: hidden; text-overflow: ellipsis; }
+.srg-bar .srg-where .srg-chev { width: 14px; height: 14px; opacity: .6; transition: transform .25s var(--ease-out); }
+.srg-bar .srg-where[aria-expanded="true"] .srg-chev { transform: rotate(180deg); }
+
+.srg-bar .srg-nav { display: inline-flex; gap: 6px; }
+.srg-bar .srg-nav .srg-btn { max-width: 30ch; }
+.srg-bar .srg-nav .srg-btn span { display: grid; gap: 3px; overflow: hidden; }
+.srg-bar .srg-nav .srg-btn small { font: 600 10px/1 var(--font); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.srg-bar .srg-nav .srg-btn em { font-style: normal; overflow: hidden; text-overflow: ellipsis; }
+.srg-bar .srg-next {
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--accent-3)));
+  box-shadow: 0 6px 18px rgb(var(--accent-rgb) / .3);
+}
+.srg-bar .srg-next small { color: color-mix(in srgb, var(--on-accent) 75%, transparent) !important; }
+.srg-bar .srg-next:hover { background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent-3))); border-color: transparent; transform: translateY(-1px); }
+.srg-bar .srg-next:hover svg { transform: translateX(3px); }
+.srg-bar .srg-prev:hover svg { transform: translateX(-3px); }
+.srg-bar .srg-nav svg { transition: transform .25s var(--ease-spring); }
+
+.srg-bar .srg-theme { width: 38px; padding: 0; justify-content: center; position: relative; overflow: hidden; }
+.srg-bar .srg-theme svg { position: absolute; transition: transform .5s var(--ease-spring), opacity .3s ease; }
+.srg-bar .srg-theme .srg-sun { transform: rotate(0) scale(1); }
+.srg-bar .srg-theme .srg-moon { transform: rotate(-90deg) scale(.3); opacity: 0; }
+:root[data-theme="dark"] .srg-bar .srg-theme .srg-sun { transform: rotate(90deg) scale(.3); opacity: 0; }
+:root[data-theme="dark"] .srg-bar .srg-theme .srg-moon { transform: rotate(0) scale(1); opacity: 1; }
+
+/* Lesson index popover */
+.srg-menu {
+  all: unset; box-sizing: border-box;
+  position: fixed; inset: calc(var(--srg-bar-h) + 8px) auto auto 50%;
+  translate: -50% 0;
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100vh - var(--srg-bar-h) - 24px);
+  overflow: auto;
+  padding: 10px;
+  border-radius: 18px;
+  font: 500 14px/1.35 var(--font);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--panel-solid) 92%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  z-index: 1001;
+}
+.srg-menu:not(:popover-open):not(.srg-open) { display: none; }
+.srg-menu:popover-open, .srg-menu.srg-open { display: block; animation: srg-pop .32s var(--ease-out); }
+@keyframes srg-pop { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+.srg-menu h4 {
+  all: unset; display: block;
+  padding: 12px 10px 6px;
+  font: 700 11px/1 var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.srg-menu a {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 12px;
+  transition: background .18s ease;
+}
+.srg-menu a:hover, .srg-menu a:focus-visible { background: rgb(var(--fg-rgb) / .06); }
+.srg-menu a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.srg-menu a b {
+  display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px;
+  font: 700 12px/1 var(--mono); color: var(--muted); background: rgb(var(--fg-rgb) / .05);
+}
+.srg-menu a[aria-current="page"] { background: rgb(var(--accent-rgb) / .12); }
+.srg-menu a[aria-current="page"] b { color: var(--on-accent); background: var(--accent); }
+.srg-menu a span small { display: block; margin-top: 2px; color: var(--muted); font-size: 12.5px; }
+
+/* "Up next" footer */
+.srg-footer {
+  width: min(1100px, calc(100% - 32px));
+  margin: 56px auto 40px;
+  align-self: center; flex: 0 0 auto;
+  display: grid; grid-template-columns: 1fr 1.6fr; gap: 14px;
+  font: 500 15px/1.45 var(--font); text-align: left; color: var(--ink);
+}
+.srg-footer .srg-card {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  position: relative; overflow: hidden;
+  display: grid; gap: 6px; align-content: center;
+  min-height: 112px; padding: 20px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s ease;
+}
+.srg-footer .srg-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgb(var(--accent-rgb) / .4); }
+.srg-footer .srg-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.srg-footer .srg-card small { font: 700 11px/1 var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.srg-footer .srg-card strong { font: 700 clamp(17px, 2vw, 21px)/1.25 var(--font-display); color: var(--ink); }
+.srg-footer .srg-card p { all: unset; display: block; color: var(--muted); font-size: 14px; }
+.srg-footer .srg-card.srg-up {
+  padding-right: 76px;
+  background:
+    radial-gradient(420px 200px at 100% 0%, rgb(var(--accent-rgb) / .18), transparent 70%),
+    var(--panel);
+}
+.srg-footer .srg-card.srg-up small { color: var(--accent); }
+.srg-footer .srg-card .srg-arrow {
+  position: absolute; right: 20px; top: 50%; translate: 0 -50%;
+  width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--on-accent); background: var(--accent);
+  box-shadow: 0 8px 22px rgb(var(--accent-rgb) / .35);
+  transition: transform .35s var(--ease-spring);
+}
+.srg-footer .srg-card:hover .srg-arrow { transform: translateX(4px); }
+.srg-footer svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.srg-footer .srg-only { grid-column: 1 / -1; }
+
+/* Page hosts with fixed full-viewport layouts can opt out of the footer
+   with <body data-srg-footer="off">. */
+
+@media (max-width: 1100px) {
+  .srg-bar .srg-nav .srg-btn small { display: none; }
+  .srg-bar .srg-nav .srg-btn { max-width: 22ch; }
+}
+@media (max-width: 860px) {
+  .srg-bar .srg-brand-text, .srg-bar .srg-sep { display: none; }
+  .srg-bar .srg-nav .srg-btn em { display: none; }
+  .srg-bar .srg-nav .srg-btn { padding: 0 10px; }
+}
+@media (max-width: 560px) {
+  .srg-bar { gap: 4px; }
+  .srg-bar .srg-where .srg-title { display: none; }
+  .srg-footer { grid-template-columns: 1fr; }
+}
+@media print {
+  .srg-bar, .srg-footer, .srg-menu { display: none !important; }
+}
