@@ -135,8 +135,18 @@
 
     /* Pipes and Filters */
     /* Glass tube = dark rim + light bore; the filter is the fluid moving inside. */
-    :root { --tube-rim: #64748b; --tube-bore: #e8eef6; --fluid: #0284c7; --fluid-back: #d97706; }
-    :root[data-theme="dark"] { --tube-rim: #94a3b8; --tube-bore: #0b1324; --fluid: #38bdf8; --fluid-back: #fbbf24; }
+    :root { --tube-rim: #64748b; --tube-bore: #e8eef6; --fluid: #0284c7; --fluid-back: #d97706;
+      /* One colour per dimension (tube fluid, tank water, icons). */
+      --c-time: #7c3aed; --c-place: #059669; --c-customer: #0891b2; --c-product: #ea580c; --c-salesperson: #db2777;
+      --clear-water: #bcdcf5; }
+    :root[data-theme="dark"] { --tube-rim: #94a3b8; --tube-bore: #0b1324; --fluid: #38bdf8; --fluid-back: #fbbf24;
+      --c-time: #a78bfa; --c-place: #34d399; --c-customer: #22d3ee; --c-product: #fb923c; --c-salesperson: #f472b6;
+      --clear-water: #6fa8d6; }
+    .water { transition: fill .5s ease, height .25s ease, y .25s ease; }
+    .who-label { font: 800 15px var(--font); fill: var(--ink); paint-order: stroke; stroke: var(--panel-solid); stroke-width: 3px; }
+    .who-track { fill: var(--panel-solid); stroke: rgb(var(--fg-rgb) / .35); stroke-width: 1; }
+    .who-seg { transition: width .35s ease, x .35s ease; }
+    .who-pct { font: 800 13px var(--mono); fill: #fff; paint-order: stroke; stroke: rgb(0 0 0 / .45); stroke-width: 2px; }
     .pipe, .bore, .flow { fill: none; stroke-linecap: round; stroke-linejoin: round; }
     .pipe { stroke: var(--tube-rim); stroke-width: 24; }
     .bore { stroke: var(--tube-bore); stroke-width: 16; }
@@ -357,6 +367,9 @@
           <rect class="label-bg" x="40" y="70" width="220" height="45" />
           <text class="label" x="150" y="87" text-anchor="middle">Sales Fact Table</text>
           <text class="sublabel" x="150" y="107" text-anchor="middle">All measures & transactional data</text>
+          <text class="who-label" id="who-label" x="150" y="138" text-anchor="middle">No filters: clear water</text>
+          <rect class="who-track" x="30" y="146" width="240" height="26" rx="10" />
+          <g id="who-bar"></g>
         </g>
         
         <g id="dim-time-group" transform="translate(40, 100)">
@@ -435,7 +448,7 @@
   </div>
 
   <section class="explanation-section">
-    <p>In a star schema, filters normally flow from the descriptive dimension tables into the central fact table: a <strong>single-direction relationship</strong> (one-way tube). The Customer dimension has a <strong>bidirectional relationship</strong>, so its single tube carries two streams: <span style="color:var(--fluid);font-weight:700">cyan</span> flows Customer → Fact, and <span style="color:var(--fluid-back);font-weight:700">amber</span> flows Fact → Customer whenever another dimension is filtered. That's useful for questions like “which customers bought this product?”. Each slider shows the <strong>% of rows kept</strong>: drag it below 100% to apply that filter and watch the fluid move.</p>
+    <p>In a star schema, filters normally flow from the descriptive dimension tables into the central fact table: a <strong>single-direction relationship</strong> (one-way tube). The Customer dimension has a <strong>bidirectional relationship</strong>, so its single tube carries two streams: Customer's own colour flows Customer → Fact, and the Fact table's current colour flows back Fact → Customer whenever another dimension is filtered. That's useful for questions like “which customers bought this product?”. Each slider shows the <strong>% of rows kept</strong>: drag it below 100% to apply that filter and watch the fluid move. Every dimension has its own colour. The Fact table's <strong>water level</strong> shows how many rows survive (the kept shares multiplied together), and its <strong>colour</strong> shows who did the filtering: clear with no filters, tinted by each dimension in proportion to how hard it filters (see the “Filtered by” bar).</p>
   </section>
 
   <script>
@@ -536,6 +549,7 @@
       setWaterLevel('water-salesperson', remainingPct.salesperson * 100);
       
       setWaterLevel('water-fact', finalPercentage * 100);
+      paintColours(filterPct, finalPercentage);
       
       if (filterPct.customer > 0 || isAnyOtherFilterActive) {
           const allFiltersExceptCustomer = remainingPct.time * remainingPct.place * remainingPct.product * remainingPct.salesperson;
@@ -546,6 +560,75 @@
 
       elements.activeRows.textContent = `${(finalPercentage * 100).toFixed(0)}%`;
     }
+
+
+    // ---- Colour = who is filtering; level = how many rows survive. ----
+    const DIMS = ['time', 'place', 'customer', 'product', 'salesperson'];
+    const DIM_LABEL = { time: 'Time', place: 'Place', customer: 'Customer', product: 'Product', salesperson: 'Salesperson' };
+    const cssColour = (name) => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      const m = v.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+      return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [128, 128, 128];
+    };
+    const rgb = (c) => `rgb(${c.map(Math.round).join(' ')})`;
+    // Each dimension wears its colour on its tank water, tube fluid and icons.
+    DIMS.forEach((d, i) => {
+      document.getElementById(`water-${d}`).style.fill = `var(--c-${d})`;
+      document.getElementById(`flow-${d}-fact`).style.setProperty('--fluid', `var(--c-${d})`);
+      const tank = document.querySelector(`#dim-${d}-group .tank-icon`);
+      if (tank) tank.style.fill = `var(--c-${d})`;
+      const icon = document.querySelectorAll('.panel .filter-icon')[i];
+      if (icon) icon.style.fill = `var(--c-${d})`;
+      document.getElementById(`filter-${d}`).style.accentColor = `var(--c-${d})`;
+    });
+    document.querySelector('.two-way .fwd').style.fill = 'var(--c-customer)';
+
+    function paintColours(filterPct, survivingShare) {
+      const weights = DIMS.map(d => filterPct[d]);          // filter strength = 100 − kept %
+      const total = weights.reduce((a, b) => a + b, 0);
+      const clear = cssColour('--clear-water');
+      let fact = clear;
+      if (total > 0) {
+        const cols = DIMS.map(d => cssColour(`--c-${d}`));
+        const blend = [0, 1, 2].map(k => cols.reduce((acc, c, i) => acc + c[k] * weights[i], 0) / total);
+        // Tint grows with the share of rows removed, so light filtering stays pale.
+        const t = Math.min(1, 0.3 + 0.7 * (1 - survivingShare));
+        fact = clear.map((v, k) => v + (blend[k] - v) * t);
+      }
+      document.getElementById('water-fact').style.fill = rgb(fact);
+      // Fact → Customer stream carries the Fact table's current colour.
+      document.getElementById('flow-fact-customer').style.setProperty('--fluid-back', rgb(fact));
+      document.querySelector('.two-way .bck').style.fill = rgb(fact);
+
+      const bar = document.getElementById('who-bar');
+      bar.innerHTML = '';
+      const label = document.getElementById('who-label');
+      if (!total) { label.textContent = 'No filters: clear water'; return; }
+      label.textContent = 'Filtered by';
+      let x = 30;
+      DIMS.forEach((d, i) => {
+        if (!weights[i]) return;
+        const w = 240 * weights[i] / total;
+        const seg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        Object.entries({ x, y: 146, width: w, height: 26, class: 'who-seg' }).forEach(([k, v]) => seg.setAttribute(k, v));
+        seg.style.fill = `var(--c-${d})`;
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        t.textContent = `${DIM_LABEL[d]}: ${Math.round(weights[i] / total * 100)}% of the filtering`;
+        seg.appendChild(t);
+        bar.appendChild(seg);
+        if (w > 34) {
+          const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          Object.entries({ x: x + w / 2, y: 164, 'text-anchor': 'middle', class: 'who-pct' }).forEach(([k, v]) => txt.setAttribute(k, v));
+          txt.textContent = `${Math.round(weights[i] / total * 100)}%`;
+          bar.appendChild(txt);
+        }
+        x += w;
+      });
+      // Round the outer ends of the bar.
+      const segs = bar.querySelectorAll('rect');
+      if (segs.length) { segs[0].setAttribute('rx', 9); segs[segs.length - 1].setAttribute('rx', 9); }
+    }
+    if (window.SRG) SRG.onThemeChange(() => updateFlow());
 
     elements.timeIn.addEventListener('input', updateFlow);
     elements.placeIn.addEventListener('input', updateFlow);
