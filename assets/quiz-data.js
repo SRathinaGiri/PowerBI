@@ -2,6 +2,26 @@
    Every lesson mixes three different formats, and consecutive lessons avoid
    repeating the same mix. All figures and names are synthetic. */
 window.SRG_QUIZZES = {
+  'PowerQueryExercises.html': [
+    { type: 'match', prompt: 'Match each problem to the Power Query step that solves it.', pairs: [['Blanks under a merged region cell', 'Fill Down'], ['Months as separate columns', 'Unpivot'], ['Q1 and Q2 in separate sheets', 'Append'], ['Customers who never bought', 'Left Anti merge']], why: 'Name the shape of the problem first, and the step usually follows.' },
+    { type: 'order', prompt: 'Put the steps for the title-row report in order.', items: ['Remove the top 2 rows', 'Promote headers', 'Filter out null regions'], why: 'Headers can only be promoted once the title rows are out of the way.' },
+    { type: 'myth', prompt: 'Myth or fact?', items: [['Unpivot turns wide month columns into rows you can pivot and chart.', true], ['Merge adds more rows beneath a table, while Append adds columns beside it.', false], ['A left anti merge keeps rows with no match on the right.', true]], why: 'Append stacks rows. Merge brings in columns through a matching key.' }
+  ],
+  'QueryFolding.html': [
+    { type: 'sort', prompt: 'On a SQL source, which way does each step usually go?', buckets: ['Usually folds', 'Often breaks folding'], items: [['Filter rows', 0], ['Remove columns', 0], ['Group by', 0], ['Add index column', 1], ['Table.Buffer', 1]], why: 'Steps with a direct SQL equivalent can be sent to the source.' },
+    { type: 'order', prompt: 'Arrange these steps to keep folding as long as possible.', items: ['Filter rows', 'Remove columns', 'Group by', 'Add index column'], why: 'Put what can fold first, and steps that cannot fold last.' },
+    { type: 'myth', prompt: 'Myth or fact?', items: [['A CSV file folds if you filter it first.', false], ['Once a step breaks folding, later steps run locally.', true], ['A greyed-out View Native Query always proves nothing folded.', false]], why: 'Files have no engine to fold to, and some connectors hide the query even when they fold.' }
+  ],
+  'RelationshipsAndCalcGroups.html': [
+    { type: 'match', prompt: 'Match each need to the feature.', pairs: [['Sales by delivery date', 'USERELATIONSHIP'], ['MTD for every measure', 'Calculation group'], ['The measure on the visual', 'SELECTEDMEASURE()']], why: 'One switches a relationship, and the others reuse one formula across measures.' },
+    { type: 'myth', prompt: 'Myth or fact?', items: [['Two relationships between the same tables can be active at once.', false], ['USERELATIONSHIP changes the relationship for one calculation only.', true], ['A calculation group replaces every measure in a model.', false]], why: 'Only one path can be active, and base measures are still needed.' },
+    { type: 'predict', prompt: 'H Mart’s last order is in March 2026. Predict the missing figure.', table: [['View', 'Apr-26 net sales'], ['By delivery date', '₹4,13,521.47'], ['By order date', '?']], ask: 'Apr-26 net sales by order date', prefix: '₹', answer: 0, why: 'No orders were placed in April, though goods ordered in March were still being delivered.' }
+  ],
+  'AskingAI.html': [
+    { type: 'order', prompt: 'Put these in the order you should use them on a project.', items: ['Clarify the business question', 'Design the model', 'Write the measure', 'Reconcile the total'], why: 'What comes before how, and checking comes last.' },
+    { type: 'sort', prompt: 'Is each item safe to paste into a public AI tool?', buckets: ['Safe', 'Keep out'], items: [['Column names', 0], ['Made-up sample rows', 0], ['A client’s PAN', 1], ['A client’s bank statement', 1]], why: 'Share the structure, never the client’s data.' },
+    { type: 'myth', prompt: 'Myth or fact?', items: [['If the DAX runs without error, the number is right.', false], ['A good prompt names the exact tables and columns.', true], ['AI can invent legal sections, so verify them at the source.', true]], why: 'H Mart’s 926% target ran with no error at all.' }
+  ],
   'stages-of-data-analysis.html': [
     { type: 'order', prompt: 'Rebuild the journey from the earliest stage to the latest.', items: ['Cross tab', 'Pivot table', 'Data cube', 'Interactive BI', 'AI-enabled BI'], why: 'Each stage keeps the same data and makes it easier to explore.' },
     { type: 'match', prompt: 'Match each stage to its navigation analogy.', pairs: [['Cross tab', 'Table of coordinates'], ['Pivot table', 'A 2D map you can turn'], ['Data cube', 'A globe'], ['Interactive BI', 'Phone map'], ['AI-enabled BI', 'Voice GPS']], why: 'The place never changed. Only the way of finding it did.' },

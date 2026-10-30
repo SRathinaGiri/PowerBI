@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Interactive Star Schema Filter Flow</title>
   <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
-  <script src="../assets/site.js?v=20261030b"></script>
+  <script src="../assets/site.js?v=20261031a"></script>
   <style>
     :root {
       --accent-2: var(--accent-3);
@@ -280,7 +280,9 @@
     .preset-row .btn { cursor: pointer; padding: 8px 12px; border-radius: 10px; font: 600 .88rem var(--font); }
   </style>
   <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
-  <script src="../assets/quiz-data.js?v=20261030c" defer></script>
+  <link rel="stylesheet" href="../assets/tryit.css?v=20261031a" />
+  <script src="../assets/tryit.js?v=20261031a" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
   <script src="../assets/quiz.js?v=20261030c" defer></script>
 </head>
 <body>
@@ -379,7 +381,7 @@
             <tr class="bidirectional-row">
               <td>Customer</td>
               <td>Bidirectional (Customer ↔ Fact)</td>
-              <td>Allows filtering customers by sales events and vice versa.</td>
+              <td>Demonstration only. Allows filtering customers by sales events and vice versa.</td>
             </tr>
           </tbody>
         </table>
@@ -462,6 +464,7 @@
   </div>
 
   <section class="explanation-section">
+    <p><strong>Two-way is a demonstration, not the default.</strong> Keep relationships one-way from dimension to fact unless you have a specific need. Two-way filtering can make results surprising, slow the model and create ambiguous paths. Microsoft’s guidance is to minimise these relationships. To count customers who bought something, a measure is usually the better tool.</p>
     <p><strong>What flows is the filter, not the data.</strong> The Sales fact table always holds all 100 rows. When you drag a dimension's slider, a pulse in that dimension's colour travels down its relationship; when it reaches the fact table, every row that doesn't match is <strong>hidden from the measure</strong> (dimmed, with a dot in that dimension's colour). A row hidden by two filters carries two dots, because filters <strong>intersect</strong>: the measure sees only rows that pass <em>every</em> filter. Most relationships are single-direction. <strong>Customer is bidirectional</strong>: after the other filters act on the fact table, a pulse travels back and dims the customers who no longer have any visible sales (dashed chips). That's how “which customers bought this product?” works. It's the same idea as the Filter Context Camera: the data stays, the frame shrinks.</p>
   </section>
 

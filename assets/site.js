@@ -28,6 +28,10 @@
       blurb: 'Build dimensional thinking from a single total all the way to a five-dimension cube.' },
     { path: 'pages/PowerQueryJoins.html', track: 'Power Query', title: 'Power Query Joins',
       blurb: 'Left, right, full, inner and anti joins with live Venn diagrams.' },
+    { path: 'pages/PowerQueryExercises.html', track: 'Power Query', title: 'Power Query Exercises',
+      blurb: 'Fifteen hands-on data cleaning problems with a workbook, answers and M code.' },
+    { path: 'pages/QueryFolding.html', track: 'Power Query', title: 'Query Folding',
+      blurb: 'Let the source do the work, and see which steps keep or break folding.' },
     { path: 'pages/SemanticModel.html', track: 'Data Modeling', title: 'The Semantic Model',
       blurb: 'From flat tables to star, snowflake, star cluster and galaxy.' },
     { path: 'pages/ModelComponents.html', track: 'Data Modeling', title: 'Components of a Data Model',
@@ -36,6 +40,8 @@
       blurb: 'Why RAM, columns and compression make Power BI fast, and what they cost.' },
     { path: 'pages/StarSchema.html', track: 'Data Modeling', title: 'Star Schema Filter Flow',
       blurb: 'Watch filters cascade from dimensions to the fact table, including bidirectional links.' },
+    { path: 'pages/RelationshipsAndCalcGroups.html', track: 'Data Modeling', title: 'Inactive Relationships and Calculation Groups',
+      blurb: 'One sale with three dates, and one time formula that serves every measure.' },
     { path: 'pages/RowContextVsFilterContext.html', track: 'DAX', title: 'Row Context vs Filter Context',
       blurb: 'The current row being evaluated versus the rows visible to a calculation.' },
     { path: 'pages/CalculatedColumnVsMeasureLab.html', track: 'DAX', title: 'Calculated Column vs Measure',
@@ -53,7 +59,9 @@
     { path: 'pages/DateFilterContextTrain.html', track: 'DAX', title: 'Date Filter Context Train',
       blurb: 'Time intelligence as a train yard: current, previous and next periods.' },
     { path: 'pages/PowerBIChartGuide.html', track: 'Visualization', title: 'Choose the Right Chart',
-      blurb: 'Chart types, when to use them, and animated previews for Power BI storytelling.' }
+      blurb: 'Chart types, when to use them, and animated previews for Power BI storytelling.' },
+    { path: 'pages/AskingAI.html', track: 'Working with AI', title: 'Asking AI Well',
+      blurb: 'You decide what, AI helps with how: prompt templates and how to check the answers.' }
   ];
 
   var KEY = 'srg-theme';

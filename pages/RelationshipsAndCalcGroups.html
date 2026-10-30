@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inactive Relationships and Calculation Groups | Power BI</title>
+  <meta name="description" content="Role-playing dates with USERELATIONSHIP and reusable time calculations with calculation groups, using real figures from the H Mart FMCG model.">
+  <link rel="stylesheet" href="../assets/site.css?v=20261031a" />
+  <script src="../assets/site.js?v=20261031a"></script>
+  <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
+  <style>
+    .panel { margin: 1.5rem 0; padding: clamp(14px, 3vw, 24px); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel-solid); box-shadow: var(--shadow); }
+    .panel h2 { margin: 0 0 .3rem; font: 800 clamp(1.25rem, 2.6vw, 1.6rem)/1.2 var(--font-display); }
+    .panel code.block { display: block; margin: .7rem 0; padding: 10px 12px; border-radius: 10px; background: var(--panel-soft); border: 1px solid var(--border); font: 600 .88rem/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .pick { display: flex; flex-wrap: wrap; gap: 6px; margin: .8rem 0; }
+    .pick button { min-height: 40px; padding: 7px 12px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel-soft); color: var(--ink); font: 700 .88rem var(--font); cursor: pointer; }
+    .pick button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .tbl-wrap { overflow-x: auto; }
+    table.fig { width: 100%; border-collapse: collapse; }
+    table.fig th, table.fig td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+    table.fig th:first-child, table.fig td:first-child { text-align: left; }
+    .note { color: var(--muted); font-size: .92rem; }
+  </style>
+  <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
+  <link rel="stylesheet" href="../assets/tryit.css?v=20261031a" />
+  <script src="../assets/tryit.js?v=20261031a" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
+  <script src="../assets/quiz.js?v=20261030c" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Data Modeling</p>
+      <h1>Inactive Relationships and Calculation Groups</h1>
+      <p class="lead">One invoice has three dates. One formula can serve every measure. Two model features that remove a lot of repeated work, shown on the <a href="HMartCaseStudy.html#model">H Mart model</a>.</p>
+    </header>
+
+    <section class="panel srg-reveal" aria-labelledby="rp-title">
+      <h2 id="rp-title">One sale, three dates</h2>
+      <p>A shop orders in March, you promise delivery by April, and the goods arrive in April. Which month did the sale belong to? FactSales links to DateTable three times, but only one relationship can be active at a time. OrderDate is active. The other two wait until a measure calls them.</p>
+      <div class="pick" id="dateBtns" role="group" aria-label="Choose the date">
+        <button type="button" data-d="order" aria-pressed="true">By order date</button>
+        <button type="button" data-d="prom" aria-pressed="false">By promised date</button>
+        <button type="button" data-d="deliv" aria-pressed="false">By delivery date</button>
+      </div>
+      <code class="block" id="dateCode"></code>
+      <div class="tbl-wrap"><table class="fig">
+        <thead><tr><th scope="col">Month</th><th scope="col">Net sales</th></tr></thead>
+        <tbody id="dateBody"></tbody>
+      </table></div>
+      <p class="note" id="dateNote" aria-live="polite"></p>
+      <p>The same total moves between months, and April 2026 appears only by delivery or promise. This matters for cut-off testing, because revenue is often recognised on delivery while orders are counted on booking.</p>
+    </section>
+
+    <section class="panel srg-reveal" aria-labelledby="cg-title">
+      <h2 id="cg-title">One formula, every measure</h2>
+      <p>Without a calculation group, MTD, QTD and FYTD for 126 measures would need hundreds of near-identical measures. A calculation group keeps one copy of each time logic. <code>SELECTEDMEASURE()</code> stands for whichever measure is on the visual.</p>
+      <div class="pick" id="itemBtns" role="group" aria-label="Choose a calculation item"></div>
+      <code class="block" id="itemCode"></code>
+      <div class="tbl-wrap"><table class="fig">
+        <thead><tr><th scope="col">On 31-03-2026</th><th scope="col">Net sales</th><th scope="col">Contribution margin</th></tr></thead>
+        <tbody id="itemBody"></tbody>
+      </table></div>
+      <p class="note">Two different measures, one formula. These are the model’s real results.</p>
+      <p>To try it, open the H Mart PBIX, put <strong>Time Intelligence[Time Calculation]</strong> on a slicer, and pick an item. Use calculation groups for repeated patterns, and an ordinary measure for logic that belongs to one measure only.</p>
+    </section>
+
+    <section class="panel srg-reveal">
+      <h2>What about many-to-many?</h2>
+      <p>H Mart does not need one, but you will meet it. If one invoice can have many salespersons and one salesperson many invoices, neither table has a unique key. The usual fix is a bridge table holding each valid pair, so filters pass through it from one side to the other. Power BI also offers a direct many-to-many relationship. Test the totals either way, because repeated matches can make a total look wrong even when each row is right.</p>
+    </section>
+  </div>
+  <script>
+    // From DAX queries on the H Mart model: USERELATIONSHIP and the Time Intelligence group.
+    const DATES = {
+      order: { code: '[Net Sales]', note: 'This is the active relationship, so no extra code is needed.', v: [10473908.99, 8383550.89, 8627624.86, null] },
+      prom: { code: "CALCULATE([Net Sales], USERELATIONSHIP('FactSales'[PromisedDate], 'DateTable'[Date]))", note: 'USERELATIONSHIP switches to the promised date for this calculation only.', v: [10353899.75, 8656718.55, 8415359.89, 400581.26] },
+      deliv: { code: "CALCULATE([Net Sales], USERELATIONSHIP('FactSales'[DeliveryDate], 'DateTable'[Date]))", note: 'USERELATIONSHIP switches to the delivery date for this calculation only.', v: [10396396.21, 8602888.51, 8462687.88, 413521.47] }
+    };
+    const MONTHS = ['Oct-25', 'Nov-25', 'Mar-26', 'Apr-26'];
+    const ITEMS = {
+      'Current': ['SELECTEDMEASURE()', 160850.79, 14125.5],
+      'MTD': ["TOTALMTD(SELECTEDMEASURE(), 'FMCG Fiscal Calendar')", 8627624.86, 634231],
+      'QTD': ["TOTALQTD(SELECTEDMEASURE(), 'FMCG Fiscal Calendar')", 21486247.96, 2017632.14],
+      'FYTD': ["TOTALYTD(SELECTEDMEASURE(), 'FMCG Fiscal Calendar')", 90964472.09, 7662453.01],
+      'Rolling 3 Months': ["CALCULATE(SELECTEDMEASURE(), DATESINPERIOD('DateTable'[Date], MAX('DateTable'[Date]), -3, MONTH))", 21486247.96, 2017632.14]
+    };
+    const rs = (n) => n == null ? 'No sales' : '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function pickDate(key) {
+      document.querySelectorAll('#dateBtns button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.d === key)));
+      const d = DATES[key];
+      document.getElementById('dateCode').textContent = d.code;
+      document.getElementById('dateNote').textContent = d.note;
+      const body = document.getElementById('dateBody');
+      body.innerHTML = '';
+      MONTHS.forEach((m, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td></td><td></td>';
+        tr.children[0].textContent = m;
+        tr.children[1].textContent = rs(d.v[i]);
+        body.appendChild(tr);
+      });
+    }
+    document.querySelectorAll('#dateBtns button').forEach((b) => b.addEventListener('click', () => pickDate(b.dataset.d)));
+    pickDate('order');
+
+    const itemBtns = document.getElementById('itemBtns');
+    function pickItem(name) {
+      itemBtns.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === name)));
+      document.getElementById('itemCode').textContent = ITEMS[name][0];
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td></td><td></td><td></td>';
+      tr.children[0].textContent = name;
+      tr.children[1].textContent = rs(ITEMS[name][1]);
+      tr.children[2].textContent = rs(ITEMS[name][2]);
+      const body = document.getElementById('itemBody');
+      body.innerHTML = '';
+      body.appendChild(tr);
+    }
+    Object.keys(ITEMS).forEach((name) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = name;
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => pickItem(name));
+      itemBtns.appendChild(b);
+    });
+    pickItem('FYTD');
+  </script>
+</body>
+</html>

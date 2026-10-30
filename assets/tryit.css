@@ -1,0 +1,13 @@
+/* "Try it in Power BI" box shown under a lesson, above its quick challenge. */
+.tryit { box-sizing: border-box; width: min(1240px, calc(100% - 32px)); margin: 2rem auto 0; padding: clamp(16px, 3vw, 26px); border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: var(--radius-lg); background: var(--panel-solid); color: var(--ink); box-shadow: var(--shadow); line-height: 1.55; }
+.tryit h2 { margin: 0 0 .3rem; font: 800 clamp(1.25rem, 2.6vw, 1.6rem)/1.2 var(--font-display); color: var(--ink); }
+.tryit p { margin: .6rem 0; }
+.tryit .ti-kicker { margin: 0 0 .3rem; font: 800 .75rem var(--font); letter-spacing: .1em; text-transform: uppercase; color: var(--accent-ink); }
+.tryit .ti-lead { color: var(--muted); }
+.ti-code { display: flex; gap: 8px; align-items: flex-start; margin: .7rem 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-soft); }
+.ti-code code { flex: 1; min-width: 0; font: 600 .9rem/1.5 var(--mono); overflow-wrap: anywhere; color: var(--ink); background: none; }
+.ti-copy { flex: none; min-height: 32px; padding: 3px 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--panel-solid); color: var(--ink); font: 700 .8rem var(--font); cursor: pointer; }
+.ti-copy:hover, .ti-copy:focus-visible { border-color: var(--accent); }
+.ti-mistake { margin-top: .8rem; padding-top: .7rem; border-top: 1px solid var(--border); }
+.ti-mistake summary { font-weight: 800; cursor: pointer; }
+@media (max-width: 520px) { .ti-code { flex-direction: column; } }
