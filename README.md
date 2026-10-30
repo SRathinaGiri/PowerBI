@@ -61,6 +61,10 @@ An animated percentage-of-total lab that shows how each function chooses a diffe
 
 Two complementary diagrams that outline the iterative stages of an analytics project—from clarifying the business question through shaping, modeling, and presenting the insight.
 
+**BeIndian.Audit DAX Library**
+
+[Function reference](pages/BeIndianAudit.html) for the 63 audit functions hosted on [DAX Lib](https://daxlib.org/package/BeIndian.Audit/), with parameters and examples run on a synthetic FMCG model.
+
 🧭 Navigation, Themes & Learning Order
 
 Every page loads two shared files:
