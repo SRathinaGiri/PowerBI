@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H Mart FMCG Case Study | Power BI</title>
+  <meta name="description" content="A Power BI case study on a synthetic FMCG distributor in Mandya: the business story, a three-fact model, and twelve report pages from Executive Summary to audit tests.">
+  <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
+  <script src="../assets/site.js?v=20261030b"></script>
+  <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
+  <style>
+    .notice { margin: 1.1rem 0 0; padding: 10px 14px; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; background: rgb(var(--accent-rgb) / .08); }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+    .stats li { padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel-solid); }
+    .stats b { display: block; font: 800 1.35rem/1.2 var(--font-display); }
+    .stats span { color: var(--muted); font-size: .88rem; }
+    .cs-section { margin-top: 3rem; }
+    .cs-section > h2 { margin: 0 0 .4rem; font: 800 clamp(1.4rem, 3vw, 1.9rem)/1.2 var(--font-display); }
+    .cs-section > p { max-width: 72ch; }
+    .jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.5rem 0 0; }
+    .jump a { padding: 5px 12px; border: 1px solid var(--border-strong); border-radius: 999px; color: var(--ink); font-size: .88rem; text-decoration: none; }
+    .jump a:hover, .jump a:focus-visible { border-color: var(--accent); color: var(--accent-ink); }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.1rem 0 .9rem; }
+    .facts button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--panel-solid); color: var(--ink); font: 700 .92rem var(--font); cursor: pointer; }
+    .facts button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .dims { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .dims li { padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-soft); opacity: .45; transition: opacity .3s ease, border-color .3s ease; }
+    .dims li.on { border-color: var(--accent); background: var(--panel-solid); opacity: 1; }
+    .dims b { display: block; }
+    .dims span { color: var(--muted); font-size: .84rem; }
+    #factNote { min-height: 4.5em; margin: .9rem 0 0; }
+    .page-card { margin-top: 2rem; padding: clamp(14px, 3vw, 22px); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel-solid); box-shadow: var(--shadow); scroll-margin-top: 72px; }
+    .page-card h3 { margin: 0 0 .75rem; font: 800 1.25rem/1.25 var(--font-display); }
+    .page-card figure { margin: 0; }
+    .page-card img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; }
+    .page-card figcaption { margin-top: 6px; color: var(--muted); font-size: .85rem; }
+    .reads { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 22px; margin: 1rem 0 0; }
+    .reads h4 { margin: 0 0 2px; color: var(--accent-ink); font: 800 .78rem var(--font); letter-spacing: .08em; text-transform: uppercase; }
+    .reads p { margin: 0; }
+    .closing-list { max-width: 72ch; padding-left: 1.2rem; }
+    .closing-list li { margin-bottom: .5rem; }
+    .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.1rem 0 2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Case study</p>
+      <h1>H Mart: an FMCG distributor in Power BI</h1>
+      <p class="lead">Two years of a Mandya wholesale and retail business, from the first summary card to the audit tests. The most useful findings are the numbers that look wrong.</p>
+      <p class="notice"><strong>All of this data is synthetic.</strong> H Mart, its customers, staff and brands were generated for teaching. Nothing here describes a real business.</p>
+      <ul class="stats">
+        <li><b>₹17.66 crore</b><span>Net sales, 01-04-2024 to 31-03-2026</span></li>
+        <li><b>8.8%</b><span>Contribution margin, ₹1.56 crore</span></li>
+        <li><b>25,000</b><span>Sales lines on 7,640 invoices</span></li>
+        <li><b>12</b><span>Report pages over 125 measures</span></li>
+      </ul>
+      <nav class="jump" aria-label="On this page">
+        <a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#takeaways">Takeaways</a>
+      </nav>
+    </header>
+
+    <section id="story" class="cs-section srg-reveal">
+      <h2>The business story</h2>
+      <p>H Mart is headquartered in Mandya, Karnataka. It sells wholesale across the district with a ten-vehicle fleet and runs one retail showroom in Mandya city. It carries 180 products from 12 brands across six departments, from rice to baby food, and serves 340 customers.</p>
+      <p>Its owner has four questions. Are we growing profitably? Is stock in the right place? Do we deliver what we promise? Does marketing pay for itself? The report answers them in that order, then turns auditor and tests whether the numbers can be trusted.</p>
+    </section>
+
+    <section id="model" class="cs-section srg-reveal">
+      <h2>The model: three facts, one set of dimensions</h2>
+      <p>Sales, stock and marketing happen at different grains, so each gets its own fact table. Shared dimensions let one slicer speak to all three. Pick a fact to see which dimensions filter it.</p>
+      <div class="facts" role="group" aria-label="Choose a fact table">
+        <button type="button" data-fact="sales" aria-pressed="true">FactSales · 25,000</button>
+        <button type="button" data-fact="stock" aria-pressed="false">FactInventorySnapshot · 37,440</button>
+        <button type="button" data-fact="spend" aria-pressed="false">FactMarketingSpend · 79</button>
+      </div>
+      <ul class="dims" id="dims">
+        <li data-d="date"><b>DateTable</b><span>April to March calendar</span></li>
+        <li data-d="product"><b>DimProduct</b><span>180 products</span></li>
+        <li data-d="supplier"><b>DimSupplier</b><span>24, through DimProduct</span></li>
+        <li data-d="place"><b>DimPlace</b><span>24 places</span></li>
+        <li data-d="customer"><b>DimCustomer</b><span>340 customers</span></li>
+        <li data-d="salesperson"><b>DimSalesperson</b><span>15 rows</span></li>
+        <li data-d="vehicle"><b>DimVehicle</b><span>11 rows</span></li>
+        <li data-d="promotion"><b>DimPromotion</b><span>15 promotions</span></li>
+        <li data-d="price"><b>DimPriceList</b><span>900 price rows</span></li>
+      </ul>
+      <p id="factNote" aria-live="polite"></p>
+    </section>
+
+    <section class="cs-section">
+      <h2>The report, page by page</h2>
+      <p>Each page follows one layout: slicers and navigation, a row of cards, two charts, then a table to drill into. Figures in Power BI cards are in millions; the text below uses lakh and crore. Select a screenshot to open it at full size.</p>
+
+      <article id="executive" class="page-card srg-reveal">
+        <h3>Executive Summary</h3>
+        <figure><a href="../assets/images/hmart/executive.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/executive.webp" width="1600" height="877" loading="lazy" alt="Executive Summary page filtered to FY 2024-25: cards for net sales, contribution margin, fill rate, inventory value and ROMI, a monthly sales line, sales by department bars and a department table."></a><figcaption>Shown with FY 2024-25 selected in the slicer.</figcaption></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>Are we growing profitably?</p></div>
+          <div><h4>The answer</h4><p>Not quite. Net sales rose 6.3%, from ₹8.56 crore to ₹9.10 crore, while contribution fell from ₹79.45 lakh to ₹76.62 lakh. Margin slipped from 9.3% to 8.4%.</p></div>
+          <div><h4>The lesson</h4><p>Put a growth number and a margin number side by side. Either one alone tells a happier story.</p></div>
+        </div>
+      </article>
+
+      <article id="sales" class="page-card srg-reveal">
+        <h3>Sales Performance</h3>
+        <figure><a href="../assets/images/hmart/sales.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/sales.webp" width="1600" height="877" loading="lazy" alt="Sales Performance page: cards for net sales, quantity, invoice count and average invoice value, monthly sales with October peaks, sales by category bars with rice on top, and a customer table."></a></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>Where do sales come from, and when?</p></div>
+          <div><h4>The answer</h4><p>Wholesale brings 96.6% of sales. The average invoice is ₹23,111. October is the peak in both years, and rice leads the categories at ₹2.42 crore.</p></div>
+          <div><h4>The lesson</h4><p>The YoY card reads 0.0% when no year is selected, because the previous-year calculation then returns the same two-year total. It only means something once a year is chosen.</p></div>
+        </div>
+      </article>
+
+      <article id="profit" class="page-card srg-reveal">
+        <h3>Profitability</h3>
+        <figure><a href="../assets/images/hmart/profit.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/profit.webp" width="1600" height="877" loading="lazy" alt="Profitability page: cards for gross profit, margins, logistics cost and profitable SKU share, a monthly margin line, contribution by brand bars and a department to product table."></a></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>What is left after the cost of serving?</p></div>
+          <div><h4>The answer</h4><p>Gross margin of 11.0% becomes 8.8% contribution. Retail earns 22.8% against wholesale’s 8.3%, so 3.4% of sales brings 8.8% of contribution. Soft drinks are thinnest at 6.7%.</p></div>
+          <div><h4>The lesson</h4><p>A small channel can matter more than its sales suggest. A channel slicer shows it; a total never will.</p></div>
+        </div>
+      </article>
+
+      <article id="inventory" class="page-card srg-reveal">
+        <h3>Inventory</h3>
+        <figure><a href="../assets/images/hmart/inventory.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/inventory.webp" width="1600" height="877" loading="lazy" alt="Inventory page: cards for inventory value, closing stock, inventory days, stock cover, stockout rate and reorder count, a stock value line, stock by department bars and a product table."></a></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>Is the stock right?</p></div>
+          <div><h4>The answer</h4><p>Stock of ₹85.83 lakh covers 22.1 days, or 3.2 weeks. Stockouts run at 0.8%, and 36 products need reordering.</p></div>
+          <div><h4>The lesson</h4><p>Stock is a snapshot, so never add it across weeks. The model keeps it in its own fact table, one row per week, product and location.</p></div>
+        </div>
+      </article>
+
+      <article id="distribution" class="page-card srg-reveal">
+        <h3>Distribution &amp; Service</h3>
+        <figure><a href="../assets/images/hmart/distribution.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/distribution.webp" width="1600" height="877" loading="lazy" alt="Distribution and Service page: cards for numeric and weighted distribution at 100 percent, fill rate 93 percent, OTIF 36 percent, on-time 88.7 percent and return rate, with brand bars, a fill rate line and a department to brand table."></a></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>Do we deliver what we promise?</p></div>
+          <div><h4>The answer</h4><p>On-time is 88.7% and fill rate 93.0%, yet OTIF is only 36.0%. A line counts as OTIF only if it arrives by the promised date and ships the exact quantity ordered.</p></div>
+          <div><h4>The lesson</h4><p>Strict measures expose what averages hide. So does the drill-down: distribution reads 100% in total, but within Baby Food individual brands reach far fewer customers.</p></div>
+        </div>
+      </article>
+
+      <article id="marketing" class="page-card srg-reveal">
+        <h3>Marketing &amp; ROMI</h3>
+        <figure><a href="../assets/images/hmart/marketing.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/marketing.webp" width="1600" height="877" loading="lazy" alt="Marketing and ROMI page: cards for marketing spend, promotion sales and contribution, ROAS 10.85 times and ROMI minus 61.3 percent, with a sales line, ROMI by promotion bars and a promotion table."></a></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>Does marketing pay for itself?</p></div>
+          <div><h4>The answer</h4><p>₹32.61 lakh of spend sits behind ₹3.54 crore of promotion sales, a ROAS of 10.85 times. But those sales earned only ₹12.62 lakh of contribution, so ROMI is −61.3%. Only Dasara Deepavali Mega, at +195%, returned more than it cost.</p></div>
+          <div><h4>The lesson</h4><p>ROAS counts sales and ROMI counts margin. On thin-margin FMCG they can point in opposite directions.</p></div>
+        </div>
+      </article>
+
+      <article id="team" class="page-card srg-reveal">
+        <h3>Sales Team &amp; Logistics</h3>
+        <figure><a href="../assets/images/hmart/team.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/team.webp" width="1600" height="877" loading="lazy" alt="Sales Team and Logistics page: cards including sales target achievement of 926.3 percent, 15 active salespersons and 39.1 kilometres average distance, with salesperson bars, a sales line and a territory table."></a></figure>
+        <div class="reads">
+          <div><h4>The question</h4><p>Is the team hitting its targets?</p></div>
+          <div><h4>The answer</h4><p>The card says 926.3%. Don’t believe it. With no date selected, the measure compares 24 months of sales with one month’s target. Select a year and it reads 37.4% in FY 2024-25 and 39.8% in FY 2025-26.</p></div>
+          <div><h4>The lesson</h4><p>Test every measure at the total and with no filters. “15 active salespersons” has the same trap: it counts the “No Salesperson - Showroom” row, so sales per salesperson divides by one too many.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section id="audit" class="cs-section">
+      <h2>Now the auditor’s turn</h2>
+      <p>Four pages use the <a href="BeIndianAudit.html">BeIndian.Audit DAX library</a> to ask a different kind of question: does this data behave as it should?</p>
+
+      <article class="page-card srg-reveal">
+        <h3>Audit: Descriptive Analytics</h3>
+        <figure><a href="../assets/images/hmart/descriptive.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/descriptive.webp" width="1600" height="877" loading="lazy" alt="Descriptive Analytics page: summary cards above three statistics tables for sales, profit and invoice amount."></a></figure>
+        <div class="reads">
+          <div><h4>The reading</h4><p>The average line is ₹7,063 and the median ₹2,028, with skewness of 3.77. A few big lines pull the average up, the largest being ₹1,24,038. At least one line lost ₹3,900.</p></div>
+          <div><h4>The lesson</h4><p>Start an audit by looking at the shape. Average alone would mislead you about a typical sale, and the minimum tells you where to look first.</p></div>
+        </div>
+      </article>
+
+      <article class="page-card srg-reveal">
+        <h3>Audit: Top N Percent</h3>
+        <figure><a href="../assets/images/hmart/topn.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/topn.webp" width="1600" height="877" loading="lazy" alt="Top N Percent page at 10 percent: cards showing the top transactions at 55.2 percent of sales, two brands, top brand and category bars and a department table."></a></figure>
+        <div class="reads">
+          <div><h4>The reading</h4><p>At the 10% setting, the top tenth of sales lines carries ₹9.75 crore, or 55.2% of sales. Chamundi and Cauvery Gold make up the top brands.</p></div>
+          <div><h4>The lesson</h4><p>Audit effort should follow value. Testing a tenth of the lines here covers more than half the rupees.</p></div>
+        </div>
+      </article>
+
+      <article class="page-card srg-reveal">
+        <h3>Audit: Benford’s Law</h3>
+        <figure><a href="../assets/images/hmart/benford.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/benford.webp" width="1600" height="877" loading="lazy" alt="Benford's Law page: cards with a mean absolute deviation of 0.0061 and a verdict of acceptable conformity, actual against expected first digit chart and a digit table."></a></figure>
+        <div class="reads">
+          <div><h4>The reading</h4><p>First digits of invoice amounts give a MAD of 0.0061, which the report labels acceptable conformity.</p></div>
+          <div><h4>The lesson</h4><p>Conformity is not proof of honesty, and a failure is not proof of fraud. Benford tells you where to look, not what you will find.</p></div>
+        </div>
+      </article>
+
+      <article class="page-card srg-reveal">
+        <h3>Audit: Brand Preference</h3>
+        <figure><a href="../assets/images/hmart/brand.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/brand.webp" width="1600" height="877" loading="lazy" alt="Brand Preference page: Chamundi as preferred brand with 14.2 percent of quantity, a word cloud of brands sized by quantity, a quantity bar chart and a department table."></a></figure>
+        <div class="reads">
+          <div><h4>The reading</h4><p>Chamundi leads with 1,08,000 units (rounded), 14.2% of quantity, and ₹3.01 crore of sales. Mysuru Select is second by quantity but not among the top three by contribution.</p></div>
+          <div><h4>The lesson</h4><p>Volume and value are different league tables. The word cloud is a custom SVG measure, drawn entirely in DAX.</p></div>
+        </div>
+      </article>
+    </section>
+
+    <section id="takeaways" class="cs-section srg-reveal">
+      <h2>What to take away</h2>
+      <ol class="closing-list">
+        <li><strong>Pair numbers that argue.</strong> Sales with margin, ROAS with ROMI, on-time with OTIF.</li>
+        <li><strong>Model the grain honestly.</strong> Sales lines, weekly stock and marketing spend are three facts, not one wide table.</li>
+        <li><strong>Distrust a number that flatters you.</strong> 926% was a filter-context problem. A correct-looking total can still be wrong.</li>
+        <li><strong>Then audit it.</strong> Shape, concentration, digits and preference take minutes once the functions exist.</li>
+      </ol>
+      <div class="links">
+        <a class="btn btn-primary" href="BeIndianAudit.html">See the 63 audit functions</a>
+        <a class="btn btn-outline" href="../index.html#tutorials">More case studies</a>
+      </div>
+    </section>
+  </div>
+  <script>
+    // Each fact lists the dimensions that actually filter it in the model's relationships.
+    const FACTS = {
+      sales: { dims: ['date', 'product', 'supplier', 'place', 'customer', 'salesperson', 'vehicle', 'promotion', 'price'],
+        note: 'One row per invoice line. It joins DateTable three times: OrderDate is active, while PromisedDate and DeliveryDate stay inactive until a measure calls them with USERELATIONSHIP.' },
+      stock: { dims: ['date', 'product', 'supplier', 'place'],
+        note: 'One row per week, product and location. It knows nothing about customers or salespersons, so those slicers cannot filter stock.' },
+      spend: { dims: ['date', 'promotion'],
+        note: 'One row per spend entry. It meets sales through DimPromotion, which is how ROMI can compare money spent with margin earned.' }
+    };
+    const buttons = [...document.querySelectorAll('[data-fact]')];
+    const dims = [...document.querySelectorAll('#dims li')];
+    function pick(key) {
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fact === key)));
+      dims.forEach((d) => d.classList.toggle('on', FACTS[key].dims.includes(d.dataset.d)));
+      document.getElementById('factNote').textContent = FACTS[key].note;
+    }
+    buttons.forEach((b) => b.addEventListener('click', () => pick(b.dataset.fact)));
+    pick('sales');
+  </script>
+</body>
+</html>

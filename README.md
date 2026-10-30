@@ -65,6 +65,10 @@ Two complementary diagrams that outline the iterative stages of an analytics pro
 
 [Function reference](pages/BeIndianAudit.html) for the 63 audit functions hosted on [DAX Lib](https://daxlib.org/package/BeIndian.Audit/), with parameters and examples run on a synthetic FMCG model.
 
+**H Mart FMCG Case Study**
+
+[Case study](pages/HMartCaseStudy.html) of a synthetic Mandya distributor: the business story, a three-fact model, and report pages from Executive Summary to the audit tests.
+
 🧭 Navigation, Themes & Learning Order
 
 Every page loads two shared files:
