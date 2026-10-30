@@ -96,7 +96,7 @@ Simply clone this repository and open any of the HTML files in your browser. The
 Bash
 
 # Clone the repository
-git clone https://github.com/SRathinagGiri/PowerBI.git
+git clone https://github.com/SRathinaGiri/PowerBI.git
 
 # Download the practice workbook (optional)
 open assets/resources/PBI.xlsx
