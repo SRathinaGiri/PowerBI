@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinds of Data Analytics | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .scenario { margin-bottom: 14px; }
+    .clinic { min-height: 400px; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 16px; }
+    .rail { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+    .rail span { padding: 4px 9px; border-radius: 999px; font: 700 .72rem var(--font); color: var(--muted); background: rgb(var(--fg-rgb) / .06); transition: background .3s ease, color .3s ease, transform .4s var(--ease-spring); }
+    .rail span.now { color: var(--on-accent); background: var(--accent); transform: scale(1.1); }
+    .case { padding: 18px; border-radius: 18px; text-align: center; background: var(--panel-solid); border: 2px solid var(--accent); box-shadow: var(--shadow-lg); animation: srg-rise .45s var(--ease-out); }
+    .case i { display: block; font-size: 2.6rem; font-style: normal; line-height: 1.2; }
+    .case h3 { margin: 4px 0 2px; font: 800 1.3rem var(--font-display); }
+    .case .abbr { font: 700 .76rem var(--mono); color: var(--accent-ink); }
+    .case q { display: block; margin: 8px 0; font-size: 1.1rem; font-weight: 700; quotes: "“" "”"; }
+    .case p { margin: 0; color: var(--muted); }
+    .tag { display: inline-block; margin-top: 8px; padding: 2px 9px; border-radius: 999px; font: 700 .72rem var(--font); color: var(--violet-ink); background: rgb(var(--violet-rgb) / .16); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Foundations</p>
+      <h1>Kinds of Data Analytics</h1>
+      <p class="lead">Each kind answers a different question. A visit to the doctor uses nearly all of them.</p>
+    </header>
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4200" aria-labelledby="kinds-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="kinds-title">A visit to the doctor</h2>
+      </header>
+      <fieldset class="scenario"><legend>See it through</legend><div class="seg">
+        <label><input type="radio" name="sc" value="0" checked>🩺 A doctor</label>
+        <label><input type="radio" name="sc" value="1">📈 A business</label>
+        <label><input type="radio" name="sc" value="2">🔍 An auditor</label>
+      </div></fieldset>
+      <div class="story-body">
+        <div class="story-stage clinic">
+          <div class="rail" id="rail" aria-hidden="true"></div>
+          <div id="case" aria-live="polite"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Descriptive.</strong> What happened?</li>
+            <li><strong>Diagnostic.</strong> Why did it happen?</li>
+            <li><strong>Predictive.</strong> What will happen?</li>
+            <li><strong>Prescriptive.</strong> What should I do?</li>
+            <li><strong>Exploratory.</strong> What is interesting?</li>
+            <li><strong>Confirmatory.</strong> Is it really true?</li>
+            <li><strong>Cognitive.</strong> What is right here?</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>Explain more</summary>
+        <p>The first four are the standard ladder of analytics. Google Maps suggesting a route and YouTube suggesting a video are everyday prescriptive examples. Exploratory and confirmatory describe how you approach data: look for patterns first, then test them. Cognitive analytics is an AI-assisted extension rather than one of the standard four.</p>
+      </details>
+    </section>
+  </div>
+  <script>
+    const KINDS = [
+      ['Descriptive', 'DDA', 'What happened?', ['🌡️', 'Your temperature is 102 °F.', 'Tea sales fell 12% in Q2.', 'Cash payments rose sharply in March.']],
+      ['Diagnostic', 'DDA', 'Why did it happen?', ['🩺', 'A throat infection is causing the fever.', 'Two stores ran out of stock for three weeks.', 'One vendor was paid repeatedly just under the approval limit.']],
+      ['Predictive', 'PDA', 'What will happen?', ['📅', 'Untreated, this may worsen over the next few days.', 'Q3 sales may fall again if stock stays short.', 'Similar payments are likely to continue next quarter.']],
+      ['Prescriptive', 'PDA', 'What should I do?', ['💊', 'Rest, drink fluids and follow this treatment.', 'Move stock to those two stores this week.', 'Tighten the approval rule for this vendor.']],
+      ['Exploratory', 'EDA', 'What is interesting?', ['🔬', 'The routine check-up shows one unusual reading.', 'Sales always spike on rainy days. Why?', 'Scanning journals shows many entries posted at midnight.']],
+      ['Confirmatory', 'CDA', 'Is it really true?', ['🧪', 'A lab test confirms or rules out the suspicion.', 'A controlled trial tests whether rain really drives sales.', 'Audit sampling tests whether the pattern holds across the population.']],
+      ['Cognitive', 'CDA', 'What is right here?', ['🧠', 'A specialist weighs your full history, helped by AI tools.', 'An AI assistant explains the sales drop in plain language.', 'An AI tool reads contracts and flags what needs an auditor’s judgement.']]
+    ];
+    const rail = document.getElementById('rail'), host = document.getElementById('case');
+    rail.innerHTML = KINDS.map((k) => `<span>${k[0]}</span>`).join('');
+    let step = 0, sc = 0;
+    function show() {
+      const k = KINDS[step];
+      [...rail.children].forEach((el, i) => el.classList.toggle('now', i === step));
+      host.innerHTML = `<div class="case"><i>${k[3][0]}</i><h3>${k[0]}</h3><span class="abbr">${k[1]}</span><q>${k[2]}</q><p>${k[3][sc + 1]}</p>${step === 6 ? '<span class="tag">AI-assisted extension</span>' : ''}</div>`;
+    }
+    document.getElementById('analogy').addEventListener('story:step', (e) => { step = e.detail.step; show(); });
+    document.querySelectorAll('input[name="sc"]').forEach((r) => r.addEventListener('change', () => { sc = Number(r.value); show(); }));
+    show();
+  </script>
+</body>
+</html>

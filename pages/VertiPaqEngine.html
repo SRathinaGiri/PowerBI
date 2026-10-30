@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The VertiPaq Engine | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .engine { min-height: 430px; }
+    .race { width: min(520px, 100%); display: grid; gap: 14px; }
+    .lane b { display: block; margin-bottom: 4px; font-size: .9rem; }
+    .road { position: relative; height: 30px; border-radius: 8px; background: rgb(var(--fg-rgb) / .08); overflow: hidden; }
+    .runner { position: absolute; top: 3px; left: 0; font-size: 1.2rem; line-height: 1; }
+    .layer.on .slow { animation: dash 6s linear infinite; }
+    .layer.on .fast { animation: dash .5s linear infinite; }
+    @keyframes dash { to { left: calc(100% - 26px); } }
+    .cols { display: flex; gap: 10px; }
+    .column { display: grid; gap: 3px; padding: 7px; border-radius: 10px; font: 600 .82rem var(--mono); text-align: center; background: var(--panel-solid); border: 2px solid var(--accent); box-shadow: var(--shadow); }
+    .column b { font-family: var(--font); color: var(--accent-ink); }
+    .layer.on .column { animation: split .7s var(--ease-spring) both; }
+    .layer.on .column:nth-child(2) { animation-delay: .15s; } .layer.on .column:nth-child(3) { animation-delay: .3s; }
+    @keyframes split { from { transform: translateX(var(--from, 0)) scale(.8); opacity: 0; } }
+    .dict { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 12px; }
+    .arrow { align-self: center; font-size: 1.5rem; color: var(--muted); }
+    .ram { width: min(480px, 100%); display: grid; gap: 10px; }
+    .gauge b { display: flex; justify-content: space-between; font-size: .88rem; }
+    .gbar { height: 22px; border-radius: 7px; overflow: hidden; background: rgb(var(--fg-rgb) / .08); }
+    .gbar i { display: block; height: 100%; width: var(--w); border-radius: 7px; background: linear-gradient(90deg, var(--accent), var(--accent-3)); }
+    .layer.on .gbar i { animation: fill 1.2s var(--ease-out) both; }
+    @keyframes fill { from { width: 0; } }
+    .gbar.warn i { background: linear-gradient(90deg, var(--accent-2), var(--accent-4)); }
+    .scan { display: flex; gap: 8px; }
+    .scan .column { position: relative; overflow: hidden; }
+    .scan .column.skip { opacity: .3; border-color: var(--border); }
+    .layer.on .beam { position: absolute; left: 0; right: 0; height: 12px; background: rgb(var(--accent-2-rgb) / .6); animation: sweep 1s linear infinite; }
+    @keyframes sweep { from { top: -12px; } to { top: 100%; } }
+    .cap { max-width: 520px; margin: 0; text-align: center; font-weight: 600; }
+    .cap small { display: block; font-weight: 500; color: var(--muted); }
+    .calc { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-bottom: 14px; }
+    .calc label { display: grid; gap: 4px; font-weight: 600; font-size: .9rem; }
+    .calc select { padding: 7px 10px; border-radius: 9px; font: inherit; background: var(--control-bg); color: var(--ink); border: 1px solid var(--border-strong); }
+    .note { margin: 12px 0 0; font-size: .9rem; color: var(--muted); }
+    @media (max-width: 560px) { .engine { min-height: 480px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Data Modeling</p>
+      <h1>The VertiPaq Engine</h1>
+      <p class="lead">An in-memory tabular engine: speed comes from RAM, columns, compression and parallel scans together.</p>
+    </header>
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4800" aria-labelledby="vp-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="vp-title">The desk and the distant warehouse</h2>
+        <p>Keep what you need on your desk rather than walking to a warehouse for every question. This builds on the <a href="OLAPConcept.html">suitcases and wardrobes</a> from OLTP vs OLAP.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage engine">
+          <div class="layer" data-s="0">
+            <div class="race">
+              <div class="lane"><b>🏭 Disk: the warehouse</b><div class="road"><span class="runner slow">🚚</span></div></div>
+              <div class="lane"><b>🗄️ RAM: the desk</b><div class="road"><span class="runner fast">⚡</span></div></div>
+            </div>
+            <p class="cap">RAM responds far faster than disk.<small>Roughly 100 nanoseconds against 100 microseconds on an SSD: an order-of-magnitude illustration, not a benchmark.</small></p>
+          </div>
+          <div class="layer" data-s="1">
+            <div class="cols">
+              <div class="column" style="--from:40px"><b>City</b><span>Chennai</span><span>Kochi</span><span>Chennai</span></div>
+              <div class="column"><b>Product</b><span>Tea</span><span>Tea</span><span>Coffee</span></div>
+              <div class="column" style="--from:-40px"><b>Amount</b><span>450</span><span>700</span><span>300</span></div>
+            </div>
+            <p class="cap">Each column is stored separately, like wardrobes.<small>A query reads only the columns it needs.</small></p>
+          </div>
+          <div class="layer" data-s="2">
+            <div class="dict">
+              <div class="column"><b>Stored text</b><span>Chennai</span><span>Kochi</span><span>Chennai</span><span>Chennai</span></div>
+              <span class="arrow" aria-hidden="true">→</span>
+              <div class="column"><b>Dictionary</b><span>1 = Chennai</span><span>2 = Kochi</span></div>
+              <div class="column"><b>Column</b><span>1</span><span>2</span><span>1</span><span>1</span></div>
+            </div>
+            <p class="cap">Repeated values become small numbers.<small>Runs of the same value can compress further.</small></p>
+          </div>
+          <div class="layer" data-s="3">
+            <div class="ram">
+              <div class="gauge"><b><span>💾 .pbix file on disk</span></b><div class="gbar"><i style="--w:35%"></i></div></div>
+              <div class="gauge"><b><span>🧠 Model open in RAM</span></b><div class="gbar"><i style="--w:70%"></i></div></div>
+              <div class="gauge"><b><span>🔄 During a refresh</span></b><div class="gbar warn"><i style="--w:100%"></i></div></div>
+            </div>
+            <p class="cap">Opening a model uses more memory than the file suggests.<small>The file is packed further for disk. In RAM the model also needs its working structures and caches, and a refresh can briefly hold old and new data. Bar lengths are illustrative.</small></p>
+          </div>
+          <div class="layer" data-s="4">
+            <div class="scan">
+              <div class="column skip"><b>City</b><span>1</span><span>2</span><span>1</span></div>
+              <div class="column skip"><b>Product</b><span>1</span><span>1</span><span>2</span></div>
+              <div class="column"><i class="beam"></i><b>Amount</b><span>450</span><span>700</span><span>300</span></div>
+              <div class="column"><i class="beam" style="animation-delay:-.5s"></i><b>Amount</b><span>120</span><span>250</span><span>600</span></div>
+            </div>
+            <p class="cap">SUM(Amount) scans only that column, on several CPU cores at once.<small>This describes Import mode. DirectQuery leaves the data in the source.</small></p>
+          </div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>RAM.</strong> Keep the data on the desk.</li>
+            <li><strong>Columns.</strong> Open only the wardrobe you need.</li>
+            <li><strong>Compression.</strong> Repeated values take little space.</li>
+            <li><strong>The cost.</strong> The whole model needs memory.</li>
+            <li><strong>The payoff.</strong> Fast parallel scans.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+    <section class="lab-panel srg-reveal" aria-labelledby="calc-title">
+      <h2 id="calc-title">How well does a column compress?</h2>
+      <p>A simplified dictionary calculation for one text column. Change the number of different values and see why high-cardinality columns are expensive.</p>
+      <div class="calc">
+        <label>Rows <select id="rows"><option value="100000">1,00,000</option><option value="1000000" selected>10,00,000</option><option value="10000000">1,00,00,000</option></select></label>
+        <label>Different values <select id="distinct"><option value="10">10</option><option value="1000" selected>1,000</option><option value="100000">1,00,000</option><option value="same">Every row different</option></select></label>
+        <label>Average text length <select id="len"><option value="8">8 bytes</option><option value="20" selected>20 bytes</option><option value="50">50 bytes</option></select></label>
+      </div>
+      <div class="ram" style="width:100%" id="result" aria-live="polite"></div>
+      <p class="note" id="calc-note"></p>
+    </section>
+  </div>
+  <script>
+    const story = document.getElementById('analogy');
+    const layers = [...story.querySelectorAll('.layer')];
+    const show = (k) => layers.forEach((l) => l.classList.toggle('on', Number(l.dataset.s) === k));
+    story.addEventListener('story:step', (e) => show(e.detail.step));
+    show(0);
+
+    const mb = (bytes) => (bytes / 1048576).toLocaleString('en-IN', { maximumFractionDigits: 1 }) + ' MB';
+    function calc() {
+      const rows = Number(document.getElementById('rows').value);
+      const dv = document.getElementById('distinct').value;
+      const distinct = Math.min(rows, dv === 'same' ? rows : Number(dv));
+      const len = Number(document.getElementById('len').value);
+      const plain = rows * len;
+      // Dictionary of unique text, plus one small integer per row.
+      const bits = Math.max(1, Math.ceil(Math.log2(distinct)));
+      const packed = distinct * len + rows * bits / 8;
+      const big = Math.max(plain, packed);
+      document.getElementById('result').innerHTML =
+        `<div class="gauge"><b><span>Plain text</span><span>${mb(plain)}</span></b><div class="gbar warn"><i style="--w:${plain / big * 100}%"></i></div></div>` +
+        `<div class="gauge"><b><span>Dictionary + ${bits}-bit values</span><span>${mb(packed)}</span></b><div class="gbar"><i style="--w:${Math.max(1, packed / big * 100)}%"></i></div></div>`;
+      document.getElementById('calc-note').textContent = packed < plain
+        ? `About ${Math.round(plain / packed)} times smaller in this simplified estimate. Few different values compress best.`
+        : 'No saving here: with every row different, the dictionary is as large as the data. Avoid unneeded high-cardinality columns, such as long IDs and timestamps.';
+    }
+    ['rows', 'distinct', 'len'].forEach((id) => document.getElementById(id).addEventListener('change', calc));
+    calc();
+  </script>
+</body>
+</html>

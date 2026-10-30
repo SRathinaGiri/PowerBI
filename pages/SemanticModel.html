@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Semantic Model | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .space { min-height: 400px; background: radial-gradient(500px 280px at 50% 45%, rgb(var(--violet-rgb) / .14), transparent 70%), var(--panel-soft); }
+    .space svg { position: absolute; inset: 0; }
+    .edge { stroke: var(--muted); stroke-width: 2.5; opacity: 0; transition: opacity .4s ease; }
+    .edge.on { opacity: .75; }
+    .edge.lit { stroke: var(--accent-2); stroke-width: 4; opacity: 1; }
+    .node { cursor: pointer; transition: transform .9s var(--ease-out), opacity .5s ease; outline: none; }
+    .node.hide { opacity: 0; pointer-events: none; }
+    .node circle { stroke-width: 2.5; transition: filter .25s ease; }
+    .node.dim circle { fill: rgb(var(--accent-rgb) / .22); stroke: var(--accent); }
+    .node.fact circle { fill: rgb(var(--accent-2-rgb) / .3); stroke: var(--accent-2); }
+    .node.lit circle { filter: drop-shadow(0 0 8px var(--accent-2)); stroke-width: 4; }
+    .node:focus-visible circle { stroke: var(--ink); stroke-width: 4; }
+    .node text { font: 700 11.5px var(--font); fill: var(--ink); text-anchor: middle; pointer-events: none; }
+    .flat .node circle { opacity: 0; }
+    .sheet { fill: var(--panel-solid); stroke: var(--border-strong); opacity: 0; transition: opacity .4s ease; }
+    .flat .sheet { opacity: 1; }
+    .kind { position: absolute; left: 50%; bottom: 10px; translate: -50% 0; padding: 5px 14px; border-radius: 999px; white-space: nowrap; font-weight: 700; font-size: .9rem; background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Data Modeling</p>
+      <h1>The Semantic Model</h1>
+      <p class="lead">Semantic means meaningful. The model turns separate tables into a connected universe that speaks business language.</p>
+    </header>
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4600" aria-labelledby="uni-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="uni-title">From tables to a data universe</h2>
+        <p>Nothing in real life is a table. Things are connected, and a good model brings those connections back. Click any table to see what it connects to.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage space" id="space">
+          <svg viewBox="0 0 600 400" id="uni" role="group" aria-label="Tables and their relationships"></svg>
+          <div class="kind" id="kind" aria-live="polite"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Flat tables.</strong> Separate sheets, and meaning lost between them.</li>
+            <li><strong>Star.</strong> One fact table at the centre, with dimensions around it.</li>
+            <li><strong>Snowflake.</strong> A dimension branches into another table.</li>
+            <li><strong>Star cluster.</strong> Some dimensions stay flat and some branch, depending on need.</li>
+            <li><strong>Galaxy.</strong> Several fact tables share the same dimensions.</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>Explain more</summary>
+        <p>Microsoft renamed Power BI “datasets” to “semantic models” in 2023. Galaxy schemas are also called fact constellations. Star schemas are usually the best fit for Power BI; snowflake is the term you’ll see most often for branched dimensions, while “star cluster” is rarer.</p>
+      </details>
+    </section>
+  </div>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const uni = document.getElementById('uni');
+    // Each step: table → [x, y], or absent if hidden.
+    const LAYOUT = [
+      { Sales: [100, 80], Date: [300, 80], Customer: [500, 80], Product: [100, 250], Place: [300, 250], Region: [500, 250] },
+      { Sales: [300, 190], Date: [300, 65], Customer: [470, 190], Product: [300, 320], Place: [130, 190] },
+      { Sales: [300, 190], Date: [300, 65], Customer: [450, 190], Product: [300, 310], Place: [150, 190], Region: [55, 100], Category: [150, 340] },
+      { Sales: [300, 190], Date: [300, 65], Customer: [460, 190], Product: [300, 310], Place: [150, 190], Region: [55, 110] },
+      { Sales: [190, 190], Returns: [430, 190], Date: [310, 60], Customer: [310, 190], Product: [310, 320], Place: [60, 120], Region: [50, 270] }
+    ];
+    const EDGES = [
+      ['Sales', 'Date', 1], ['Sales', 'Customer', 1], ['Sales', 'Product', 1], ['Sales', 'Place', 1],
+      ['Place', 'Region', 2], ['Product', 'Category', 2],
+      ['Returns', 'Date', 4], ['Returns', 'Customer', 4], ['Returns', 'Product', 4]
+    ];
+    const NAMES = ['Flat tables: no connections', 'Star schema', 'Snowflake schema', 'Star cluster: a mix of both', 'Galaxy: two facts share dimensions'];
+    const FACTS = ['Sales', 'Returns'];
+    const edges = EDGES.map(([a, b, from]) => { const l = document.createElementNS(NS, 'line'); l.setAttribute('class', 'edge'); uni.appendChild(l); return { a, b, from, l }; });
+    const nodes = {};
+    [...new Set(LAYOUT.flatMap((l) => Object.keys(l)))].forEach((name) => {
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'node ' + (FACTS.includes(name) ? 'fact' : 'dim'));
+      g.setAttribute('tabindex', '0'); g.setAttribute('role', 'button');
+      g.innerHTML = `<rect class="sheet" x="-52" y="-32" width="104" height="64" rx="6"/><circle r="38"/><text y="4">${name}</text>`;
+      g.setAttribute('aria-label', name + ' table');
+      uni.appendChild(g);
+      nodes[name] = g;
+      const pick = () => light(name);
+      g.addEventListener('click', pick);
+      g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    });
+    let step = 0, timer = null;
+    function light(name) {
+      Object.values(nodes).forEach((n) => n.classList.remove('lit'));
+      edges.forEach((e) => e.l.classList.remove('lit'));
+      if (!name || step === 0) return;
+      nodes[name].classList.add('lit');
+      edges.forEach((e) => {
+        if (e.l.classList.contains('on') && (e.a === name || e.b === name)) {
+          e.l.classList.add('lit');
+          nodes[e.a === name ? e.b : e.a].classList.add('lit');
+        }
+      });
+    }
+    function show(k) {
+      step = k;
+      const pos = LAYOUT[k];
+      uni.classList.toggle('flat', k === 0);
+      light(null);
+      Object.entries(nodes).forEach(([name, g]) => {
+        const p = pos[name];
+        g.classList.toggle('hide', !p);
+        if (p) g.style.transform = `translate(${p[0]}px, ${p[1]}px)`;
+      });
+      edges.forEach((e) => e.l.classList.remove('on'));
+      clearTimeout(timer);
+      timer = setTimeout(() => edges.forEach((e) => {
+        if (k < e.from || !pos[e.a] || !pos[e.b]) return;
+        [['x1', pos[e.a][0]], ['y1', pos[e.a][1]], ['x2', pos[e.b][0]], ['y2', pos[e.b][1]]].forEach(([attr, v]) => e.l.setAttribute(attr, v));
+        e.l.classList.add('on');
+      }), 650);
+      document.getElementById('kind').textContent = NAMES[k];
+    }
+    document.getElementById('analogy').addEventListener('story:step', (e) => show(e.detail.step));
+    show(0);
+  </script>
+</body>
+</html>
