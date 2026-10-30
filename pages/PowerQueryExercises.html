@@ -28,7 +28,7 @@
     .ex pre code { background: none; }
   </style>
   <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
-  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031b" defer></script>
   <script src="../assets/quiz.js?v=20261030c" defer></script>
 </head>
 <body>
@@ -137,11 +137,12 @@ Email = Table.AddColumn(Source, &quot;Email&quot;, each Text.Lower(Text.Replace(
       <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">EmpID</th><th scope="col">EmployeeName</th><th scope="col">DateOfBirth</th><th scope="col">DateOfJoining</th><th scope="col">Department</th></tr></thead><tbody><tr><td>E1000</td><td>Janaki Ramaswamy</td><td>20-03-1968</td><td>19-01-2023</td><td>Operations</td></tr><tr><td>E1001</td><td>Nitara Lata</td><td>30-09-2001</td><td>08-01-2025</td><td>HR</td></tr><tr><td>E1002</td><td>Yashasvi Mall</td><td>07-06-1977</td><td>06-05-2008</td><td>IT</td></tr><tr><td>E1003</td><td>Hardik Sengupta</td><td>15-09-1994</td><td>22-04-2016</td><td>IT</td></tr></tbody></table></div></div></div>
       <details><summary>Show the result and M code</summary>
         <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">EmpID</th><th scope="col">DateOfBirth</th><th scope="col">DateOfJoining</th><th scope="col">Retirement</th></tr></thead><tbody><tr><td>E1000</td><td>20-03-1968</td><td>19-01-2023</td><td>20-03-2028</td></tr><tr><td>E1001</td><td>30-09-2001</td><td>08-01-2025</td><td>30-09-2061</td></tr><tr><td>E1002</td><td>07-06-1977</td><td>06-05-2008</td><td>07-06-2037</td></tr><tr><td>E1003</td><td>15-09-1994</td><td>22-04-2016</td><td>15-09-2054</td></tr></tbody></table></div></div></div>
-        <p><strong>Check:</strong> Janaki Ramaswamy retires on 20-03-2028. Age and service change daily, so your figures depend on today’s date.</p>
+        <p><strong>Check:</strong> Janaki Ramaswamy retires on 20-03-2028. Age is in completed years. Service is approximate, because days ÷ 365.25 only averages out leap years. Both depend on today’s date.</p>
         <pre><code>Today = Date.From(DateTime.LocalNow()),
-Age = Table.AddColumn(Source, &quot;Age&quot;, each Today - [DateOfBirth]),
+// Today - [DateOfBirth] returns a duration, so work out completed years instead
+Age = Table.AddColumn(Source, &quot;Age&quot;, each let Y = Date.Year(Today) - Date.Year([DateOfBirth]) in if Date.AddYears([DateOfBirth], Y) &gt; Today then Y - 1 else Y, Int64.Type),
 Retire = Table.AddColumn(Age, &quot;Retirement&quot;, each Date.AddYears([DateOfBirth], 60)),
-Service = Table.AddColumn(Retire, &quot;Service Years&quot;, each Duration.Days(Today - [DateOfJoining]) / 365.25)</code></pre>
+Service = Table.AddColumn(Retire, &quot;Service Years (approx)&quot;, each Duration.Days(Today - [DateOfJoining]) / 365.25)</code></pre>
       </details>
     </article>
     <h2 class="phase">Phase 3: Shape transformation</h2>

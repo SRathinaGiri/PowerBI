@@ -10,7 +10,7 @@ window.SRG_QUIZZES = {
   'QueryFolding.html': [
     { type: 'sort', prompt: 'On a SQL source, which way does each step usually go?', buckets: ['Usually folds', 'Often breaks folding'], items: [['Filter rows', 0], ['Remove columns', 0], ['Group by', 0], ['Add index column', 1], ['Table.Buffer', 1]], why: 'Steps with a direct SQL equivalent can be sent to the source.' },
     { type: 'order', prompt: 'Arrange these steps to keep folding as long as possible.', items: ['Filter rows', 'Remove columns', 'Group by', 'Add index column'], why: 'Put what can fold first, and steps that cannot fold last.' },
-    { type: 'myth', prompt: 'Myth or fact?', items: [['A CSV file folds if you filter it first.', false], ['Once a step breaks folding, later steps run locally.', true], ['A greyed-out View Native Query always proves nothing folded.', false]], why: 'Files have no engine to fold to, and some connectors hide the query even when they fold.' }
+    { type: 'myth', prompt: 'Myth or fact?', items: [['A CSV file folds if you filter it first.', false], ['Everything after a non-folding step is always guaranteed to run locally.', false], ['A greyed-out View Native Query always proves nothing folded.', false]], why: 'Files have no engine to fold to, the engine may reorder steps, and View Native Query depends on the connector.' }
   ],
   'RelationshipsAndCalcGroups.html': [
     { type: 'match', prompt: 'Match each need to the feature.', pairs: [['Sales by delivery date', 'USERELATIONSHIP'], ['MTD for every measure', 'Calculation group'], ['The measure on the visual', 'SELECTEDMEASURE()']], why: 'One switches a relationship, and the others reuse one formula across measures.' },

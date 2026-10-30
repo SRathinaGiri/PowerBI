@@ -34,7 +34,7 @@
     .cs-h { margin: 2rem 0 .4rem; font: 800 clamp(1.25rem, 2.6vw, 1.6rem)/1.2 var(--font-display); }
   </style>
   <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
-  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031b" defer></script>
   <script src="../assets/quiz.js?v=20261030c" defer></script>
 </head>
 <body>
@@ -47,12 +47,12 @@
 
     <section class="srg-reveal">
       <h2 class="cs-h">What it means</h2>
-      <p>Power Query can translate your steps into the source’s own language, usually SQL, and let the source do the work. That translation is folding. Your steps fold as far as they can. At the first step that cannot be translated, everything from there on runs inside Power Query on your machine or gateway.</p>
+      <p>Power Query can translate your steps into the source’s own language, usually SQL, and let the source do the work. That translation is folding. A step that cannot be translated usually means later work runs inside Power Query, on your machine or gateway. That is not an absolute rule: the engine may reorder steps while optimising, and in uncommon cases a later step still folds.</p>
     </section>
 
     <section class="sim srg-reveal" aria-labelledby="sim-title">
       <h2 id="sim-title">Build a query and watch the work move</h2>
-      <p class="sim-note">Imagine H Mart’s FactSales lives in SQL Server: 25,000 rows and 36 columns. The row counts are real, but this is a teaching model of how folding behaves, not a measurement.</p>
+      <p class="sim-note">Imagine H Mart’s FactSales lives in SQL Server: 25,000 rows and 36 columns. The row counts are real, but this is a simplified teaching model: it treats every step after a break as local and does not reorder steps. It is not a measurement.</p>
       <p class="grp">Start from</p>
       <div class="row">
         <button type="button" class="preset" id="good">Good order: filter first</button>
@@ -84,8 +84,8 @@
       <h2 class="cs-h">How to check in Power BI Desktop</h2>
       <ol>
         <li>Open Transform data and right-click the last applied step.</li>
-        <li>If <strong>View Native Query</strong> is available, that step folded, and you can read the SQL. If it is greyed out, it may not have folded. Some connectors hide the query even when they do fold.</li>
-        <li>Newer versions also show folding indicators beside each step. Query Diagnostics gives the full picture.</li>
+        <li>If <strong>View Native Query</strong> is available, that step folded, and you can read the SQL. If it is greyed out on a source that normally offers it, that step has probably stopped folding. Availability depends on the connector.</li>
+        <li>Query Diagnostics in Desktop shows what was sent to the source. Step folding indicators and the query plan are available only in Power Query Online, such as in dataflows.</li>
       </ol>
       <h2 class="cs-h">Why a CA should care</h2>
       <p>On a ledger of crores of rows, folding can be the difference between a refresh of minutes and one that fails. Incremental refresh also relies on the date filter folding. The habit is simple: filter and remove columns first, then do the steps that cannot fold.</p>
