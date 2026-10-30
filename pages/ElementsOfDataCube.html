@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elements of the Data Cube | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <script src="../assets/story.js" defer></script>
+  <style>
+    :root { --c-fact: var(--accent-2); --c-dim: var(--accent); --c-hier: var(--violet); --c-meas: var(--accent-3); }
+    body { margin: 0; font-family: var(--font); color: var(--ink); line-height: 1.55; }
+    .container { max-width: 1240px; margin: 0 auto; padding: 2.5rem 16px 1rem; }
+    .eyebrow { margin: 0 0 .5rem; font: 700 .78rem/1 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--accent-2); }
+    h1 { margin: 0 0 .6rem; font: 700 clamp(2rem, 4.4vw, 3rem)/1.1 var(--font-display); letter-spacing: -.025em; }
+    .lead { margin: 0; max-width: 70ch; font-size: 1.12rem; color: var(--muted); }
+    .story { width: 100%; }
+
+    /* ---------- Analogy scene: a slip that gains meaning ---------- */
+    .slip-stage { min-height: 430px; }
+    .layer { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+      opacity: 0; transform: translateY(14px) scale(.97); pointer-events: none; transition: opacity .5s var(--ease-out), transform .7s var(--ease-out); }
+    .story[data-step="0"] .l-slip, .story[data-step="1"] .l-slip, .story[data-step="2"] .l-slip,
+    .story[data-step="3"] .l-measure, .story[data-step="4"] .l-punch { opacity: 1; transform: none; }
+
+    .slip { position: relative; width: 190px; padding: 18px 14px; text-align: center; background: #fffdf6; color: #1d1d1d; border-radius: 4px; box-shadow: var(--shadow-lg); transform: rotate(-2deg); }
+    .slip b { display: block; font: 800 2.7rem/1.1 var(--mono); }
+    .slip span { display: block; min-height: 1.3em; font: 600 .86rem var(--font); color: #5b5b5b; }
+    .slip .q { display: none; color: #b91c1c; }
+    .story[data-step="0"] .slip .q { display: block; }
+    .story[data-step="0"] .slip .a, .story[data-step="0"] .slip .rs { display: none; }
+    .slip .rs { display: inline; font: inherit; color: inherit; min-height: 0; }
+    .labels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(560px, 100%); }
+    .lab { padding: 8px 12px; border-radius: 12px; background: var(--panel-solid); border: 2px solid var(--c-dim); box-shadow: var(--shadow);
+      opacity: 0; transform: translateY(16px) scale(.9); transition: opacity .45s ease, transform .6s var(--ease-spring); }
+    .lab:nth-child(2) { transition-delay: .1s; } .lab:nth-child(3) { transition-delay: .2s; } .lab:nth-child(4) { transition-delay: .3s; }
+    .story[data-step="1"] .lab, .story[data-step="2"] .lab { opacity: 1; transform: none; }
+    .lab small { display: block; font: 700 .7rem/1.2 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); }
+    .lab strong { font-size: .98rem; color: var(--ink); }
+    .lab .path { display: block; overflow: hidden; max-height: 0; font: 600 .78rem/1.35 var(--mono); color: var(--violet-ink); transition: max-height .5s var(--ease-out), margin .5s var(--ease-out); }
+    .story[data-step="2"] .lab .path { max-height: 3em; margin-top: 3px; }
+    .story[data-step="2"] .lab { border-color: var(--c-hier); }
+
+    .formula { padding: 6px 14px; border-radius: 10px; background: var(--code-bg); color: var(--code-ink); font: 600 .9rem var(--mono); text-align: center; }
+    .context { font-weight: 700; color: var(--accent-ink); }
+    .slip-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .mini { padding: 8px 12px; background: #fffdf6; color: #1d1d1d; border-radius: 3px; box-shadow: var(--shadow); font: 700 1rem var(--mono); }
+    .story[data-step="3"] .mini { animation: fall .6s var(--ease-out) both; }
+    .story[data-step="3"] .mini:nth-child(2) { animation-delay: .2s; } .story[data-step="3"] .mini:nth-child(3) { animation-delay: .4s; } .story[data-step="3"] .mini:nth-child(4) { animation-delay: .6s; }
+    @keyframes fall { from { opacity: 0; transform: translateY(-30px) rotate(6deg); } }
+    .scalar { padding: 10px 26px; border-radius: 16px; text-align: center; background: var(--panel-solid); border: 3px solid var(--c-meas); box-shadow: var(--shadow-lg); }
+    .scalar b { display: block; font: 800 2.3rem/1.1 var(--font-display); color: var(--ink); }
+    .scalar small { color: var(--muted); }
+    .story[data-step="3"] .scalar { animation: pop .6s 1s var(--ease-spring) both; }
+    @keyframes pop { from { opacity: 0; transform: scale(.5); } }
+
+    .punch { max-width: 620px; margin: 0; text-align: center; font: 700 clamp(1.45rem, 3.2vw, 2.2rem)/1.35 var(--font-display); letter-spacing: -.01em; color: var(--ink); }
+    .punch span { padding: 0 .18em; border-radius: 8px; }
+    .w-dim { background: rgb(var(--accent-rgb) / .2); } .w-hier { background: rgb(var(--violet-rgb) / .22); }
+    .w-meas { background: rgb(var(--accent-3-rgb) / .22); } .w-fact { background: rgb(var(--accent-2-rgb) / .25); }
+    .story[data-step="4"] .punch span { animation: pop .55s var(--ease-spring) both; }
+    .story[data-step="4"] .w-hier { animation-delay: .25s; } .story[data-step="4"] .w-meas { animation-delay: .5s; } .story[data-step="4"] .w-fact { animation-delay: .75s; }
+
+    /* ---------- Try it ---------- */
+    .lab-panel { margin: 28px 0; padding: clamp(18px, 3vw, 30px); border-radius: var(--radius-lg); background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo)); border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .lab-panel h2 { margin: 0 0 4px; font: 700 clamp(1.35rem, 2.6vw, 1.9rem)/1.2 var(--font-display); }
+    .lab-panel > p { margin: 0 0 16px; color: var(--muted); }
+    .pickers { display: flex; flex-wrap: wrap; gap: 12px 22px; margin-bottom: 14px; }
+    fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+    legend { padding: 0; margin-bottom: 6px; font: 700 .76rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+    .seg label { position: relative; padding: 7px 13px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: .92rem; color: var(--ink); background: rgb(var(--fg-rgb) / .06); border: 1px solid var(--border); transition: background .2s ease, color .2s ease; }
+    .seg input { position: absolute; opacity: 0; }
+    .seg label:has(input:checked) { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sentence { margin: 0 0 14px; font-weight: 600; }
+    .sentence b { color: var(--accent-ink); }
+    .bars { display: grid; gap: 8px; }
+    .bar { display: grid; grid-template-columns: minmax(84px, 150px) 1fr minmax(70px, auto); gap: 10px; align-items: center; font-size: .94rem; }
+    .track { height: 22px; border-radius: 7px; overflow: hidden; background: rgb(var(--fg-rgb) / .07); }
+    .track i { display: block; height: 100%; border-radius: 7px; background: linear-gradient(90deg, var(--accent), var(--accent-3)); transition: width .6s var(--ease-out); }
+    .bar b { text-align: right; font-family: var(--mono); }
+    .bar.total { margin-top: 4px; padding-top: 8px; border-top: 2px solid var(--border-strong); font-weight: 700; }
+    .note { margin: 12px 0 0; font-size: .9rem; color: var(--muted); }
+
+    /* ---------- Definitions ---------- */
+    .defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 10px; }
+    .def { padding: 14px; border-radius: var(--radius); background: var(--panel-soft); border: 1px solid var(--border); border-top: 4px solid var(--c); }
+    .def h3 { margin: 0 0 6px; font: 700 1.05rem var(--font-display); }
+    .def p { margin: 0; color: var(--muted); font-size: .93rem; }
+    @media (max-width: 560px) {
+      .slip-stage { min-height: 500px; }
+      .labels { grid-template-columns: 1fr; gap: 6px; }
+      .lab { padding: 5px 10px; }
+      .slip { padding: 10px; } .slip b { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Foundations</p>
+      <h1>Elements of the Data Cube</h1>
+      <p class="lead">Four words explain every report: fact, dimension, hierarchy and measure.</p>
+    </header>
+
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4600" aria-labelledby="slip-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="slip-title">The slip that says “450”</h2>
+        <p>A number alone tells you nothing. Watch one bill slip gain meaning, then become part of an answer.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage slip-stage" aria-hidden="true">
+          <div class="layer l-slip">
+            <div class="slip"><b><span class="rs">₹</span>450</b><span class="q">450 what? Whose? When?</span><span class="a">one sale</span></div>
+            <div class="labels">
+              <div class="lab"><small>Time</small><strong>15-08-2026</strong><span class="path">FY 2026-27 › Q2 › Aug</span></div>
+              <div class="lab"><small>Place</small><strong>Chennai</strong><span class="path">India › Tamil Nadu › Chennai</span></div>
+              <div class="lab"><small>Product</small><strong>Masala Tea</strong><span class="path">Beverages › Tea › Masala Tea</span></div>
+              <div class="lab"><small>Customer</small><strong>Meera</strong><span class="path">Retail › Regular › Meera</span></div>
+            </div>
+          </div>
+          <div class="layer l-measure">
+            <div class="context">Chennai · August 2026</div>
+            <div class="slip-row" id="measure-slips"></div>
+            <div class="formula">Total Sales = SUM ( Sales[Amount] )</div>
+            <div class="scalar"><b id="measure-total"></b><small>one scalar value</small></div>
+          </div>
+          <div class="layer l-punch">
+            <p class="punch"><span class="w-dim">Dimensions</span> in different levels of <span class="w-hier">hierarchies</span> are <span class="w-meas">measured</span> by <span class="w-fact">facts</span>.</p>
+          </div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Fact.</strong> The truth about something that happened. Mostly a number, and meaningless alone.</li>
+            <li><strong>Dimension.</strong> Labels give it meaning: when, where, what and who. This is relatively permanent master data.</li>
+            <li><strong>Hierarchy.</strong> Each dimension has levels, so you can look at the same sale from near or far.</li>
+            <li><strong>Measure.</strong> A calculation over the facts in view returns one scalar value.</li>
+            <li><strong>The punch line.</strong> All four words in one sentence.</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>Explain more</summary>
+        <div class="defs">
+          <div class="def" style="--c: var(--c-fact)"><h3>Fact</h3><p>The truth about something that happened. Mostly numbers, recorded transaction by transaction. Meaningless without labels.</p></div>
+          <div class="def" style="--c: var(--c-dim)"><h3>Dimension</h3><p>Anything we want to measure using facts. Relatively permanent, with hardened edges. This is master data: mostly labels, and it gives facts their meaning.</p></div>
+          <div class="def" style="--c: var(--c-hier)"><h3>Hierarchy</h3><p>The different levels of a dimension, such as Year › Quarter › Month or Country › State › City.</p></div>
+          <div class="def" style="--c: var(--c-meas)"><h3>Measure</h3><p>Any calculated scalar value. A fact is stored; a measure is worked out for whatever is in view.</p></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="lab-panel srg-reveal" aria-labelledby="try-title">
+      <h2 id="try-title">Try the punch line</h2>
+      <p>Pick a dimension, a level of its hierarchy and a measure. The same 12 made-up sales answer every combination.</p>
+      <div class="pickers">
+        <fieldset><legend>Dimension</legend><div class="seg" id="pick-dim"></div></fieldset>
+        <fieldset><legend>Hierarchy level</legend><div class="seg" id="pick-level"></div></fieldset>
+        <fieldset><legend>Measure</legend><div class="seg" id="pick-measure"></div></fieldset>
+      </div>
+      <p class="sentence" id="sentence" aria-live="polite"></p>
+      <div class="bars" id="bars"></div>
+      <p class="note" id="lab-note"></p>
+    </section>
+  </div>
+
+  <script>
+    // Synthetic teaching data. Amounts are whole rupees, so sums stay exact.
+    const FACTS = [
+      ['2026-08-15', 'Masala Tea', 'Chennai', 450], ['2026-08-18', 'Filter Coffee', 'Chennai', 300],
+      ['2026-08-21', 'Millet Cookies', 'Chennai', 250], ['2026-08-27', 'Masala Tea', 'Chennai', 120],
+      ['2026-05-10', 'Filter Coffee', 'Coimbatore', 600], ['2026-06-12', 'Millet Cookies', 'Coimbatore', 350],
+      ['2026-09-05', 'Masala Tea', 'Kochi', 700], ['2026-10-14', 'Filter Coffee', 'Kochi', 520],
+      ['2026-12-20', 'Millet Cookies', 'Bengaluru', 800], ['2027-01-09', 'Masala Tea', 'Bengaluru', 650],
+      ['2027-02-16', 'Filter Coffee', 'Mysuru', 480], ['2027-03-03', 'Millet Cookies', 'Mysuru', 380]
+    ].map(([date, product, city, amount]) => ({ date, product, city, amount }))
+      .sort((a, b) => a.date.localeCompare(b.date)); // so quarters and months group in calendar order
+
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const STATE = { Chennai: 'Tamil Nadu', Coimbatore: 'Tamil Nadu', Kochi: 'Kerala', Bengaluru: 'Karnataka', Mysuru: 'Karnataka' };
+    const TYPE = { 'Masala Tea': 'Tea', 'Filter Coffee': 'Coffee', 'Millet Cookies': 'Cookies' };
+    const CATEGORY = { Tea: 'Beverages', Coffee: 'Beverages', Cookies: 'Snacks' };
+    // Indian financial year: April to March, with Q1 = Apr–Jun.
+    const parts = (iso) => iso.split('-').map(Number);
+    const fyStart = (iso) => { const [y, m] = parts(iso); return m >= 4 ? y : y - 1; };
+    const fyQuarter = (iso) => Math.floor(((parts(iso)[1] + 8) % 12) / 3) + 1;
+    const DIMENSIONS = {
+      Time: {
+        'Financial year': (f) => `FY ${fyStart(f.date)}-${String(fyStart(f.date) + 1).slice(2)}`,
+        Quarter: (f) => `Q${fyQuarter(f.date)}`,
+        Month: (f) => `${MONTHS[parts(f.date)[1] - 1]} ${parts(f.date)[0]}`
+      },
+      Place: { Country: () => 'India', State: (f) => STATE[f.city], City: (f) => f.city },
+      Product: { Category: (f) => CATEGORY[TYPE[f.product]], Type: (f) => TYPE[f.product], Product: (f) => f.product }
+    };
+    const inr = (n) => '₹' + n.toLocaleString('en-IN');
+    const sum = (rows) => rows.reduce((s, f) => s + f.amount, 0);
+    const MEASURES = {
+      'Total Sales': { calc: sum, show: inr, dax: 'SUM ( Sales[Amount] )' },
+      'Number of Sales': { calc: (rows) => rows.length, show: String, dax: 'COUNTROWS ( Sales )' },
+      // Display only: average rounded to the nearest rupee.
+      'Average Sale': { calc: (rows) => (rows.length ? sum(rows) / rows.length : 0), show: (n) => inr(Math.round(n)), dax: 'AVERAGE ( Sales[Amount] )' }
+    };
+
+    // Story step 4: the slips behind the measure come from the same data.
+    const chennaiAug = FACTS.filter((f) => f.city === 'Chennai' && f.date.startsWith('2026-08'));
+    document.getElementById('measure-slips').innerHTML = chennaiAug.map((f) => `<div class="mini">${inr(f.amount)}</div>`).join('');
+    document.getElementById('measure-total').textContent = inr(sum(chennaiAug));
+
+    // ---- Try it ----
+    const state = { dim: 'Time', level: 'Quarter', measure: 'Total Sales' };
+    function radios(hostId, name, options, current, onPick) {
+      const host = document.getElementById(hostId);
+      host.innerHTML = '';
+      options.forEach((opt) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'radio'; input.name = name; input.value = opt; input.checked = opt === current;
+        input.addEventListener('change', () => onPick(opt));
+        label.append(input, document.createTextNode(opt));
+        host.appendChild(label);
+      });
+    }
+    const esc = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    function render() {
+      radios('pick-dim', 'dim', Object.keys(DIMENSIONS), state.dim, (d) => { state.dim = d; state.level = Object.keys(DIMENSIONS[d])[1]; render(); });
+      radios('pick-level', 'level', Object.keys(DIMENSIONS[state.dim]), state.level, (l) => { state.level = l; render(); });
+      radios('pick-measure', 'measure', Object.keys(MEASURES), state.measure, (m) => { state.measure = m; render(); });
+      const key = DIMENSIONS[state.dim][state.level];
+      const groups = new Map();
+      FACTS.forEach((f) => { const k = key(f); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(f); });
+      const m = MEASURES[state.measure];
+      const rows = [...groups].map(([label, facts]) => ({ label, value: m.calc(facts) }));
+      const max = Math.max(...rows.map((r) => r.value));
+      document.getElementById('sentence').innerHTML = `<b>${state.dim}</b> at the <b>${state.level}</b> level, measured by <b>${state.measure}</b> = ${esc(m.dax)}`;
+      document.getElementById('bars').innerHTML = rows.map((r) =>
+        `<div class="bar"><span>${esc(r.label)}</span><div class="track"><i style="width:${(r.value / max) * 100}%"></i></div><b>${m.show(r.value)}</b></div>`).join('') +
+        `<div class="bar total"><span>All 12 sales</span><span></span><b>${m.show(m.calc(FACTS))}</b></div>`;
+      document.getElementById('lab-note').textContent = state.measure === 'Average Sale'
+        ? 'The overall average is worked out from all 12 sales, not by averaging the bars. A measure is recalculated for whatever is in view.'
+        : 'Change the level and the bars regroup, but the total stays the same. The facts never changed.';
+    }
+    render();
+  </script>
+</body>
+</html>

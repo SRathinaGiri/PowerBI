@@ -6,6 +6,8 @@
   'use strict';
 
   var LESSONS = [
+    { path: 'pages/ElementsOfDataCube.html', track: 'Foundations', title: 'Elements of the Data Cube',
+      blurb: 'Fact, dimension, hierarchy and measure: four words that explain every report.' },
     { path: 'pages/stages-of-data-analysis.html', track: 'Foundations', title: 'Stages of Data Analysis',
       blurb: 'From cross tabs and pivot tables to cubes, interactive BI and AI-enabled insight.' },
     { path: 'pages/OLAPConcept.html', track: 'Foundations', title: 'OLTP vs OLAP',
