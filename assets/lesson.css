@@ -1,0 +1,30 @@
+/* Shared layout for the foundations lessons (used with site.css + story.css). */
+body { margin: 0; font-family: var(--font); color: var(--ink); line-height: 1.55; }
+.container { max-width: 1240px; margin: 0 auto; padding: 2.5rem 16px 1rem; }
+.eyebrow { margin: 0 0 .5rem; font: 700 .78rem/1 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--accent-2); }
+.container > header h1 { margin: 0 0 .6rem; font: 700 clamp(2rem, 4.4vw, 3rem)/1.1 var(--font-display); letter-spacing: -.025em; }
+.lead { margin: 0; max-width: 70ch; font-size: 1.12rem; color: var(--muted); }
+.container .story { width: 100%; }
+.lab-panel { margin: 28px 0; padding: clamp(18px, 3vw, 30px); border-radius: var(--radius-lg); background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo)); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.lab-panel h2 { margin: 0 0 4px; font: 700 clamp(1.35rem, 2.6vw, 1.9rem)/1.2 var(--font-display); }
+.lab-panel > p { margin: 0 0 16px; color: var(--muted); }
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 6px; font: 700 .76rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg label { position: relative; padding: 7px 13px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: .92rem; color: var(--ink); background: rgb(var(--fg-rgb) / .06); border: 1px solid var(--border); transition: background .2s ease, color .2s ease; }
+.seg input { position: absolute; opacity: 0; }
+.seg label:has(input:checked) { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.scene-caption { margin: 0; padding: 8px 14px; font-weight: 600; text-align: center; color: var(--ink); }
+.layer { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  opacity: 0; transform: translateY(14px) scale(.97); pointer-events: none; transition: opacity .5s var(--ease-out), transform .7s var(--ease-out); }
+.layer.on { opacity: 1; transform: none; pointer-events: auto; }
+
+/* The 16-step map */
+.steps-map { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
+.sm-group { flex: 1 1 280px; padding: 10px 12px; border-radius: 14px; text-decoration: none; color: var(--ink); background: var(--panel-soft); border: 1px solid var(--border); transition: border-color .2s ease, transform .3s var(--ease-out); }
+a.sm-group:hover { transform: translateY(-2px); border-color: rgb(var(--accent-rgb) / .5); }
+.sm-group.now { background: rgb(var(--accent-rgb) / .1); border-color: var(--accent); }
+.sm-group b { display: block; margin-bottom: 6px; font-size: .84rem; }
+.sm-group span { display: inline-block; margin: 0 3px 3px 0; padding: 1px 7px; border-radius: 999px; font-size: .74rem; color: var(--muted); background: rgb(var(--fg-rgb) / .06); }
+.sm-group.now span { color: var(--accent-ink); background: rgb(var(--accent-rgb) / .16); }

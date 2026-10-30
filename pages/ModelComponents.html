@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Components of a Data Model | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .building { min-height: 440px; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 14px; }
+    .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+    .tile { all: unset; box-sizing: border-box; cursor: pointer; padding: 10px 4px; border-radius: 12px; text-align: center; font: 700 .76rem var(--font); color: var(--muted); background: rgb(var(--fg-rgb) / .05); border: 2px solid var(--border); transition: transform .45s var(--ease-spring), border-color .25s ease, background .25s ease, color .25s ease; }
+    .tile i { display: block; font-size: 1.6rem; font-style: normal; }
+    .tile:hover { color: var(--ink); }
+    .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .tile.now { color: var(--ink); background: rgb(var(--accent-rgb) / .16); border-color: var(--accent); transform: translateY(-4px); }
+    .detail { padding: 14px 16px; border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); animation: srg-rise .45s var(--ease-out); }
+    .detail h3 { margin: 0 0 6px; font: 800 1.15rem var(--font-display); }
+    .detail p { margin: 0 0 6px; }
+    .detail small { color: var(--muted); font-size: .88rem; }
+    @media (max-width: 640px) { .tiles { grid-template-columns: repeat(2, 1fr); } .building { min-height: 620px; } }
+    .warn { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 999px; font: 700 .76rem var(--font); color: var(--danger-ink); background: rgb(var(--danger-rgb) / .14); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Data Modeling</p>
+      <h1>Components of a Data Model</h1>
+      <p class="lead">Eight parts work together, much like the systems of a smart building.</p>
+    </header>
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4200" aria-labelledby="bld-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="bld-title">The smart building</h2>
+        <p>Click any part of the building, or press Play to tour it.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage building">
+          <div class="tiles" id="tiles"></div>
+          <div id="detail" aria-live="polite"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Tables.</strong> The rooms.</li>
+            <li><strong>Relationships.</strong> The corridors.</li>
+            <li><strong>Hierarchies.</strong> The floors.</li>
+            <li><strong>Measures.</strong> The meters.</li>
+            <li><strong>Perspectives.</strong> The visitor maps.</li>
+            <li><strong>Roles.</strong> The keycards.</li>
+            <li><strong>Cultures.</strong> The multilingual signs.</li>
+            <li><strong>Calculation groups.</strong> The master switch.</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>Explain more</summary>
+        <p>A model also has columns, partitions, parameters and shared expressions, and DAX functions. These eight are the ones to learn first.</p>
+      </details>
+    </section>
+  </div>
+  <script>
+    const PARTS = [
+      ['🚪', 'Tables', 'Rooms hold everything in the building.', 'Tables hold the facts and dimensions.', 'Example: Sales, Customer, Date.'],
+      ['🛤️', 'Relationships', 'Corridors connect the rooms.', 'Relationships let a filter travel from one table to another.', 'Example: Customer → Sales.'],
+      ['🏢', 'Hierarchies', 'Floors let you move up and down the building.', 'Hierarchies give you levels to drill through.', 'Example: Year › Quarter › Month.'],
+      ['📟', 'Measures', 'Meters calculate a reading for wherever you stand.', 'Measures return one scalar value for the current filter context.', 'Example: Total Sales.'],
+      ['🗺️', 'Perspectives', 'A visitor map shows only the rooms relevant to that visitor.', 'Perspectives show a focused view of a large model.', 'Example: a Sales view that hides HR tables.', 'A convenience view, not security'],
+      ['🔑', 'Roles', 'Keycards decide which doors open for whom.', 'Roles enforce security, including row-level security.', 'Example: a Chennai manager sees only Chennai rows.'],
+      ['🌐', 'Cultures', 'Signs appear in each visitor’s language.', 'Cultures hold translated names for tables, columns and measures.', 'Example: “Sales” shown in Tamil or Hindi.'],
+      ['🎛️', 'Calculation groups', 'One master switch changes every light in the building.', 'Calculation groups apply one logic to many measures.', 'Example: YTD applied to Sales, Cost and Profit.']
+    ];
+    const tiles = document.getElementById('tiles'), detail = document.getElementById('detail');
+    const story = document.getElementById('analogy');
+    tiles.innerHTML = PARTS.map((p, i) => `<button class="tile" type="button" data-i="${i}"><i aria-hidden="true">${p[0]}</i>${p[1]}</button>`).join('');
+    tiles.addEventListener('click', (e) => {
+      const t = e.target.closest('.tile');
+      if (t) { story._story.stop(); story._story.go(Number(t.dataset.i)); }
+    });
+    function show(k) {
+      const p = PARTS[k];
+      [...tiles.children].forEach((el, i) => { el.classList.toggle('now', i === k); el.setAttribute('aria-pressed', String(i === k)); });
+      detail.innerHTML = `<div class="detail"><h3>${p[1]}</h3><p>${p[2]} ${p[3]}</p><small>${p[4]}</small>${p[5] ? `<br><span class="warn">${p[5]}</span>` : ''}</div>`;
+    }
+    story.addEventListener('story:step', (e) => show(e.detail.step));
+    show(0);
+  </script>
+</body>
+</html>

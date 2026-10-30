@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Processing: R2R | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .example { margin-bottom: 14px; }
+    .r2r-stage { min-height: 440px; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 14px; }
+    .board { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 10px; }
+    .col { flex: 1 1 130px; max-width: 220px; padding: 8px; border-radius: 14px; background: rgb(var(--accent-rgb) / .07); border: 1px solid rgb(var(--accent-rgb) / .3); }
+    .col h3 { margin: 0 0 6px; font: 700 .86rem var(--font); color: var(--accent-ink); text-align: center; }
+    .rec { padding: 6px 9px; margin-bottom: 5px; border-radius: 5px; background: #fffdf6; color: #1d1d1d; box-shadow: var(--shadow); font-size: .8rem; line-height: 1.3; }
+    .rec b { display: block; font-family: var(--mono); }
+    .pile { max-width: 560px; margin: 0 auto; }
+    .pile .rec { width: 150px; margin: 0; }
+    .pile .rec:nth-child(odd) { transform: rotate(-2deg); } .pile .rec:nth-child(even) { transform: rotate(2deg); }
+    .sub { margin-top: 4px; padding-top: 5px; border-top: 2px solid var(--accent); text-align: center; font: 800 .95rem var(--mono); color: var(--ink); animation: srg-rise .5s var(--ease-out); }
+    .report { align-self: center; width: min(420px, 100%); padding: 12px 16px; border-radius: 16px; background: var(--panel-solid); border: 3px solid var(--accent-3); box-shadow: var(--shadow-lg); animation: srg-rise .55s var(--ease-out); }
+    .report.tablet { border: 8px solid #1d2433; border-radius: 22px; }
+    .report h3 { margin: 0 0 6px; font: 800 1rem var(--font-display); }
+    .report div { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); font-size: .92rem; }
+    .report div:last-child { border: 0; font-weight: 800; }
+    .report b { font-family: var(--mono); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Foundations</p>
+      <h1>Data Processing: R2R</h1>
+      <p class="lead">Record to Report: any data, from a voucher to a train ticket, goes through the same five steps.</p>
+    </header>
+    <div data-steps-map="process"></div>
+
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4600" aria-labelledby="r2r-title">
+      <header class="story-head">
+        <p class="story-kicker">Two real-world examples</p>
+        <h2 id="r2r-title">Same five steps, any data</h2>
+      </header>
+      <fieldset class="example"><legend>Choose an example</legend><div class="seg">
+        <label><input type="radio" name="ex" value="voucher" checked>🧾 Accounts vouchers</label>
+        <label><input type="radio" name="ex" value="ticket">🚆 Train tickets</label>
+      </div></fieldset>
+      <div class="story-body">
+        <div class="story-stage r2r-stage" aria-live="polite">
+          <p class="scene-caption" id="caption"></p>
+          <div class="board" id="board"></div>
+          <div id="report-host"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Recording.</strong> Capture each event once, as it happens.</li>
+            <li><strong>Classifying.</strong> Put like with like.</li>
+            <li><strong>Sorting.</strong> Arrange each group in a useful order.</li>
+            <li><strong>Summarizing.</strong> Replace many details with a few totals.</li>
+            <li><strong>Reporting.</strong> Show the decision-maker what they need.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Synthetic teaching data. Amounts are whole rupees, so sums stay exact.
+    const inr = (n) => '₹' + n.toLocaleString('en-IN');
+    const EXAMPLES = {
+      voucher: {
+        captions: ['Each voucher is entered in the day book, in date order.', 'Vouchers are posted to their ledger heads.', 'Within each ledger, entries are arranged by date.', 'Each ledger is totalled, as in a trial balance.', 'The totals become a simple income statement.'],
+        records: [
+          ['V1', 'Sales', '01-04-2026', 50000], ['V2', 'Rent', '02-04-2026', 20000], ['V3', 'Sales', '12-04-2026', 10000],
+          ['V4', 'Electricity', '15-04-2026', 5000], ['V5', 'Sales', '08-04-2026', 30000], ['V6', 'Salary', '28-04-2026', 15000]
+        ].map(([id, group, date, val]) => ({ id, group, line: id + ' · ' + date, val, order: date, show: inr(val) })),
+        total: inr,
+        report(groups) {
+          const income = groups.Sales, expense = groups.Rent + groups.Electricity + groups.Salary;
+          return { title: 'Income statement · April 2026', lines: [['Income', inr(income)], ['Expenses', inr(expense)], ['Surplus', inr(income - expense)]] };
+        }
+      },
+      ticket: {
+        captions: ['Each booking is recorded with a PNR: train, coach and how many are travelling.', 'Bookings are grouped by coach.', 'Within each coach, bookings are arranged by first berth.', 'Passengers are totalled per coach.', 'The TTE’s tablet shows the chart for this train.'],
+        records: [
+          ['PNR 101', 'S1', 12, 2], ['PNR 102', 'S2', 7, 4], ['PNR 103', 'S1', 3, 1],
+          ['PNR 104', 'S2', 41, 3], ['PNR 105', 'A1', 9, 2], ['PNR 106', 'S1', 25, 1]
+        ].map(([id, group, berth, val]) => ({ id, group, line: id + ' · berth ' + berth, val, order: String(berth).padStart(3, '0'), show: val + (val === 1 ? ' passenger' : ' passengers') })),
+        total: (n) => n + ' going',
+        report(groups) {
+          const all = Object.values(groups).reduce((a, b) => a + b, 0);
+          return { tablet: true, title: '📱 TTE tablet · Example Express', lines: Object.entries(groups).map(([k, v]) => ['Coach ' + k, v + ' passengers']).concat([['On board', all + ' passengers']]) };
+        }
+      }
+    };
+    const story = document.getElementById('analogy');
+    const board = document.getElementById('board');
+    const reportHost = document.getElementById('report-host');
+    let example = 'voucher', step = 0;
+    const card = (r) => `<div class="rec" data-key="${r.id}"><b>${r.show}</b>${r.line}</div>`;
+    function draw() {
+      const ex = EXAMPLES[example];
+      document.getElementById('caption').textContent = ex.captions[step];
+      flipRender(board, () => {
+        if (step === 0) { board.className = 'board pile'; board.innerHTML = ex.records.map(card).join(''); return; }
+        board.className = 'board';
+        const names = [...new Set(ex.records.map((r) => r.group))];
+        board.innerHTML = names.map((g) => {
+          let rows = ex.records.filter((r) => r.group === g);
+          if (step >= 2) rows = [...rows].sort((a, b) => a.order.localeCompare(b.order));
+          const total = rows.reduce((s, r) => s + r.val, 0);
+          return `<div class="col"><h3>${g}</h3>${rows.map(card).join('')}${step >= 3 ? `<div class="sub">${ex.total(total)}</div>` : ''}</div>`;
+        }).join('');
+      });
+      if (step === 4) {
+        const groups = {};
+        ex.records.forEach((r) => { groups[r.group] = (groups[r.group] || 0) + r.val; });
+        const rep = ex.report(groups);
+        reportHost.innerHTML = `<div class="report${rep.tablet ? ' tablet' : ''}"><h3>${rep.title}</h3>${rep.lines.map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>`;
+        reportHost.style.display = 'flex'; reportHost.style.justifyContent = 'center';
+      } else reportHost.innerHTML = '';
+    }
+    story.addEventListener('story:step', (e) => { step = e.detail.step; draw(); });
+    document.querySelectorAll('input[name="ex"]').forEach((r) => r.addEventListener('change', () => { example = r.value; board.innerHTML = ''; draw(); }));
+    draw();
+  </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Steps to Power BI | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .belt-stage { min-height: 380px; display: flex; flex-direction: column; justify-content: center; gap: 16px; padding: 16px; }
+    .belt { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .unit { padding: 12px 6px; border-radius: 14px; text-align: center; background: rgb(var(--fg-rgb) / .05); border: 2px solid var(--border); transition: transform .5s var(--ease-spring), border-color .3s ease, background .3s ease; }
+    .unit i { display: block; font-size: 1.8rem; font-style: normal; }
+    .unit b { display: block; font-size: .88rem; }
+    .unit small { color: var(--muted); font-size: .74rem; }
+    .unit.now { border-color: var(--accent); background: rgb(var(--accent-rgb) / .14); transform: translateY(-6px); }
+    .conveyor { position: relative; height: 16px; border-radius: 8px; background: repeating-linear-gradient(90deg, rgb(var(--fg-rgb) / .22) 0 14px, transparent 14px 28px); animation: run 1s linear infinite; }
+    @keyframes run { to { background-position: 28px 0; } }
+    .parcel { position: absolute; top: -18px; left: 0; font-size: 1.5rem; line-height: 1; transition: left .8s var(--ease-out); }
+    .say { padding: 12px 16px; border-radius: 14px; text-align: center; font-weight: 600; background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); }
+    .quiz { display: grid; gap: 10px; }
+    .q { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--panel-soft); border: 1px solid var(--border); }
+    .q select { padding: 7px 10px; border-radius: 9px; font: inherit; background: var(--control-bg); color: var(--ink); border: 1px solid var(--border-strong); }
+    .q em { font-style: normal; font-weight: 700; min-width: 100%; }
+    .q em.ok { color: var(--accent-3-ink); } .q em.no { color: var(--danger-ink); }
+    @media (max-width: 560px) { .belt { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Foundations</p>
+      <h1>From Steps to Power BI</h1>
+      <p class="lead">Each APPASA step has a home: you, Power Query, the data model or the report.</p>
+    </header>
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4000" aria-labelledby="line-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="line-title">The assembly line</h2>
+      </header>
+      <div class="story-body">
+        <div class="story-stage belt-stage">
+          <div class="belt" id="belt" aria-hidden="true"></div>
+          <div class="conveyor" aria-hidden="true"><span class="parcel" id="parcel">📦</span></div>
+          <div class="say" id="say" aria-live="polite"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Ask.</strong> Only a person can frame the question.</li>
+            <li><strong>Prepare and Process.</strong> Power Query does the ETL.</li>
+            <li><strong>Analyze.</strong> The data model and DAX find the answer.</li>
+            <li><strong>Share.</strong> Reports and the Power BI service deliver it.</li>
+            <li><strong>Act.</strong> A person decides, and the question starts again.</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>Explain more</summary>
+        <p>Power Pivot is Excel’s name for the data model. Power BI Desktop uses the same VertiPaq engine, so the modelling and DAX skills carry over.</p>
+      </details>
+    </section>
+    <section class="lab-panel srg-reveal" aria-labelledby="quiz-title">
+      <h2 id="quiz-title">Where does it belong?</h2>
+      <p>Pick the step for each task.</p>
+      <div class="quiz" id="quiz"></div>
+    </section>
+  </div>
+  <script>
+    const UNITS = [['🙋', 'You', 'Ask'], ['🧹', 'Power Query', 'Prepare, Process'], ['🧮', 'Data model + DAX', 'Analyze'], ['📊', 'Report + service', 'Share']];
+    const STOPS = [
+      [0, 2, 'What do we need to know? No tool can decide this for you.'],
+      [1, 28, 'Extract from sources, transform and clean, then load into the model.'],
+      [2, 53, 'Relationships connect the tables; measures calculate the answers.'],
+      [3, 78, 'Build the report, publish it and share it with the team.'],
+      [0, 2, 'Back to you: decide, act, and ask the next question.']
+    ];
+    const belt = document.getElementById('belt');
+    belt.innerHTML = UNITS.map((u) => `<div class="unit"><i>${u[0]}</i><b>${u[1]}</b><small>${u[2]}</small></div>`).join('');
+    function show(k) {
+      const [unit, left, text] = STOPS[k];
+      [...belt.children].forEach((el, i) => el.classList.toggle('now', i === unit));
+      document.getElementById('parcel').style.left = left + '%';
+      document.getElementById('say').textContent = text;
+    }
+    document.getElementById('analogy').addEventListener('story:step', (e) => show(e.detail.step));
+    show(0);
+
+    const STEP_NAMES = ['Ask', 'Prepare', 'Process', 'Analyze', 'Share', 'Act'];
+    const TASKS = [
+      ['Connect to a folder of Excel files', 'Prepare', 'Power Query gets the data.'],
+      ['Remove blank rows and fix date formats', 'Process', 'Power Query cleans the data.'],
+      ['Write a Total Sales measure', 'Analyze', 'DAX runs in the data model.'],
+      ['Publish the report for the team', 'Share', 'The Power BI service delivers it.'],
+      ['Decide to restock two stores', 'Act', 'A person makes the decision.'],
+      ['Decide which question the report must answer', 'Ask', 'A person frames the question.']
+    ];
+    document.getElementById('quiz').innerHTML = TASKS.map((t, i) => `<div class="q"><label for="t${i}">${t[0]}</label><select id="t${i}" data-i="${i}"><option value="">Choose…</option>${STEP_NAMES.map((s) => `<option>${s}</option>`).join('')}</select><em id="r${i}" aria-live="polite"></em></div>`).join('');
+    document.querySelectorAll('.q select').forEach((sel) => sel.addEventListener('change', () => {
+      const t = TASKS[sel.dataset.i], out = document.getElementById('r' + sel.dataset.i);
+      if (!sel.value) { out.textContent = ''; return; }
+      const ok = sel.value === t[1];
+      out.className = ok ? 'ok' : 'no';
+      out.textContent = ok ? `Correct. ${t[2]}` : 'Not quite. Try another step.';
+    }));
+  </script>
+</body>
+</html>

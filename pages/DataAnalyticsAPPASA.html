@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Analytics: APPASA | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css" />
+  <script src="../assets/site.js"></script>
+  <link rel="stylesheet" href="../assets/story.css" />
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <script src="../assets/story.js" defer></script>
+  <script src="../assets/lesson.js"></script>
+  <style>
+    .kitchen { min-height: 400px; display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 16px; }
+    .line { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .stn { padding: 8px 2px; text-align: center; border-radius: 12px; background: rgb(var(--fg-rgb) / .05); border: 2px solid transparent; font: 700 .74rem var(--font); color: var(--muted); transition: transform .5s var(--ease-spring), background .3s ease, border-color .3s ease; }
+    .stn i { display: block; font-size: 1.6rem; font-style: normal; }
+    .stn.done { background: rgb(var(--accent-3-rgb) / .14); color: var(--ink); }
+    .stn.now { background: rgb(var(--accent-rgb) / .16); border-color: var(--accent); color: var(--ink); transform: translateY(-6px) scale(1.06); }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .say { padding: 14px; border-radius: 16px; background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); animation: srg-rise .45s var(--ease-out); }
+    .say small { display: block; margin-bottom: 4px; font: 700 .72rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .say.data { border-color: var(--accent); }
+    @media (max-width: 560px) { .pair { grid-template-columns: 1fr; } .line { grid-template-columns: repeat(3, 1fr); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Foundations</p>
+      <h1>Data Analytics: APPASA</h1>
+      <p class="lead">Ask, Prepare, Process, Analyze, Share, Act: the six steps from the Google Data Analytics certificate.</p>
+    </header>
+    <div data-steps-map="analyse"></div>
+
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4200" aria-labelledby="appasa-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="appasa-title">Cooking a meal for guests</h2>
+        <p>A good analysis runs like a good meal: know what is wanted before you touch an ingredient, and don’t stop at serving.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage kitchen">
+          <div class="line" id="line" aria-hidden="true"></div>
+          <div class="pair" id="pair" aria-live="polite"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Ask.</strong> What do we need to know?</li>
+            <li><strong>Prepare.</strong> Gather the data.</li>
+            <li><strong>Process.</strong> Clean it and make it usable.</li>
+            <li><strong>Analyze.</strong> Find the answer in it.</li>
+            <li><strong>Share.</strong> Present it so others understand.</li>
+            <li><strong>Act.</strong> Decide, do it, and learn from the result.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+    const STEPS = [
+      ['🤔', 'Ask', 'Who is coming? Any allergies? What shall we cook?', 'Why did tea sales fall in Q2, and which stores are affected?'],
+      ['🛒', 'Prepare', 'Buy the vegetables, rice and spices.', 'Collect sales, store and price data from their sources.'],
+      ['🔪', 'Process', 'Wash, peel and chop. Throw out anything spoiled.', 'Remove duplicates, fix errors and align date formats.'],
+      ['🍲', 'Analyze', 'Cook, taste, and adjust the salt.', 'Compare stores and periods; test possible reasons.'],
+      ['🍽️', 'Share', 'Plate it nicely and serve it.', 'Build a clear report for the sales team.'],
+      ['✅', 'Act', 'Guests want less chilli? Change the recipe next time.', 'Restock the affected stores, then check whether sales recover.']
+    ];
+    const line = document.getElementById('line'), pair = document.getElementById('pair');
+    line.innerHTML = STEPS.map((s) => `<div class="stn"><i>${s[0]}</i>${s[1]}</div>`).join('');
+    function show(k) {
+      [...line.children].forEach((el, i) => { el.classList.toggle('done', i < k); el.classList.toggle('now', i === k); });
+      pair.innerHTML = `<div class="say"><small>In the kitchen</small>${STEPS[k][2]}</div><div class="say data"><small>With data</small>${STEPS[k][3]}</div>`;
+    }
+    document.getElementById('analogy').addEventListener('story:step', (e) => show(e.detail.step));
+    show(0);
+  </script>
+</body>
+</html>
