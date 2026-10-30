@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elements of the Data Cube | Power BI</title>
-  <link rel="stylesheet" href="../assets/site.css" />
-  <script src="../assets/site.js"></script>
-  <link rel="stylesheet" href="../assets/story.css" />
-  <script src="../assets/story.js" defer></script>
+  <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
+  <script src="../assets/site.js?v=20261030b"></script>
+  <link rel="stylesheet" href="../assets/story.css?v=20261030b" />
+  <script src="../assets/story.js?v=20261030b" defer></script>
   <style>
     :root { --c-fact: var(--accent-2); --c-dim: var(--accent); --c-hier: var(--violet); --c-meas: var(--accent-3); }
     body { margin: 0; font-family: var(--font); color: var(--ink); line-height: 1.55; }
@@ -95,6 +95,37 @@
       .lab { padding: 5px 10px; }
       .slip { padding: 10px; } .slip b { font-size: 2rem; }
     }
+
+    /* ---------- One scale, many dimensions ---------- */
+    .scale-stage { min-height: 400px; }
+    .layer { position: absolute; inset: 0; padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; opacity: 0; transform: translateY(14px); pointer-events: none; transition: opacity .5s var(--ease-out), transform .7s var(--ease-out); }
+    .scale-stage .layer.on { opacity: 1; transform: none; }
+    .boxart { width: min(520px, 100%); height: auto !important; }
+    .f-front { fill: rgb(var(--accent-rgb) / .28); } .f-top { fill: rgb(var(--accent-rgb) / .16); } .f-side { fill: rgb(var(--accent-rgb) / .4); }
+    .boxart polygon { stroke: var(--accent); stroke-width: 2; }
+    .tape { opacity: 0; transition: opacity .4s ease; }
+    .tape line { stroke: var(--accent-2); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 2 9; }
+    .tape text { font: 800 16px var(--font); fill: var(--ink); text-anchor: middle; }
+    .tape.t1 text { text-anchor: end; } .tape.t2 text { text-anchor: start; }
+    .tape.on { opacity: 1; }
+    .same { margin: 0; font-weight: 700; text-align: center; }
+    .same b { color: var(--accent-ink); }
+    .rank { width: min(520px, 100%); display: grid; gap: 8px; }
+    .r-row { display: grid; grid-template-columns: 110px 1fr 76px; gap: 8px; align-items: center; font-size: .92rem; }
+    .r-track { height: 24px; border-radius: 7px; background: rgb(var(--fg-rgb) / .08); overflow: hidden; }
+    .r-track i { display: block; height: 100%; width: var(--w); border-radius: 7px; background: var(--accent); animation: tape-out .9s var(--ease-out) both; }
+    .r-row.best .r-track i { background: var(--accent-3); }
+    .r-row.best { font-weight: 800; }
+    .r-row b { text-align: right; font-family: var(--mono); }
+    @keyframes tape-out { from { width: 0; } }
+    .root { display: flex; align-items: center; gap: 10px; font: 800 clamp(1.8rem, 5vw, 2.8rem) var(--font-display); }
+    .root span { padding: 2px 14px; border-radius: 12px; background: rgb(var(--violet-rgb) / .2); }
+    .root i { font-style: normal; color: var(--muted); }
+    .root-mean { margin: 0; font-weight: 600; text-align: center; }
+    .picks { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .picks div { padding: 8px 14px; border-radius: 12px; text-align: center; background: var(--panel-solid); border: 2px solid var(--accent-3); box-shadow: var(--shadow); }
+    .picks small { display: block; color: var(--muted); }
+    @media (max-width: 560px) { .scale-stage { min-height: 430px; } .r-row { grid-template-columns: 84px 1fr 66px; } }
   </style>
 </head>
 <body>
@@ -153,6 +184,49 @@
       </details>
     </section>
 
+    <section id="scale-story" class="story srg-reveal" data-story data-delay="4200" aria-labelledby="scale-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="scale-title">One scale, many dimensions</h2>
+        <p>A single measuring tape measures a box’s length, width and depth. A single measure can do the same for your business.</p>
+      </header>
+      <div class="story-body">
+        <div class="story-stage scale-stage">
+          <div class="layer" data-for="0 1 2">
+            <svg viewBox="0 0 600 340" class="boxart" aria-hidden="true">
+              <polygon class="f-front" points="150,130 370,130 370,270 150,270"/>
+              <polygon class="f-top" points="150,130 230,75 450,75 370,130"/>
+              <polygon class="f-side" points="370,130 450,75 450,215 370,270"/>
+              <g class="tape t0"><line x1="150" y1="294" x2="370" y2="294"/><text x="260" y="322">Length: 30 cm</text></g>
+              <g class="tape t1"><line x1="124" y1="130" x2="124" y2="270"/><text x="112" y="205" text-anchor="end">Width: 20 cm</text></g>
+              <g class="tape t2"><line x1="388" y1="281" x2="468" y2="226"/><text x="470" y="272">Depth: 15 cm</text></g>
+            </svg>
+            <p class="same">📏 The same tape every time</p>
+          </div>
+          <div class="layer" data-for="3 4 5">
+            <p class="same">📏 Total Sales measures <b id="scale-dim"></b></p>
+            <div class="rank" id="rank"></div>
+          </div>
+          <div class="layer" data-for="6">
+            <div class="root"><span>inter</span><i>+</i><span>legere</span></div>
+            <p class="root-mean">Latin: to choose between. That is intelligence.</p>
+            <div class="picks" id="picks"></div>
+          </div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Length.</strong> The tape measures one direction.</li>
+            <li><strong>Width.</strong> Same tape, another direction.</li>
+            <li><strong>Depth.</strong> Same tape, a third direction.</li>
+            <li><strong>Customers.</strong> Total Sales finds the good customers.</li>
+            <li><strong>Products.</strong> The same measure finds the good products.</li>
+            <li><strong>Branches.</strong> The same measure finds the good branches.</li>
+            <li><strong>Choose.</strong> Comparing lets us decide: data-driven decision making.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
     <section class="lab-panel srg-reveal" aria-labelledby="try-title">
       <h2 id="try-title">Try the punch line</h2>
       <p>Pick a dimension, a level of its hierarchy and a measure. The same 12 made-up sales answer every combination.</p>
@@ -170,13 +244,13 @@
   <script>
     // Synthetic teaching data. Amounts are whole rupees, so sums stay exact.
     const FACTS = [
-      ['2026-08-15', 'Masala Tea', 'Chennai', 450], ['2026-08-18', 'Filter Coffee', 'Chennai', 300],
-      ['2026-08-21', 'Millet Cookies', 'Chennai', 250], ['2026-08-27', 'Masala Tea', 'Chennai', 120],
-      ['2026-05-10', 'Filter Coffee', 'Coimbatore', 600], ['2026-06-12', 'Millet Cookies', 'Coimbatore', 350],
-      ['2026-09-05', 'Masala Tea', 'Kochi', 700], ['2026-10-14', 'Filter Coffee', 'Kochi', 520],
-      ['2026-12-20', 'Millet Cookies', 'Bengaluru', 800], ['2027-01-09', 'Masala Tea', 'Bengaluru', 650],
-      ['2027-02-16', 'Filter Coffee', 'Mysuru', 480], ['2027-03-03', 'Millet Cookies', 'Mysuru', 380]
-    ].map(([date, product, city, amount]) => ({ date, product, city, amount }))
+      ['2026-08-15', 'Masala Tea', 'Chennai', 450, 'Meera'], ['2026-08-18', 'Filter Coffee', 'Chennai', 300, 'Arjun'],
+      ['2026-08-21', 'Millet Cookies', 'Chennai', 250, 'Kavya'], ['2026-08-27', 'Masala Tea', 'Chennai', 120, 'Meera'],
+      ['2026-05-10', 'Filter Coffee', 'Coimbatore', 600, 'Ravi'], ['2026-06-12', 'Millet Cookies', 'Coimbatore', 350, 'Kavya'],
+      ['2026-09-05', 'Masala Tea', 'Kochi', 700, 'Arjun'], ['2026-10-14', 'Filter Coffee', 'Kochi', 520, 'Meera'],
+      ['2026-12-20', 'Millet Cookies', 'Bengaluru', 800, 'Ravi'], ['2027-01-09', 'Masala Tea', 'Bengaluru', 650, 'Arjun'],
+      ['2027-02-16', 'Filter Coffee', 'Mysuru', 480, 'Kavya'], ['2027-03-03', 'Millet Cookies', 'Mysuru', 380, 'Ravi']
+    ].map(([date, product, city, amount, customer]) => ({ date, product, city, amount, customer }))
       .sort((a, b) => a.date.localeCompare(b.date)); // so quarters and months group in calendar order
 
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -244,6 +318,32 @@
         : 'Change the level and the bars regroup, but the total stays the same. The facts never changed.';
     }
     render();
+
+    // ---- One scale, many dimensions: the same measure ranks each dimension ----
+    const scaleStory = document.getElementById('scale-story');
+    const SCALE = [['customers', 'customer', 'Customer'], ['products', 'product', 'Product'], ['branches', 'city', 'Branch']];
+    const ranked = (field) => {
+      const totals = new Map();
+      FACTS.forEach((f) => totals.set(f[field], (totals.get(f[field]) || 0) + f.amount));
+      return [...totals].sort((a, b) => b[1] - a[1]);
+    };
+    document.getElementById('picks').innerHTML = SCALE.map(([, field, label]) => {
+      const [name, total] = ranked(field)[0];
+      return `<div><small>Best ${label.toLowerCase()}</small><strong>${esc(name)}</strong><small>${inr(total)}</small></div>`;
+    }).join('');
+    function showScale(k) {
+      scaleStory.querySelectorAll('.layer').forEach((l) => l.classList.toggle('on', l.dataset.for.split(' ').includes(String(k))));
+      scaleStory.querySelectorAll('.tape').forEach((t, i) => t.classList.toggle('on', i <= k));
+      if (k >= 3 && k <= 5) {
+        const [word, field] = SCALE[k - 3];
+        const rows = ranked(field);
+        document.getElementById('scale-dim').textContent = word;
+        document.getElementById('rank').innerHTML = rows.map(([name, total], i) =>
+          `<div class="r-row${i === 0 ? ' best' : ''}"><span>${esc(name)}</span><div class="r-track"><i style="--w:${total / rows[0][1] * 100}%"></i></div><b>${inr(total)}</b></div>`).join('');
+      }
+    }
+    scaleStory.addEventListener('story:step', (e) => showScale(e.detail.step));
+    showScale(0);
   </script>
 </body>
 </html>

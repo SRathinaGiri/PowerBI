@@ -6,8 +6,12 @@
   'use strict';
 
   var LESSONS = [
+    { path: 'pages/stages-of-data-analysis.html', track: 'Foundations', title: 'Stages of Data Analysis',
+      blurb: 'From cross tabs and pivot tables to cubes, interactive BI and AI-enabled insight.' },
     { path: 'pages/ElementsOfDataCube.html', track: 'Foundations', title: 'Elements of the Data Cube',
       blurb: 'Fact, dimension, hierarchy and measure: four words that explain every report.' },
+    { path: 'pages/FactToWisdom.html', track: 'Foundations', title: 'From Fact to Wisdom',
+      blurb: 'The hourglass: from an ocean of facts through one drop of information to wisdom.' },
     { path: 'pages/DataProcessingR2R.html', track: 'Foundations', title: 'Data Processing: R2R',
       blurb: 'Recording to Reporting, seen through accounts vouchers and train tickets.' },
     { path: 'pages/DataAnalyticsAPPASA.html', track: 'Foundations', title: 'Data Analytics: APPASA',
@@ -16,8 +20,6 @@
       blurb: 'Seven questions analytics can answer, told as a visit to the doctor.' },
     { path: 'pages/StepsToPowerBI.html', track: 'Foundations', title: 'From Steps to Power BI',
       blurb: 'Which tool handles each APPASA step, on an assembly line.' },
-    { path: 'pages/stages-of-data-analysis.html', track: 'Foundations', title: 'Stages of Data Analysis',
-      blurb: 'From cross tabs and pivot tables to cubes, interactive BI and AI-enabled insight.' },
     { path: 'pages/OLAPConcept.html', track: 'Foundations', title: 'OLTP vs OLAP',
       blurb: 'Why analytics engines are built differently from transaction systems, and why columnstores win.' },
     { path: 'pages/OLAPDataCube.html', track: 'Foundations', title: 'OLAP Data Cube Operations',

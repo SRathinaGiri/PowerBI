@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Fact to Wisdom | Power BI</title>
+  <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
+  <script src="../assets/site.js?v=20261030b"></script>
+  <link rel="stylesheet" href="../assets/story.css?v=20261030b" />
+  <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
+  <script src="../assets/story.js?v=20261030b" defer></script>
+  <script src="../assets/lesson.js?v=20261030b"></script>
+  <style>
+    .glass-stage { min-height: 620px; height: auto; overflow: visible; display: flex; flex-direction: column; }
+    .glass-stage svg { flex: 1 1 auto; min-height: 480px; }
+    .band { opacity: .14; transition: opacity .7s ease; }
+    .band.reached { opacity: .5; }
+    .band.now { opacity: 1; }
+    .outline { fill: none; stroke: var(--glass-rim); stroke-width: 3; }
+    :root { --glass-rim: #64748b; --pill: rgb(255 255 255 / .9); }
+    :root[data-theme="dark"] { --glass-rim: #cbd5e1; --pill: rgb(10 18 32 / .88); }
+    .lv rect { fill: var(--pill); stroke: var(--border-strong); }
+    .lv text { font: 800 15px var(--font); fill: var(--ink); text-anchor: middle; }
+    .lv { opacity: .5; transition: opacity .5s ease; }
+    .lv.reached { opacity: .85; }
+    .lv.now { opacity: 1; }
+    .lv.now rect { stroke: var(--accent); stroke-width: 2.5; }
+    .drop { fill: #7dd3fc; filter: drop-shadow(0 0 4px #38bdf8); }
+    .story[data-climb="on"] .drop { animation: rise 3s linear infinite; }
+    .drop:nth-of-type(2) { animation-delay: -1s !important; } .drop:nth-of-type(3) { animation-delay: -2s !important; }
+    @keyframes rise { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(var(--climb, -300px)); opacity: 0; } }
+    .side { font: 800 12px var(--font); letter-spacing: .12em; fill: var(--muted); text-anchor: middle; }
+    .say { margin: 0 12px 12px; padding: 12px 14px; border-radius: 14px; background: var(--panel-solid); border: 1px solid var(--border); box-shadow: var(--shadow); animation: srg-rise .45s var(--ease-out); }
+    .say h3 { margin: 0 0 2px; font: 800 1.1rem var(--font-display); }
+    .say p { margin: 0; color: var(--muted); }
+    .say .bi { margin-top: 6px; color: var(--ink); font-weight: 600; }
+    .say small { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; font: 700 .7rem var(--font); color: var(--accent-ink); background: rgb(var(--accent-rgb) / .14); }
+    figure { margin: 12px auto 0; max-width: 460px; }
+    figure img { display: block; width: 100%; border-radius: var(--radius); box-shadow: var(--shadow); }
+    figcaption { margin-top: 6px; text-align: center; font-size: .85rem; color: var(--muted); }
+    .closing { margin: 24px 0 8px; text-align: center; font: 700 clamp(1.2rem, 2.6vw, 1.7rem)/1.3 var(--font-display); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Foundations</p>
+      <h1>From Fact to Wisdom</h1>
+      <p class="lead">An ocean of raw reality narrows to a single drop of information, then widens again inside us.</p>
+    </header>
+    <section id="analogy" class="story srg-reveal" data-story data-delay="4600" aria-labelledby="glass-title">
+      <header class="story-head">
+        <p class="story-kicker">Real-world analogy</p>
+        <h2 id="glass-title">The hourglass, read from the bottom up</h2>
+      </header>
+      <div class="story-body">
+        <div class="story-stage glass-stage">
+          <svg viewBox="0 0 600 660" id="glass" aria-hidden="true">
+            <defs>
+              <clipPath id="hg"><path d="M40 20 H560 C560 170 320 250 312 320 C320 390 560 470 590 600 V660 H10 V600 C40 470 280 390 288 320 C280 250 40 170 40 20 Z"/></clipPath>
+              <linearGradient id="g-fact" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0ea5c9"/><stop offset="1" stop-color="#0b3a6b"/></linearGradient>
+              <linearGradient id="g-data" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0ea5c9"/></linearGradient>
+              <linearGradient id="g-wis" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4338ca"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+            </defs>
+            <g clip-path="url(#hg)">
+              <rect class="band" data-l="0" x="0" y="570" width="600" height="90" fill="url(#g-fact)"/>
+              <rect class="band" data-l="1" x="0" y="345" width="600" height="225" fill="url(#g-data)"/>
+              <rect class="band" data-l="2" x="0" y="295" width="600" height="50" fill="#e0f2fe"/>
+              <rect class="band" data-l="3" x="0" y="205" width="600" height="90" fill="#d97706"/>
+              <rect class="band" data-l="4" x="0" y="110" width="600" height="95" fill="#059669"/>
+              <rect class="band" data-l="5" x="0" y="0" width="600" height="110" fill="url(#g-wis)"/>
+              <g transform="translate(300 590)"><circle class="drop" r="5"/><circle class="drop" r="4"/><circle class="drop" r="5"/></g>
+            </g>
+            <path class="outline" d="M40 20 H560 C560 170 320 250 312 320 C320 390 560 470 590 600 V660 H10 V600 C40 470 280 390 288 320 C280 250 40 170 40 20 Z"/>
+            <text class="side" x="62" y="205" transform="rotate(-90 62 205)">INTERNAL JOURNEY</text>
+            <text class="side" x="62" y="425" transform="rotate(-90 62 425)">EXTERNAL JOURNEY</text>
+            <g id="labels"></g>
+          </svg>
+          <div id="say" aria-live="polite"></div>
+        </div>
+        <div class="story-side">
+          <ol class="story-steps">
+            <li><strong>Fact.</strong> An endless ocean of what is.</li>
+            <li><strong>Data.</strong> We observe and collect the relevant facts.</li>
+            <li><strong>Information.</strong> We extract the juice. Noise becomes meaning.</li>
+            <li><strong>Knowledge.</strong> We explore it in depth. This looks at the past.</li>
+            <li><strong>Intelligence.</strong> We apply it and choose. This acts in the present.</li>
+            <li><strong>Wisdom.</strong> Insight and foresight. This looks to the future.</li>
+          </ol>
+        </div>
+      </div>
+      <details class="story-more">
+        <summary>The original hourglass</summary>
+        <figure>
+          <img src="../assets/images/from-fact-to-wisdom.webp" alt="Hourglass poster: Fact at the bottom as an ocean, narrowing through Data to Information, then widening through Knowledge and Intelligence to Wisdom under a galaxy." loading="lazy">
+          <figcaption>“From Fact to Wisdom”, created by CA Rathinagiri.</figcaption>
+        </figure>
+      </details>
+    </section>
+    <p class="closing srg-reveal">Same reality. A deeper you.</p>
+  </div>
+  <script>
+    const LEVELS = [
+      ['Fact', 'Infinite raw reality.', 'Everything that actually happens in the business, recorded or not.', '', 615],
+      ['Data', 'A collection of relevant facts.', 'The rows captured in your Sales, Customer and Product tables.', '', 455],
+      ['Information', 'The juice extracted from data.', 'Total Sales by branch: a number that now means something.', '', 320],
+      ['Knowledge', 'Analysis and in-depth exploration of information.', 'Chennai dips every monsoon, and these two products drive it.', 'Past', 250],
+      ['Intelligence', 'Present application, contextual understanding and decision-making.', 'Inter + legere, to choose between: move stock to Chennai this week.', 'Present', 158],
+      ['Wisdom', 'Future insight and foresight.', 'Should we be in this business, this way, five years from now?', 'Future', 58]
+    ];
+    const NS = 'http://www.w3.org/2000/svg';
+    const labels = document.getElementById('labels');
+    const lvEls = LEVELS.map(([name, , , , y]) => {
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'lv');
+      const w = name.length * 10 + 34;
+      g.innerHTML = `<rect x="${300 - w / 2}" y="${y - 16}" width="${w}" height="30" rx="15"/><text x="300" y="${y + 4}">${name}</text>`;
+      labels.appendChild(g);
+      return g;
+    });
+    const bands = [...document.querySelectorAll('.band')];
+    const story = document.getElementById('analogy');
+    const drops = document.querySelectorAll('.drop');
+    function show(k) {
+      bands.forEach((b) => { const l = Number(b.dataset.l); b.classList.toggle('now', l === k); b.classList.toggle('reached', l < k); });
+      lvEls.forEach((g, l) => { g.classList.toggle('now', l === k); g.classList.toggle('reached', l < k); });
+      // Drops climb from the ocean to the level in focus.
+      story.dataset.climb = k > 0 ? 'on' : 'off';
+      drops.forEach((d) => d.style.setProperty('--climb', `${LEVELS[k][4] - 590}px`));
+      const [name, def, bi, when] = LEVELS[k];
+      document.getElementById('say').innerHTML = `<div class="say"><h3>${name}${when ? `<small>${when}</small>` : ''}</h3><p>${def}</p><p class="bi">In a business: ${bi}</p></div>`;
+    }
+    story.addEventListener('story:step', (e) => show(e.detail.step));
+    show(0);
+  </script>
+</body>
+</html>
