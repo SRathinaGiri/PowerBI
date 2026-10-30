@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Query Folding | Power BI</title>
+  <meta name="description" content="What query folding is, which Power Query steps keep it and break it, and a simulator showing how step order changes the work done.">
+  <link rel="stylesheet" href="../assets/site.css?v=20261031a" />
+  <script src="../assets/site.js?v=20261031a"></script>
+  <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
+  <style>
+    .sim { margin: 1.5rem 0; padding: clamp(14px, 3vw, 24px); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel-solid); box-shadow: var(--shadow); }
+    .sim h2 { margin: 0 0 .3rem; font: 800 clamp(1.25rem, 2.6vw, 1.6rem)/1.2 var(--font-display); }
+    .sim-note { color: var(--muted); margin: 0 0 1rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; margin: .5rem 0; }
+    .row button { min-height: 40px; padding: 7px 12px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel-soft); color: var(--ink); font: 700 .88rem var(--font); cursor: pointer; }
+    .row button:hover:not(:disabled), .row button:focus-visible { border-color: var(--accent); }
+    .row button:disabled { opacity: .45; cursor: not-allowed; }
+    .row .preset { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .grp { margin: 1rem 0 .2rem; font: 800 .76rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    #pipe { list-style: none; margin: 1rem 0; padding: 0; display: grid; gap: 6px; }
+    #pipe li { padding: 8px 12px; border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 10px; background: var(--panel-soft); }
+    #pipe li.local { border-left-color: var(--danger); }
+    #pipe small { display: block; color: var(--muted); }
+    .out { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 1rem 0; }
+    .out div { padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; }
+    .out b { display: block; font: 800 1.25rem var(--font-display); }
+    .out span { color: var(--muted); font-size: .86rem; }
+    #sql { display: block; padding: 10px 12px; border-radius: 10px; background: var(--panel-soft); border: 1px solid var(--border); font: 600 .88rem/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin: 1rem 0; }
+    .cards > div { padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel-solid); }
+    .cards h3 { margin: 0 0 .4rem; font: 800 1.05rem var(--font-display); }
+    .cards ul { margin: 0; padding-left: 1.1rem; }
+    .cs-h { margin: 2rem 0 .4rem; font: 800 clamp(1.25rem, 2.6vw, 1.6rem)/1.2 var(--font-display); }
+  </style>
+  <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
+  <script src="../assets/quiz.js?v=20261030c" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Power Query</p>
+      <h1>Query Folding</h1>
+      <p class="lead">Should the warehouse pack only what you need, or should a truck bring everything to your office for you to sort? Folding is the first option.</p>
+    </header>
+
+    <section class="srg-reveal">
+      <h2 class="cs-h">What it means</h2>
+      <p>Power Query can translate your steps into the source’s own language, usually SQL, and let the source do the work. That translation is folding. Your steps fold as far as they can. At the first step that cannot be translated, everything from there on runs inside Power Query on your machine or gateway.</p>
+    </section>
+
+    <section class="sim srg-reveal" aria-labelledby="sim-title">
+      <h2 id="sim-title">Build a query and watch the work move</h2>
+      <p class="sim-note">Imagine H Mart’s FactSales lives in SQL Server: 25,000 rows and 36 columns. The row counts are real, but this is a teaching model of how folding behaves, not a measurement.</p>
+      <p class="grp">Start from</p>
+      <div class="row">
+        <button type="button" class="preset" id="good">Good order: filter first</button>
+        <button type="button" class="preset" id="bad">Bad order: index first</button>
+        <button type="button" id="reset">Clear all steps</button>
+      </div>
+      <p class="grp">Steps that usually fold</p>
+      <div class="row" id="foldBtns"></div>
+      <p class="grp">Steps that often break folding</p>
+      <div class="row" id="breakBtns"></div>
+      <ol id="pipe" aria-live="polite"></ol>
+      <div class="out">
+        <div><b id="oRows">25,000</b><span>Rows sent to Power Query</span></div>
+        <div><b id="oCells">9,00,000</b><span>Cells sent (rows × columns)</span></div>
+        <div><b id="oLocal">0</b><span>Steps run locally</span></div>
+      </div>
+      <p class="grp">What the source receives</p>
+      <code id="sql"></code>
+    </section>
+
+    <section class="srg-reveal">
+      <h2 class="cs-h">What keeps it and what breaks it</h2>
+      <div class="cards">
+        <div><h3>Usually folds on SQL sources</h3><ul><li>Filtering rows</li><li>Choosing or removing columns</li><li>Group by and sum</li><li>Merging tables from the same source</li><li>Renaming and sorting</li></ul></div>
+        <div><h3>Often breaks it</h3><ul><li>Adding an index column</li><li>Custom M functions with no SQL equivalent</li><li>Table.Buffer</li><li>Merging across different sources</li><li>Pivot or unpivot on some connectors</li></ul></div>
+        <div><h3>Never folds</h3><ul><li>Excel and CSV files, because they have no engine to do the work</li><li>That includes the H Mart data set and the Power Query exercises, so practise the idea here and check it on a database at work</li></ul></div>
+      </div>
+      <p>This varies by connector and version, so never assume. Check it instead.</p>
+      <h2 class="cs-h">How to check in Power BI Desktop</h2>
+      <ol>
+        <li>Open Transform data and right-click the last applied step.</li>
+        <li>If <strong>View Native Query</strong> is available, that step folded, and you can read the SQL. If it is greyed out, it may not have folded. Some connectors hide the query even when they do fold.</li>
+        <li>Newer versions also show folding indicators beside each step. Query Diagnostics gives the full picture.</li>
+      </ol>
+      <h2 class="cs-h">Why a CA should care</h2>
+      <p>On a ledger of crores of rows, folding can be the difference between a refresh of minutes and one that fails. Incremental refresh also relies on the date filter folding. The habit is simple: filter and remove columns first, then do the steps that cannot fold.</p>
+    </section>
+  </div>
+  <script>
+    const STEPS = {
+      filter: { label: "Filter: Channel = Retail", folds: true },
+      cols: { label: 'Keep 4 columns', folds: true },
+      group: { label: 'Group by Department', folds: true },
+      index: { label: 'Add index column', folds: false },
+      proper: { label: 'Custom M function', folds: false },
+      buffer: { label: 'Table.Buffer', folds: false }
+    };
+    const fmt = (n) => n.toLocaleString('en-IN');
+    let pipe = [];
+    const foldBtns = document.getElementById('foldBtns');
+    const breakBtns = document.getElementById('breakBtns');
+    Object.keys(STEPS).forEach((k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.k = k;
+      b.textContent = '+ ' + STEPS[k].label;
+      b.addEventListener('click', () => { pipe.push(k); render(); });
+      (STEPS[k].folds ? foldBtns : breakBtns).appendChild(b);
+    });
+    document.getElementById('good').addEventListener('click', () => { pipe = ['filter', 'cols', 'group', 'index']; render(); });
+    document.getElementById('bad').addEventListener('click', () => { pipe = ['index', 'filter', 'cols', 'group']; render(); });
+    document.getElementById('reset').addEventListener('click', () => { pipe = []; render(); });
+
+    function render() {
+      let rows = 25000, cols = 36, broken = false, sentRows = rows, sentCols = cols, local = 0;
+      const where = [], grouped = pipe.includes('group');
+      let selectCols = '*', groupSql = '', fromSql = 'FactSales';
+      const list = document.getElementById('pipe');
+      list.innerHTML = '';
+      pipe.forEach((k) => {
+        if (k === 'filter') rows = 6048;
+        if (k === 'cols') cols = 4;
+        if (k === 'group') { rows = 6; cols = 2; }
+        if (k === 'index' || k === 'proper') cols += 1;
+        if (!STEPS[k].folds) broken = true;
+        const li = document.createElement('li');
+        li.className = broken ? 'local' : '';
+        li.innerHTML = '<strong></strong><small></small>';
+        li.firstChild.textContent = STEPS[k].label;
+        li.lastChild.textContent = (broken ? 'Runs locally. ' : 'Folded to the source. ') + fmt(rows) + ' rows, ' + cols + ' columns';
+        list.appendChild(li);
+        if (broken) { local += 1; return; }
+        sentRows = rows; sentCols = cols;
+        if (k === 'filter') where.push("Channel = 'Retail'");
+        if (k === 'cols') selectCols = 'OrderDate, Channel, ProductKey, NetSales';
+        if (k === 'group') { selectCols = 'Department, SUM(NetSales) AS Sales'; fromSql = 'FactSales JOIN DimProduct ON FactSales.ProductKey = DimProduct.ProductKey'; groupSql = '\nGROUP BY Department'; }
+      });
+      document.getElementById('oRows').textContent = fmt(sentRows);
+      document.getElementById('oCells').textContent = fmt(sentRows * sentCols);
+      document.getElementById('oLocal').textContent = local;
+      document.getElementById('sql').textContent = 'SELECT ' + selectCols + '\nFROM ' + fromSql + (where.length ? '\nWHERE ' + where.join(' AND ') : '') + groupSql;
+      // Once grouped, the detail columns are gone, so these steps no longer make sense.
+      document.querySelectorAll('[data-k]').forEach((b) => {
+        const k = b.dataset.k;
+        b.disabled = (grouped && (k === 'filter' || k === 'cols')) || (pipe.includes(k) && (k === 'filter' || k === 'cols' || k === 'group'));
+      });
+    }
+    render();
+  </script>
+</body>
+</html>

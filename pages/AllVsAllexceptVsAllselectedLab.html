@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ALL vs ALLEXCEPT vs ALLSELECTED | Power BI</title>
   <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
-  <script src="../assets/site.js?v=20261030b"></script>
+  <script src="../assets/site.js?v=20261031a"></script>
   <link rel="stylesheet" href="../assets/story.css?v=20261030b" />
   <script src="../assets/story.js?v=20261030b" defer></script>
   <style>
@@ -357,7 +357,9 @@
     @media (max-width: 560px) { .classes { grid-template-columns: 1fr; } .hall { display: none; } .exam-stage { padding-bottom: 110px; } }
   </style>
   <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
-  <script src="../assets/quiz-data.js?v=20261030c" defer></script>
+  <link rel="stylesheet" href="../assets/tryit.css?v=20261031a" />
+  <script src="../assets/tryit.js?v=20261031a" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
   <script src="../assets/quiz.js?v=20261030c" defer></script>
 </head>
 <body>
@@ -372,7 +374,7 @@
     </div>
     <div class="hero-card">
       <h2>Core Difference</h2>
-      <code>% of Grand Total = DIVIDE([Sales], CALCULATE([Sales], ALL(Market[Country], Market[Category])))</code>
+      <code>% of Grand Total = DIVIDE([Sales], CALCULATE([Sales], ALL(Market)))</code>
       <p><strong>ALL</strong> removes the specified filters and goes back to the full universe.</p>
       <code>% Within Category = DIVIDE([Sales], CALCULATE([Sales], ALLEXCEPT(Market, Market[Category])))</code>
       <p><strong>ALLEXCEPT</strong> clears many filters but preserves one grouping.</p>

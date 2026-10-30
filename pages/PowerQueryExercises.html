@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Query Exercises | Power BI</title>
+  <meta name="description" content="Fifteen hands-on Power Query exercises covering cleaning, enrichment, reshaping and combining data, with a workbook, expected results and M code.">
+  <link rel="stylesheet" href="../assets/site.css?v=20261031a" />
+  <script src="../assets/site.js?v=20261031a"></script>
+  <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
+  <style>
+    .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.1rem 0 0; }
+    .phase { margin: 2.4rem 0 .1rem; font: 800 clamp(1.3rem, 2.8vw, 1.8rem)/1.2 var(--font-display); }
+    .phase-sub { margin: 0 0 .6rem; color: var(--muted); }
+    .ex { margin-top: 1rem; padding: clamp(14px, 3vw, 20px); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel-solid); scroll-margin-top: 72px; }
+    .ex h3 { display: flex; gap: 10px; align-items: center; margin: 0 0 .5rem; font: 800 1.15rem/1.25 var(--font-display); }
+    .ex h3 span { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: .9rem; }
+    .ex p { margin: .35rem 0; }
+    .ba { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: .7rem 0; }
+    .ba h4 { margin: 0 0 4px; font: 800 .76rem var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .ba > div { min-width: 0; }
+    .tw { overflow-x: auto; }
+    table.mini { border-collapse: collapse; font-size: .86rem; }
+    table.mini th, table.mini td { padding: 4px 9px; border: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    table.mini th { background: var(--panel-soft); }
+    .ex summary { font-weight: 800; cursor: pointer; }
+    .ex pre { margin: .6rem 0 0; padding: 10px 12px; overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-soft); font: 600 .84rem/1.5 var(--mono); }
+    .ex pre code { background: none; }
+  </style>
+  <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
+  <script src="../assets/quiz.js?v=20261030c" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Power Query</p>
+      <h1>Power Query Exercises</h1>
+      <p class="lead">Fifteen messy-data problems in four phases, covering most of the Transform ribbon. Download the workbook, try each one in Power Query, then check your result here.</p>
+      <div class="links">
+        <a class="btn btn-primary" href="../Tutorials/PowerQuery/Power_Query_Exercises.xlsx" download>Exercise workbook (Excel, 55 KB)</a>
+        <a class="btn btn-outline" href="../Tutorials/PowerQuery/PowerQueryExercises.pdf" download>Question paper (PDF, 137 KB)</a>
+      </div>
+      <p>All names and numbers in the workbook are synthetic. Each sheet is numbered to match its exercise. In the M code, <code>Source</code> means the table already loaded from that sheet.</p>
+    </header>
+    <h2 class="phase">Phase 1: Basic cleaning and formatting</h2>
+    <p class="phase-sub">Get your data ready for analysis.</p>
+    <article class="ex srg-reveal" id="ex1">
+      <h3><span>1</span> Remove rows and columns</h3>
+      <p><strong>Scenario:</strong> A legacy report has two title rows and empty rows.</p>
+      <p><strong>Task:</strong> Remove the top 2 rows, promote headers and filter out null regions.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Column1</th><th scope="col">Column2</th><th scope="col">Column3</th></tr></thead><tbody><tr><td>Sales Report</td><td>null</td><td>null</td></tr><tr><td>As on 18-09-2025</td><td>null</td><td>null</td></tr><tr><td>Region</td><td>Sales</td><td>Notes</td></tr><tr><td>South</td><td>25000</td><td>Good</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Region</th><th scope="col">Sales</th><th scope="col">Notes</th></tr></thead><tbody><tr><td>South</td><td>25000</td><td>Good</td></tr><tr><td>North</td><td>32000</td><td>Excellent</td></tr><tr><td>West</td><td>18000</td><td>Average</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> 3 rows remain.</p>
+        <pre><code>Skipped = Table.Skip(Source, 2),
+Headers = Table.PromoteHeaders(Skipped),
+Kept = Table.SelectRows(Headers, each [Region] &lt;&gt; null)</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex2">
+      <h3><span>2</span> Replace values and clean</h3>
+      <p><strong>Scenario:</strong> City names are inconsistent, such as BOM and Bombay, and names have stray spaces.</p>
+      <p><strong>Task:</strong> Trim the names, then replace values to standardise the cities.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Name</th><th scope="col">City</th></tr></thead><tbody><tr><td>  Agastya Natt  </td><td>BOM</td></tr><tr><td>  Victor Sinha  </td><td>Bombay</td></tr><tr><td>  Ekani Chhabra  </td><td>CHN</td></tr><tr><td>  Yashvi Naik  </td><td>Bombay</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Name</th><th scope="col">City</th></tr></thead><tbody><tr><td>Agastya Natt</td><td>Mumbai</td></tr><tr><td>Victor Sinha</td><td>Mumbai</td></tr><tr><td>Ekani Chhabra</td><td>Chennai</td></tr><tr><td>Yashvi Naik</td><td>Mumbai</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Chennai 42, Mumbai 32, New Delhi 26.</p>
+        <pre><code>Trimmed = Table.TransformColumns(Source, {{&quot;Name&quot;, Text.Trim, type text}}),
+City1 = Table.ReplaceValue(Trimmed, &quot;BOM&quot;, &quot;Mumbai&quot;, Replacer.ReplaceValue, {&quot;City&quot;})
+// Repeat for Bombay, CHN, Madras and DEL</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex3">
+      <h3><span>3</span> Fill down</h3>
+      <p><strong>Scenario:</strong> Merged cells leave regions blank, and Power Query reads them as null.</p>
+      <p><strong>Task:</strong> Use Transform, Fill, Down so every city has a region.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Region</th><th scope="col">City</th><th scope="col">Sales</th></tr></thead><tbody><tr><td>Meghalaya</td><td>Bhubaneswar</td><td>476</td></tr><tr><td>null</td><td>Bhiwandi</td><td>597</td></tr><tr><td>null</td><td>Allahabad</td><td>257</td></tr><tr><td>null</td><td>Bhopal</td><td>769</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Region</th><th scope="col">City</th><th scope="col">Sales</th></tr></thead><tbody><tr><td>Meghalaya</td><td>Bhubaneswar</td><td>476</td></tr><tr><td>Meghalaya</td><td>Bhiwandi</td><td>597</td></tr><tr><td>Meghalaya</td><td>Allahabad</td><td>257</td></tr><tr><td>Meghalaya</td><td>Bhopal</td><td>769</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> No nulls remain. 10 region names now cover 100 rows.</p>
+        <pre><code>Filled = Table.FillDown(Source, {&quot;Region&quot;})</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex4">
+      <h3><span>4</span> Split column</h3>
+      <p><strong>Scenario:</strong> HR exports names as Last, First, but Payroll needs two columns.</p>
+      <p><strong>Task:</strong> Split FullName by the comma.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">EmployeeID</th><th scope="col">FullName</th></tr></thead><tbody><tr><td>EMP1000</td><td>Master, Viraj</td></tr><tr><td>EMP1001</td><td>Deep, Vrinda</td></tr><tr><td>EMP1002</td><td>Gade, Leena</td></tr><tr><td>EMP1003</td><td>De, Ati</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">EmployeeID</th><th scope="col">LastName</th><th scope="col">FirstName</th></tr></thead><tbody><tr><td>EMP1000</td><td>Master</td><td>Viraj</td></tr><tr><td>EMP1001</td><td>Deep</td><td>Vrinda</td></tr><tr><td>EMP1002</td><td>Gade</td><td>Leena</td></tr><tr><td>EMP1003</td><td>De</td><td>Ati</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Row 1 becomes Master and Viraj.</p>
+        <pre><code>Split = Table.SplitColumn(Source, &quot;FullName&quot;, Splitter.SplitTextByDelimiter(&quot;, &quot;), {&quot;LastName&quot;, &quot;FirstName&quot;})</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex5">
+      <h3><span>5</span> Extract text</h3>
+      <p><strong>Scenario:</strong> Invoice numbers follow the pattern INV-YYYY-####.</p>
+      <p><strong>Task:</strong> Extract the year (text between delimiters) and the sequence number (text after delimiter).</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">InvoiceNumber</th></tr></thead><tbody><tr><td>INV-2020-0000</td></tr><tr><td>INV-2021-0001</td></tr><tr><td>INV-2024-0002</td></tr><tr><td>INV-2025-0003</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">InvoiceNumber</th><th scope="col">Year</th><th scope="col">Sequence</th></tr></thead><tbody><tr><td>INV-2020-0000</td><td>2020</td><td>0000</td></tr><tr><td>INV-2021-0001</td><td>2021</td><td>0001</td></tr><tr><td>INV-2024-0002</td><td>2024</td><td>0002</td></tr><tr><td>INV-2025-0003</td><td>2025</td><td>0003</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Invoices per year: 2020 12, 2021 23, 2022 20, 2023 13, 2024 15, 2025 17.</p>
+        <pre><code>Year = Table.AddColumn(Source, &quot;Year&quot;, each Text.BetweenDelimiters([InvoiceNumber], &quot;-&quot;, &quot;-&quot;)),
+Seq = Table.AddColumn(Year, &quot;Sequence&quot;, each Text.AfterDelimiter([InvoiceNumber], &quot;-&quot;, 1))</code></pre>
+      </details>
+    </article>
+    <h2 class="phase">Phase 2: Logic and enrichment</h2>
+    <p class="phase-sub">Create new data from existing data.</p>
+    <article class="ex srg-reveal" id="ex6">
+      <h3><span>6</span> Column from examples</h3>
+      <p><strong>Scenario:</strong> Generate emails like firstname.lastname@company.com without writing formulas.</p>
+      <p><strong>Task:</strong> Use Column From Examples and type the pattern for the first two rows.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Name</th><th scope="col">Company</th></tr></thead><tbody><tr><td>Brijesh Pant</td><td>Pai-Goda</td></tr><tr><td>Anita Patil</td><td>Comar-Dugal</td></tr><tr><td>Robert Ramakrishnan</td><td>Thaman-Sengupta</td></tr><tr><td>Lajita Sahota</td><td>Thakur PLC</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Name</th><th scope="col">Company</th><th scope="col">Email</th></tr></thead><tbody><tr><td>Brijesh Pant</td><td>Pai-Goda</td><td>brijesh.pant@company.com</td></tr><tr><td>Anita Patil</td><td>Comar-Dugal</td><td>anita.patil@company.com</td></tr><tr><td>Robert Ramakrishnan</td><td>Thaman-Sengupta</td><td>robert.ramakrishnan@company.com</td></tr><tr><td>Lajita Sahota</td><td>Thakur PLC</td><td>lajita.sahota@company.com</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Row 1: brijesh.pant@company.com.</p>
+        <pre><code>// The equivalent M, if you want to see what the feature builds
+Email = Table.AddColumn(Source, &quot;Email&quot;, each Text.Lower(Text.Replace([Name], &quot; &quot;, &quot;.&quot;)) &amp; &quot;@company.com&quot;)</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex7">
+      <h3><span>7</span> Conditional column</h3>
+      <p><strong>Scenario:</strong> Categorise sales performance.</p>
+      <p><strong>Task:</strong> Add Performance: above 2,00,000 is Excellent, above 1,00,000 is Good, otherwise Improvement.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Salesperson</th><th scope="col">Sales</th></tr></thead><tbody><tr><td>Mohammed Chhabra</td><td>99206</td></tr><tr><td>Aarna Bansal</td><td>79906</td></tr><tr><td>Irya Dalal</td><td>210570</td></tr><tr><td>Jagvi Bhatia</td><td>135136</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Salesperson</th><th scope="col">Sales</th><th scope="col">Performance</th></tr></thead><tbody><tr><td>Mohammed Chhabra</td><td>99206</td><td>Improvement</td></tr><tr><td>Aarna Bansal</td><td>79906</td><td>Improvement</td></tr><tr><td>Irya Dalal</td><td>210570</td><td>Excellent</td></tr><tr><td>Jagvi Bhatia</td><td>135136</td><td>Good</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Excellent 28, Good 48, Improvement 24.</p>
+        <pre><code>Perf = Table.AddColumn(Source, &quot;Performance&quot;, each if [Sales] &gt; 200000 then &quot;Excellent&quot; else if [Sales] &gt; 100000 then &quot;Good&quot; else &quot;Improvement&quot;)</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex8">
+      <h3><span>8</span> Date calculations</h3>
+      <p><strong>Scenario:</strong> HR needs tenure and retirement dates.</p>
+      <p><strong>Task:</strong> Add Age, Retirement at 60 years, and Service Years from DateOfJoining to today.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">EmpID</th><th scope="col">EmployeeName</th><th scope="col">DateOfBirth</th><th scope="col">DateOfJoining</th><th scope="col">Department</th></tr></thead><tbody><tr><td>E1000</td><td>Janaki Ramaswamy</td><td>20-03-1968</td><td>19-01-2023</td><td>Operations</td></tr><tr><td>E1001</td><td>Nitara Lata</td><td>30-09-2001</td><td>08-01-2025</td><td>HR</td></tr><tr><td>E1002</td><td>Yashasvi Mall</td><td>07-06-1977</td><td>06-05-2008</td><td>IT</td></tr><tr><td>E1003</td><td>Hardik Sengupta</td><td>15-09-1994</td><td>22-04-2016</td><td>IT</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">EmpID</th><th scope="col">DateOfBirth</th><th scope="col">DateOfJoining</th><th scope="col">Retirement</th></tr></thead><tbody><tr><td>E1000</td><td>20-03-1968</td><td>19-01-2023</td><td>20-03-2028</td></tr><tr><td>E1001</td><td>30-09-2001</td><td>08-01-2025</td><td>30-09-2061</td></tr><tr><td>E1002</td><td>07-06-1977</td><td>06-05-2008</td><td>07-06-2037</td></tr><tr><td>E1003</td><td>15-09-1994</td><td>22-04-2016</td><td>15-09-2054</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Janaki Ramaswamy retires on 20-03-2028. Age and service change daily, so your figures depend on today’s date.</p>
+        <pre><code>Today = Date.From(DateTime.LocalNow()),
+Age = Table.AddColumn(Source, &quot;Age&quot;, each Today - [DateOfBirth]),
+Retire = Table.AddColumn(Age, &quot;Retirement&quot;, each Date.AddYears([DateOfBirth], 60)),
+Service = Table.AddColumn(Retire, &quot;Service Years&quot;, each Duration.Days(Today - [DateOfJoining]) / 365.25)</code></pre>
+      </details>
+    </article>
+    <h2 class="phase">Phase 3: Shape transformation</h2>
+    <p class="phase-sub">Change how the table looks, rows against columns.</p>
+    <article class="ex srg-reveal" id="ex9">
+      <h3><span>9</span> Transpose</h3>
+      <p><strong>Scenario:</strong> Metrics are in rows and years in columns.</p>
+      <p><strong>Task:</strong> Transpose and fix the headers.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Metric</th><th scope="col">2023</th><th scope="col">2024</th></tr></thead><tbody><tr><td>Revenue</td><td>500000</td><td>650000</td></tr><tr><td>Expenses</td><td>350000</td><td>420000</td></tr><tr><td>Profit</td><td>150000</td><td>230000</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Year</th><th scope="col">Revenue</th><th scope="col">Expenses</th><th scope="col">Profit</th></tr></thead><tbody><tr><td>2023</td><td>500000</td><td>350000</td><td>150000</td></tr><tr><td>2024</td><td>650000</td><td>420000</td><td>230000</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> 2 rows, with Revenue, Expenses and Profit as columns.</p>
+        <pre><code>Demoted = Table.DemoteHeaders(Source),
+Flipped = Table.Transpose(Demoted),
+Headers = Table.PromoteHeaders(Flipped)</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex10">
+      <h3><span>10</span> Pivot</h3>
+      <p><strong>Scenario:</strong> Sensor data is tall, with metrics in one column.</p>
+      <p><strong>Task:</strong> Pivot Metric so Temperature and Humidity become columns.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Date</th><th scope="col">Location</th><th scope="col">Metric</th><th scope="col">Value</th></tr></thead><tbody><tr><td>01-05-2025</td><td>Ghaziabad</td><td>Temperature</td><td>39.3</td></tr><tr><td>01-05-2025</td><td>Ghaziabad</td><td>Humidity</td><td>66.4</td></tr><tr><td>01-05-2025</td><td>Aurangabad</td><td>Temperature</td><td>30.9</td></tr><tr><td>01-05-2025</td><td>Aurangabad</td><td>Humidity</td><td>39.6</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Date</th><th scope="col">Location</th><th scope="col">Temperature</th><th scope="col">Humidity</th></tr></thead><tbody><tr><td>01-05-2025</td><td>Ghaziabad</td><td>39.3</td><td>66.4</td></tr><tr><td>01-05-2025</td><td>Aurangabad</td><td>30.9</td><td>39.6</td></tr><tr><td>01-05-2025</td><td>Tiruppur</td><td>65</td><td>89.9</td></tr><tr><td>01-05-2025</td><td>Hazaribagh</td><td>89.9</td><td>40.5</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> 100 rows become 50.</p>
+        <pre><code>Pivoted = Table.Pivot(Source, List.Distinct(Source[Metric]), &quot;Metric&quot;, &quot;Value&quot;, List.Sum)</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex11">
+      <h3><span>11</span> Unpivot</h3>
+      <p><strong>Scenario:</strong> Sales are wide, with months as columns, so a pivot table cannot use them.</p>
+      <p><strong>Task:</strong> Unpivot the months to get Month and Amount.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Product</th><th scope="col">Jan_Sales</th><th scope="col">Feb_Sales</th><th scope="col">Mar_Sales</th></tr></thead><tbody><tr><td>Product_0</td><td>133</td><td>132</td><td>290</td></tr><tr><td>Product_1</td><td>221</td><td>158</td><td>373</td></tr><tr><td>Product_2</td><td>448</td><td>347</td><td>147</td></tr><tr><td>Product_3</td><td>158</td><td>168</td><td>225</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Product</th><th scope="col">Month</th><th scope="col">Amount</th></tr></thead><tbody><tr><td>Product_0</td><td>Jan_Sales</td><td>133</td></tr><tr><td>Product_1</td><td>Jan_Sales</td><td>221</td></tr><tr><td>Product_2</td><td>Jan_Sales</td><td>448</td></tr><tr><td>Product_3</td><td>Jan_Sales</td><td>158</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> 100 rows become 300. Total amount: 93,607.</p>
+        <pre><code>Tall = Table.UnpivotOtherColumns(Source, {&quot;Product&quot;}, &quot;Month&quot;, &quot;Amount&quot;)</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex12">
+      <h3><span>12</span> Group by</h3>
+      <p><strong>Scenario:</strong> Management wants total sales per category.</p>
+      <p><strong>Task:</strong> Group by Category and sum Amount.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Category</th><th scope="col">Amount</th></tr></thead><tbody><tr><td>Apparel</td><td>14727.73</td></tr><tr><td>Stationery</td><td>2939.74</td></tr><tr><td>Stationery</td><td>7145.19</td></tr><tr><td>Electronics</td><td>10407.51</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Category</th><th scope="col">Total Sales</th></tr></thead><tbody><tr><td>Apparel</td><td>204988.91</td></tr><tr><td>Electronics</td><td>177004.82</td></tr><tr><td>Furniture</td><td>148169.63</td></tr><tr><td>Groceries</td><td>108829.52</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Apparel ₹2,04,988.91, five categories.</p>
+        <pre><code>Grouped = Table.Group(Source, {&quot;Category&quot;}, {{&quot;Total Sales&quot;, each List.Sum([Amount]), type number}})</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex13">
+      <h3><span>13</span> Parse JSON</h3>
+      <p><strong>Scenario:</strong> Product attributes are stored as JSON text in one cell.</p>
+      <p><strong>Task:</strong> Use Transform, Parse, JSON and expand the columns.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">OrderID</th><th scope="col">Attributes</th></tr></thead><tbody><tr><td>ORD200</td><td>{&quot;color&quot;: &quot;WhiteSmoke&quot;, &quot;storage_g…</td></tr><tr><td>ORD201</td><td>{&quot;color&quot;: &quot;DeepPink&quot;, &quot;storage_gb&quot;…</td></tr><tr><td>ORD202</td><td>{&quot;color&quot;: &quot;SlateBlue&quot;, &quot;storage_gb…</td></tr><tr><td>ORD203</td><td>{&quot;color&quot;: &quot;DarkSalmon&quot;, &quot;storage_g…</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">OrderID</th><th scope="col">color</th><th scope="col">storage_gb</th><th scope="col">warranty_yrs</th></tr></thead><tbody><tr><td>ORD200</td><td>WhiteSmoke</td><td>1024</td><td>3</td></tr><tr><td>ORD201</td><td>DeepPink</td><td>1024</td><td>1</td></tr><tr><td>ORD202</td><td>SlateBlue</td><td>512</td><td>1</td></tr><tr><td>ORD203</td><td>DarkSalmon</td><td>256</td><td>1</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> Storage: 512 GB 33, 1024 GB 26, 256 GB 21, 128 GB 20.</p>
+        <pre><code>Parsed = Table.TransformColumns(Source, {{&quot;Attributes&quot;, Json.Document}}),
+Expanded = Table.ExpandRecordColumn(Parsed, &quot;Attributes&quot;, {&quot;color&quot;, &quot;storage_gb&quot;, &quot;warranty_yrs&quot;})</code></pre>
+      </details>
+    </article>
+    <h2 class="phase">Phase 4: Combining queries</h2>
+    <p class="phase-sub">Bring several tables together.</p>
+    <article class="ex srg-reveal" id="ex14">
+      <h3><span>14</span> Append queries</h3>
+      <p><strong>Scenario:</strong> Sales come in separate Q1 and Q2 sheets.</p>
+      <p><strong>Task:</strong> Append them into a single query.</p>
+      <div class="ba"><div><h4>Before</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Date</th><th scope="col">Product</th><th scope="col">Amount</th></tr></thead><tbody><tr><td>29-09-2025</td><td>Veniam</td><td>7136.78</td></tr><tr><td>21-10-2025</td><td>Temporibus</td><td>2701.39</td></tr><tr><td>10-11-2025</td><td>Quasi</td><td>8578.38</td></tr><tr><td>22-11-2025</td><td>Atque</td><td>20583.57</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the result and M code</summary>
+        <div class="ba"><div><h4>After</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">Date</th><th scope="col">Product</th><th scope="col">Amount</th></tr></thead><tbody><tr><td>19-06-2025</td><td>Temporibus</td><td>10266.13</td></tr><tr><td>30-07-2025</td><td>Ducimus</td><td>10965.56</td></tr><tr><td>24-08-2025</td><td>Temporibus</td><td>12482.94</td></tr><tr><td>14-07-2025</td><td>Praesentium</td><td>20508.65</td></tr></tbody></table></div></div></div>
+        <p><strong>Check:</strong> 50 + 50 = 100 rows. Total: ₹12,52,221.58.</p>
+        <pre><code>Combined = Table.Combine({Sales_Q1, Sales_Q2})</code></pre>
+      </details>
+    </article>
+    <article class="ex srg-reveal" id="ex15">
+      <h3><span>15</span> Merge queries</h3>
+      <p><strong>Objective:</strong> Join tables to answer business questions. See the <a href="PowerQueryJoins.html">Joins Playground</a> first.</p>
+      <ul>
+        <li><strong>A. Left outer:</strong> merge Orders and Customers to get the GST number, keeping it null if missing.</li>
+        <li><strong>B. Inner:</strong> merge Orders and Products, then calculate Total Sales (Qty × Price) for valid products only.</li>
+        <li><strong>C. Right anti:</strong> find dead stock, the products never ordered.</li>
+        <li><strong>D. Left anti:</strong> merge Customers and Orders to find customers who never bought anything.</li>
+      </ul>
+      <div class="ba"><div><h4>Orders</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">OrderID</th><th scope="col">CustomerID</th><th scope="col">ProductID</th><th scope="col">Quantity</th></tr></thead><tbody><tr><td>ORD100</td><td>CUST029</td><td>10</td><td>6</td></tr><tr><td>ORD101</td><td>CUST028</td><td>17</td><td>10</td></tr><tr><td>ORD102</td><td>CUST022</td><td>15</td><td>5</td></tr></tbody></table></div></div><div><h4>Products</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">ProductID</th><th scope="col">ProductName</th><th scope="col">Price</th></tr></thead><tbody><tr><td>1</td><td>Qui</td><td>2492.53</td></tr><tr><td>2</td><td>Culpa</td><td>785</td></tr><tr><td>3</td><td>Velit</td><td>970.85</td></tr></tbody></table></div></div><div><h4>Customers</h4><div class="tw"><table class="mini"><thead><tr><th scope="col">CustomerID</th><th scope="col">CustomerName</th><th scope="col">GST_Number</th></tr></thead><tbody><tr><td>CUST001</td><td>Chaaya Memon</td><td>29gDAjG6175U</td></tr><tr><td>CUST002</td><td>Faqid Oza</td><td>29nttBG5549Q</td></tr><tr><td>CUST003</td><td>Manya Bala</td><td>29bsXeJ3773c</td></tr></tbody></table></div></div></div>
+      <details><summary>Show the results and M code</summary>
+        <ul>
+          <li><strong>A:</strong> 100 rows. 44 orders have a null GST number.</li>
+          <li><strong>B:</strong> Total Sales ₹21,36,978.91.</li>
+          <li><strong>C:</strong> Product IDs 26, 27, 28, 29, 30.</li>
+          <li><strong>D:</strong> CUST008 and CUST034.</li>
+        </ul>
+        <pre><code>A = Table.NestedJoin(Orders, {&quot;CustomerID&quot;}, Customers, {&quot;CustomerID&quot;}, &quot;Cust&quot;, JoinKind.LeftOuter)
+B = Table.NestedJoin(Orders, {&quot;ProductID&quot;}, Products, {&quot;ProductID&quot;}, &quot;Prod&quot;, JoinKind.Inner)
+C = Table.NestedJoin(Orders, {&quot;ProductID&quot;}, Products, {&quot;ProductID&quot;}, &quot;Prod&quot;, JoinKind.RightAnti)
+D = Table.NestedJoin(Customers, {&quot;CustomerID&quot;}, Orders, {&quot;CustomerID&quot;}, &quot;Ord&quot;, JoinKind.LeftAnti)
+// Then expand the new column to bring in the fields you need</code></pre>
+      </details>
+    </article>
+  </div>
+</body>
+</html>

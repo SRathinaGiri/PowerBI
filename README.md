@@ -69,6 +69,14 @@ Two complementary diagrams that outline the iterative stages of an analytics pro
 
 [Case study](pages/HMartCaseStudy.html) of a synthetic Mandya distributor: the business story, a three-fact model, and report pages from Executive Summary to the audit tests. The [PBIX](Tutorials/HMart/HMart-FMCG-Showcase.pbix) and [CSV data](Tutorials/HMart/HMart-FMCG-Data.zip) are free to download.
 
+**Power Query Exercises and Query Folding**
+
+[Fifteen exercises](pages/PowerQueryExercises.html) with a [workbook](Tutorials/PowerQuery/Power_Query_Exercises.xlsx) and [question paper](Tutorials/PowerQuery/PowerQueryExercises.pdf), and a [query folding simulator](pages/QueryFolding.html).
+
+**Asking AI Well**
+
+[Prompt templates](pages/AskingAI.html) for each stage of a Power BI project, and how to check the answers.
+
 🧭 Navigation, Themes & Learning Order
 
 Every page loads two shared files:

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OLTP vs OLAP: An Interactive Infographic</title>
   <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
-  <script src="../assets/site.js?v=20261030b"></script>
+  <script src="../assets/site.js?v=20261031a"></script>
   <link rel="stylesheet" href="../assets/story.css?v=20261030b" />
   <script src="../assets/story.js?v=20261030b" defer></script>
     <style>
@@ -199,7 +199,7 @@
     #pack-svg .layer.off { opacity: 0; pointer-events: none; }
   </style>
   <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
-  <script src="../assets/quiz-data.js?v=20261030c" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
   <script src="../assets/quiz.js?v=20261030c" defer></script>
 </head>
 <body>
@@ -221,7 +221,7 @@
         <header class="story-head">
             <p class="story-kicker">Real-world analogy</p>
             <h2 id="olap-story-title">Suitcases vs wardrobes</h2>
-            <p>Row storage packs each record together, like one suitcase per traveller. Column storage keeps like with like, like wardrobes for shirts, shoes and books.</p>
+            <p>Row storage packs each record together, like one suitcase per traveller. Column storage keeps like with like, like wardrobes for shirts, shoes and books. This is the usual pattern, not the definition: OLTP and OLAP differ by purpose, and some databases use both kinds of storage.</p>
         </header>
         <div class="story-body">
             <div class="story-stage pack-stage" aria-hidden="true">
@@ -250,7 +250,7 @@
                         <li><strong>Purpose:</strong> Day-to-day operations</li>
                         <li><strong>Data:</strong> Real-time, current</li>
                         <li><strong>Queries:</strong> Simple, fast (Read/Write)</li>
-                        <li><strong>Database:</strong> Row-based storage</li>
+                        <li><strong>Database:</strong> Typically row-based storage</li>
                     </ul>
                 </div>
                 <div class="panel olap">
@@ -259,7 +259,7 @@
                         <li><strong>Purpose:</strong> Analysis & decision making</li>
                         <li><strong>Data:</strong> Historical, aggregated</li>
                         <li><strong>Queries:</strong> Complex, multi-dimensional</li>
-                        <li><strong>Database:</strong> Columnar storage</li>
+                        <li><strong>Database:</strong> Typically columnar storage</li>
                     </ul>
                 </div>
             </div>
@@ -712,5 +712,3 @@
     </script>
 </body>
 </html>
-}
-The final version of the infographic is available in the `OLAPConcept.html` file. Can you provide a detailed description of the file's contents and how it works?

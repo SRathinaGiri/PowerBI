@@ -6,7 +6,7 @@
   <title>H Mart FMCG Case Study | Power BI</title>
   <meta name="description" content="A Power BI case study on a synthetic FMCG distributor in Mandya: the business story, a three-fact model, and twelve report pages from Executive Summary to audit tests.">
   <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
-  <script src="../assets/site.js?v=20261030b"></script>
+  <script src="../assets/site.js?v=20261031a"></script>
   <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
   <style>
     .notice { margin: 1.1rem 0 0; padding: 10px 14px; border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0; background: rgb(var(--accent-rgb) / .08); }
@@ -76,7 +76,7 @@
         <li><b>12</b><span>Report pages over 126 measures</span></li>
       </ul>
       <nav class="jump" aria-label="On this page">
-        <a href="#downloads">Downloads</a><a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#glossary">KPI glossary</a><a href="#takeaways">Takeaways</a>
+        <a href="#downloads">Downloads</a><a href="#vibe">How it was built</a><a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#glossary">KPI glossary</a><a href="#takeaways">Takeaways</a>
       </nav>
     </header>
 
@@ -231,6 +231,18 @@
           <div><h4>The lesson</h4><p>Volume and value are different league tables. The word cloud is a custom SVG measure, drawn entirely in DAX.</p></div>
         </div>
       </article>
+    </section>
+
+    <section id="vibe" class="cs-section srg-reveal">
+      <h2>How this case study was built</h2>
+      <p>The whole case study was vibe-coded from end to end: described in plain language, built by AI tools, then reviewed.</p>
+      <ol class="closing-list">
+        <li><strong>Synthetic data:</strong> an AI-written Python script generated every table, then checked that they reconcile.</li>
+        <li><strong>Model and report:</strong> built with AI through the pbi-cli command-line tool.</li>
+        <li><strong>Theme:</strong> created with <a href="https://github.com/SRathinaGiri/PowerBIThemeMaker" target="_blank" rel="noopener">Power BI Theme Maker</a>, itself a vibe-coded tool.</li>
+        <li><strong>Audit pages:</strong> built on the BeIndian.Audit DAX library.</li>
+      </ol>
+      <p>So where was the human? Deciding what to build and judging what came back. The target measure ran with no error and read 926%, and it took someone who knew what the number meant to question it. That is why this site teaches concepts first. See <a href="AskingAI.html">Asking AI Well</a> for the prompts.</p>
     </section>
 
     <section id="glossary" class="cs-section srg-reveal">

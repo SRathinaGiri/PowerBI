@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asking AI Well | Power BI</title>
+  <meta name="description" content="AI is getting good at how. You still decide what. Prompt templates for each stage of a Power BI project, and how to check the answers.">
+  <link rel="stylesheet" href="../assets/site.css?v=20261031a" />
+  <script src="../assets/site.js?v=20261031a"></script>
+  <link rel="stylesheet" href="../assets/lesson.css?v=20261030b" />
+  <style>
+    .sec { margin-top: 2.2rem; }
+    .sec > h2 { margin: 0 0 .4rem; font: 800 clamp(1.3rem, 2.8vw, 1.8rem)/1.2 var(--font-display); }
+    .sec > p { max-width: 72ch; }
+    .warn { margin: 1.1rem 0 0; padding: 12px 14px; border-left: 4px solid var(--danger); border-radius: 0 12px 12px 0; background: rgb(var(--fg-rgb) / .04); }
+    .prompts { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 14px; margin-top: 1rem; }
+    .prompt { display: flex; flex-direction: column; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--panel-solid); }
+    .prompt h3 { margin: 0 0 .15rem; font: 800 1.05rem/1.25 var(--font-display); }
+    .prompt .when { margin: 0 0 .6rem; color: var(--muted); font-size: .9rem; }
+    .prompt pre { flex: 1; margin: 0 0 .6rem; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-soft); font: 600 .84rem/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .prompt button { align-self: flex-start; min-height: 40px; padding: 6px 14px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--panel-solid); color: var(--ink); font: 700 .86rem var(--font); cursor: pointer; }
+    .prompt button:hover, .prompt button:focus-visible { border-color: var(--accent); }
+    .checks { max-width: 72ch; padding-left: 1.2rem; }
+    .checks li { margin-bottom: .5rem; }
+  </style>
+  <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
+  <script src="../assets/quiz.js?v=20261030c" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header class="srg-enter">
+      <p class="eyebrow">Working with AI</p>
+      <h1>Asking AI Well</h1>
+      <p class="lead">AI is getting better at <em>how</em> every month. Knowing <em>what</em> to do, what to ask and whether the answer is right remains your job. That is why this path teaches concepts first.</p>
+      <p class="warn"><strong>Never paste real client data into a public AI tool.</strong> PAN, GSTIN, bank details and client financials stay out. Share column names and a few made-up rows, or use synthetic data, as H Mart does. Check your firm’s policy and your duty of confidentiality first.</p>
+    </header>
+
+    <section class="sec srg-reveal">
+      <h2>What every good prompt contains</h2>
+      <ol class="checks">
+        <li><strong>The business question,</strong> in plain words, not the formula you think you need.</li>
+        <li><strong>The structure,</strong> with exact table and column names and how the tables relate.</li>
+        <li><strong>The rules,</strong> such as an April to March year or which date counts as the sale date.</li>
+        <li><strong>A way to check,</strong> by asking for one figure you can verify yourself.</li>
+      </ol>
+    </section>
+
+    <section class="sec srg-reveal">
+      <h2>Prompt templates</h2>
+      <p>Copy one and replace the parts in [square brackets]. They follow the order of a real project.</p>
+      <div class="prompts" id="prompts"></div>
+    </section>
+
+    <section class="sec srg-reveal">
+      <h2>Check every answer</h2>
+      <ol class="checks">
+        <li><strong>Reconcile.</strong> Does the total match the source or the trial balance?</li>
+        <li><strong>Test the total row.</strong> In the <a href="HMartCaseStudy.html#team">H Mart case study</a>, the AI-built target measure read 926% at the total and looked fine everywhere else.</li>
+        <li><strong>Try a filter you can verify by hand.</strong> One month, one customer.</li>
+        <li><strong>Ask it to explain,</strong> then see if you agree. If you cannot explain a formula to your manager, do not ship it.</li>
+        <li><strong>Be alert with law and standards.</strong> AI can invent sections and rates. Verify them at the source, and review anything that will be filed or relied upon.</li>
+      </ol>
+    </section>
+
+    <section class="sec srg-reveal">
+      <h2>Proof that this works</h2>
+      <p>The <a href="HMartCaseStudy.html#vibe">H Mart FMCG case study</a> was vibe-coded from end to end, from the synthetic data to the finished report. The human part was deciding what to build and catching what was wrong.</p>
+    </section>
+  </div>
+  <script>
+    const PROMPTS = [
+      ['Clarify the question', 'Before touching any data.', 'I am a [role] preparing a Power BI report for [audience]. They want to know: [business question].\nAsk me up to five questions about what this really needs. Then list the KPIs you would use, how each is defined, and the data each one needs. Do not write code yet.'],
+      ['Profile messy data', 'When a new file arrives.', 'Here are the column names and five made-up sample rows from my [source] file:\n[paste synthetic rows]\nList likely data quality problems, what you would check first, and the cleaning steps in order. Say which assumptions you are making.'],
+      ['Write Power Query steps', 'When you know the shape you want.', 'My source table looks like this: [columns and sample rows].\nI need it to look like this: [target columns and sample rows].\nWrite the Power Query M steps, one step per line with a comment. Filter and remove columns first, and tell me which steps may break query folding on [source type].'],
+      ['Design the model', 'Before building relationships.', 'I have these tables: [table, grain, key columns].\nPropose a star schema. For each table say fact or dimension, its grain and its key. List relationships with direction, flag anything many-to-many or ambiguous, and explain any two-way relationship you think is really necessary.'],
+      ['Write a measure', 'When you know the definition.', 'Model: [tables, columns, relationships]. The date table is [name] with a [April to March] year.\nWrite a DAX measure for: [definition in words].\nIt will be shown by [visual fields]. Tell me what it should return at the total row and with no filters, and give me one result I can check by hand.'],
+      ['Debug a wrong number', 'When a figure looks wrong.', 'This DAX measure:\n[paste measure]\nShows [wrong value] in [visual, fields, filters]. I expected [right value] because [reason].\nExplain the filter context at that cell, step by step, then the cause, then the smallest fix. Do not rewrite the whole measure.'],
+      ['Explain inherited work', 'When you open someone else’s report.', 'Explain this measure in plain English for an accountant:\n[paste measure]\nThen tell me what it assumes about the model, where it could give a misleading total, and one test to confirm it works.'],
+      ['Review as an auditor', 'Before the report goes out.', 'Act as a sceptical reviewer. Here are my measures and what each should mean:\n[paste]\nFind errors of logic, totals that may mislead, and unstated assumptions. Rank them by risk. For each, tell me how to prove it is a real problem rather than assuming it is.'],
+      ['Create safe practice data', 'When you cannot share the real thing.', 'Write a Python script that generates synthetic data for a [business type] with these tables: [tables and columns].\nUse realistic patterns such as seasonality and returns, a fixed random seed, and obviously fake names and identifiers. Include a check that the tables reconcile.']
+    ];
+    const box = document.getElementById('prompts');
+    PROMPTS.forEach(([title, when, text]) => {
+      const card = document.createElement('article');
+      card.className = 'prompt';
+      const h = document.createElement('h3'); h.textContent = title;
+      const w = document.createElement('p'); w.className = 'when'; w.textContent = when;
+      const p = document.createElement('pre'); p.textContent = text;
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Copy prompt';
+      b.setAttribute('aria-label', 'Copy prompt: ' + title);
+      b.addEventListener('click', () => {
+        const done = (msg) => { b.textContent = msg; setTimeout(() => { b.textContent = 'Copy prompt'; }, 1500); };
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => done('Copied'), () => done('Select and copy'));
+        else done('Select and copy');
+      });
+      card.append(h, w, p, b);
+      box.appendChild(card);
+    });
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Purchases vs Payments Join Visualizer</title>
   <link rel="stylesheet" href="../assets/site.css?v=20261030b" />
-  <script src="../assets/site.js?v=20261030b"></script>
+  <script src="../assets/site.js?v=20261031a"></script>
   <link rel="stylesheet" href="../assets/story.css?v=20261030b" />
   <script src="../assets/story.js?v=20261030b" defer></script>
   <style>
@@ -201,7 +201,7 @@
     .venn-badge b { color: var(--ink); }
   </style>
   <link rel="stylesheet" href="../assets/quiz.css?v=20261030c" />
-  <script src="../assets/quiz-data.js?v=20261030c" defer></script>
+  <script src="../assets/quiz-data.js?v=20261031a" defer></script>
   <script src="../assets/quiz.js?v=20261030c" defer></script>
 </head>
 <body>
@@ -243,7 +243,7 @@
         <li><strong>Right anti:</strong> groom's side only.</li>
         <li><strong>Left outer:</strong> the whole bride's list, with groom's details where they match.</li>
         <li><strong>Right outer:</strong> the whole groom's list.</li>
-        <li><strong>Full outer:</strong> everyone, with shared guests printed only once.</li>
+        <li><strong>Full outer:</strong> everyone. A shared guest is printed once only if each list names that guest once.</li>
       </ol>
     </div>
   </div>
@@ -256,8 +256,8 @@
     <div class="field">
       <label for="scenarioSelect">Select a Business Question</label>
       <select id="scenarioSelect">
-        <option value="inner">1. Purchases which are paid? (Inner Join)</option>
-        <option value="leftAnti">2. Unpaid Purchases? (Left Anti Join)</option>
+        <option value="inner">1. Purchases with a payment record? (Inner Join)</option>
+        <option value="leftAnti">2. Purchases with no payment record? (Left Anti Join)</option>
         <option value="rightAnti">3. Payments Unrelated to Purchases? (Right Anti)</option>
         <option value="left">4. Purchases data with Payments? (Left Outer)</option>
         <option value="right">5. Payments data with Purchases? (Right Outer)</option>
@@ -266,7 +266,7 @@
     </div>
 
     <div class="question-box">
-      <p class="question-text" id="qText">Which purchases have been paid?</p>
+      <p class="question-text" id="qText">Which purchases have a payment record?</p>
       <p class="answer-text" id="aText">This join lists only the purchases that have a matching record in the Payments table.</p>
       <span class="pill" id="rowCountPill">0 rows returned</span>
     </div>
@@ -338,6 +338,12 @@
 
 </div>
 
+<section class="lab-panel" style="max-width:1240px;margin:28px auto;box-sizing:border-box" aria-labelledby="join-traps">
+  <h2 id="join-traps">Two traps a match can hide</h2>
+  <p><strong>A match is not a settlement.</strong> A ₹10,000 purchase with a ₹4,000 payment still matches in an inner join, yet ₹6,000 is outstanding. A join proves that a record exists. To test settlement, compare the amounts.</p>
+  <p><strong>Duplicate keys multiply rows.</strong> Two payments against one purchase return two rows, so summing the purchase amount now shows ₹20,000. Check that the key is unique, or group the payments first. The same applies to the guest list: someone named twice on one list appears twice.</p>
+</section>
+
 <script>
   // --- DATA & LOGIC ---
   
@@ -358,12 +364,12 @@
 
   const scenarios = {
     inner: {
-      question: "1. Purchases which are paid?",
+      question: "1. Purchases with a payment record?",
       desc: "Inner Join: Returns records that have matching values in both tables.",
       highlight: ['hl-inner']
     },
     leftAnti: {
-      question: "2. Unpaid Purchases?",
+      question: "2. Purchases with no payment record?",
       desc: "Left Anti Join: Returns rows from the Left table (Purchases) that have NO match in the Right table.",
       highlight: ['hl-leftAnti']
     },
