@@ -67,7 +67,7 @@ Two complementary diagrams that outline the iterative stages of an analytics pro
 
 **H Mart FMCG Case Study**
 
-[Case study](pages/HMartCaseStudy.html) of a synthetic Mandya distributor: the business story, a three-fact model, and report pages from Executive Summary to the audit tests.
+[Case study](pages/HMartCaseStudy.html) of a synthetic Mandya distributor: the business story, a three-fact model, and report pages from Executive Summary to the audit tests. The [PBIX](Tutorials/HMart/HMart-FMCG-Showcase.pbix) and [CSV data](Tutorials/HMart/HMart-FMCG-Data.zip) are free to download.
 
 🧭 Navigation, Themes & Learning Order
 

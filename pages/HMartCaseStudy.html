@@ -39,6 +39,14 @@
     .reads p { margin: 0; }
     .closing-list { max-width: 72ch; padding-left: 1.2rem; }
     .closing-list li { margin-bottom: .5rem; }
+    .model-shot { margin: 1.1rem 0 0; }
+    .model-shot img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; }
+    .model-shot figcaption { margin-top: 6px; color: var(--muted); font-size: .85rem; }
+    .shapes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 1.1rem 0; }
+    .shapes div { padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-solid); }
+    .shapes dt { font: 800 1rem var(--font-display); }
+    .shapes dd { margin: 2px 0 0; color: var(--muted); }
+    #downloads code { overflow-wrap: anywhere; }
     .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.1rem 0 2rem; }
   </style>
 </head>
@@ -53,10 +61,10 @@
         <li><b>₹17.66 crore</b><span>Net sales, 01-04-2024 to 31-03-2026</span></li>
         <li><b>8.8%</b><span>Contribution margin, ₹1.56 crore</span></li>
         <li><b>25,000</b><span>Sales lines on 7,640 invoices</span></li>
-        <li><b>12</b><span>Report pages over 125 measures</span></li>
+        <li><b>12</b><span>Report pages over 126 measures</span></li>
       </ul>
       <nav class="jump" aria-label="On this page">
-        <a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#takeaways">Takeaways</a>
+        <a href="#downloads">Downloads</a><a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#takeaways">Takeaways</a>
       </nav>
     </header>
 
@@ -67,8 +75,17 @@
     </section>
 
     <section id="model" class="cs-section srg-reveal">
-      <h2>The model: three facts, one set of dimensions</h2>
-      <p>Sales, stock and marketing happen at different grains, so each gets its own fact table. Shared dimensions let one slicer speak to all three. Pick a fact to see which dimensions filter it.</p>
+      <h2>The model: a galaxy of three stars</h2>
+      <p>Sales, stock and marketing happen at different grains, so each gets its own fact table. Shared dimensions let one slicer speak to all three. This is the report's Model view, read with the shapes from the <a href="SemanticModel.html">Semantic Model lesson</a>.</p>
+      <figure class="model-shot"><a href="../assets/images/hmart/model.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/model.webp" width="2000" height="975" loading="lazy" alt="Power BI Model view: FactSales, FactInventorySnapshot and FactMarketingSpend linked to shared dimension tables such as DateTable, DimProduct, DimPlace and DimPromotion, with DimSupplier beyond DimProduct and unconnected helper tables on the right."></a><figcaption>Model view of the H Mart report. Select it to open at full size.</figcaption></figure>
+      <dl class="shapes">
+        <div><dt>Star</dt><dd>Each fact sits at the centre of its own dimensions. FactSales is the biggest star, with DimCustomer, DimSalesperson and DimVehicle around it.</dd></div>
+        <div><dt>Snowflake</dt><dd>One branch: DimSupplier reaches the facts only through DimProduct.</dd></div>
+        <div><dt>Star cluster</dt><dd>The two mixed: most dimensions stay flat and only Product branches, because that is all this business needs.</dd></div>
+        <div><dt>Galaxy</dt><dd>The whole model. The facts share DateTable, DimProduct, DimPlace and DimPromotion, so sales can sit beside stock or marketing spend in one visual.</dd></div>
+      </dl>
+      <p>The tables on the far right of the diagram have no relationships on purpose. They hold measures, slicer parameters and calculation groups, not business data.</p>
+      <p>Pick a fact to see which dimensions filter it.</p>
       <div class="facts" role="group" aria-label="Choose a fact table">
         <button type="button" data-fact="sales" aria-pressed="true">FactSales · 25,000</button>
         <button type="button" data-fact="stock" aria-pressed="false">FactInventorySnapshot · 37,440</button>
@@ -213,16 +230,31 @@
         <li><strong>Then audit it.</strong> Shape, concentration, digits and preference take minutes once the functions exist.</li>
       </ol>
       <div class="links">
-        <a class="btn btn-primary" href="BeIndianAudit.html">See the 63 audit functions</a>
+        <a class="btn btn-primary" href="#downloads">Download the case study</a>
+        <a class="btn btn-outline" href="BeIndianAudit.html">See the 63 audit functions</a>
         <a class="btn btn-outline" href="../index.html#tutorials">More case studies</a>
       </div>
+    </section>
+
+    <section id="downloads" class="cs-section srg-reveal">
+      <h2>Download and explore it yourself</h2>
+      <p>The report and its data are free to download for learning. Everything is synthetic.</p>
+      <div class="links">
+        <a class="btn btn-primary" href="../Tutorials/HMart/HMart-FMCG-Showcase.pbix" download>Power BI report (PBIX, 6.3 MB)</a>
+        <a class="btn btn-outline" href="../Tutorials/HMart/HMart-FMCG-Data.zip" download>Data set (15 CSV files, 1.8 MB)</a>
+      </div>
+      <ol class="closing-list">
+        <li><strong>Just exploring?</strong> Open the PBIX in a current version of Power BI Desktop. The data is already inside, so you need nothing else.</li>
+        <li><strong>Want to refresh it?</strong> Unzip the data set so the files sit in <code>C:\OneDrive\PowerBICourse\FMCG\data</code>, the path the queries expect. For another folder, change each file under Transform data, then Data source settings.</li>
+        <li><strong>Building your own?</strong> Start from the CSV files. <code>data_dictionary.csv</code> explains the columns.</li>
+      </ol>
     </section>
   </div>
   <script>
     // Each fact lists the dimensions that actually filter it in the model's relationships.
     const FACTS = {
       sales: { dims: ['date', 'product', 'supplier', 'place', 'customer', 'salesperson', 'vehicle', 'promotion', 'price'],
-        note: 'One row per invoice line. It joins DateTable three times: OrderDate is active, while PromisedDate and DeliveryDate stay inactive until a measure calls them with USERELATIONSHIP.' },
+        note: 'One row per invoice line. It joins DateTable three times: OrderDate is active, while PromisedDate and DeliveryDate stay inactive until a measure calls them with USERELATIONSHIP. Its link to DimPriceList is inactive too.' },
       stock: { dims: ['date', 'product', 'supplier', 'place'],
         note: 'One row per week, product and location. It knows nothing about customers or salespersons, so those slicers cannot filter stock.' },
       spend: { dims: ['date', 'promotion'],
