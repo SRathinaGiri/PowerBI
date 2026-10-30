@@ -47,6 +47,18 @@
     .shapes dt { font: 800 1rem var(--font-display); }
     .shapes dd { margin: 2px 0 0; color: var(--muted); }
     #downloads code { overflow-wrap: anywhere; }
+    .pairs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 1.1rem 0 0; }
+    .pair { padding: 14px 16px; border: 1px solid var(--border); border-top: 4px solid var(--accent); border-radius: 14px; background: var(--panel-solid); }
+    .pair h3 { margin: 0 0 .4rem; font: 800 1.08rem/1.25 var(--font-display); }
+    .pair p, .pair ul { margin: 0 0 .5rem; }
+    .pair ul { padding-left: 1.1rem; }
+    .pair-rule { margin-bottom: 0 !important; font-weight: 700; }
+    .g-group { margin: 1.6rem 0 .5rem; font: 800 1.08rem/1.25 var(--font-display); }
+    .glossary { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; margin: 0; }
+    .glossary div { padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-solid); scroll-margin-top: 72px; }
+    .glossary div:target { border-color: var(--accent); box-shadow: 0 0 0 2px rgb(var(--accent-rgb) / .35); }
+    .glossary dt { font-weight: 800; }
+    .glossary dd { margin: 2px 0 0; color: var(--muted); }
     .links { display: flex; flex-wrap: wrap; gap: 8px; margin: 1.1rem 0 2rem; }
   </style>
 </head>
@@ -64,14 +76,14 @@
         <li><b>12</b><span>Report pages over 126 measures</span></li>
       </ul>
       <nav class="jump" aria-label="On this page">
-        <a href="#downloads">Downloads</a><a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#takeaways">Takeaways</a>
+        <a href="#downloads">Downloads</a><a href="#story">Story</a><a href="#model">Model</a><a href="#executive">Executive</a><a href="#sales">Sales</a><a href="#profit">Profitability</a><a href="#inventory">Inventory</a><a href="#distribution">Distribution</a><a href="#marketing">Marketing</a><a href="#team">Team</a><a href="#audit">Audit</a><a href="#glossary">KPI glossary</a><a href="#takeaways">Takeaways</a>
       </nav>
     </header>
 
     <section id="story" class="cs-section srg-reveal">
       <h2>The business story</h2>
-      <p>H Mart is headquartered in Mandya, Karnataka. It sells wholesale across the district with a ten-vehicle fleet and runs one retail showroom in Mandya city. It carries 180 products from 12 brands across six departments, from rice to baby food, and serves 340 customers.</p>
-      <p>Its owner has four questions. Are we growing profitably? Is stock in the right place? Do we deliver what we promise? Does marketing pay for itself? The report answers them in that order, then turns auditor and tests whether the numbers can be trusted.</p>
+      <p>FMCG means fast-moving consumer goods: everyday items such as rice, soap and soft drinks that sell quickly, in large volumes, at thin margins. H Mart is headquartered in Mandya, Karnataka. It sells wholesale across the district with a ten-vehicle fleet and runs one retail showroom in Mandya city. It carries 180 products from 12 brands across six departments, from rice to baby food, and serves 340 customers.</p>
+      <p>Its owner has four questions. Are we growing profitably? Is stock in the right place? Do we deliver what we promise? Does marketing pay for itself? The report answers them in that order, then turns auditor and tests whether the numbers can be trusted. Any unfamiliar term is explained in the <a href="#glossary">KPI glossary</a>.</p>
     </section>
 
     <section id="model" class="cs-section srg-reveal">
@@ -114,7 +126,7 @@
         <figure><a href="../assets/images/hmart/executive.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/executive.webp" width="1600" height="877" loading="lazy" alt="Executive Summary page filtered to FY 2024-25: cards for net sales, contribution margin, fill rate, inventory value and ROMI, a monthly sales line, sales by department bars and a department table."></a><figcaption>Shown with FY 2024-25 selected in the slicer.</figcaption></figure>
         <div class="reads">
           <div><h4>The question</h4><p>Are we growing profitably?</p></div>
-          <div><h4>The answer</h4><p>Not quite. Net sales rose 6.3%, from ₹8.56 crore to ₹9.10 crore, while contribution fell from ₹79.45 lakh to ₹76.62 lakh. Margin slipped from 9.3% to 8.4%.</p></div>
+          <div><h4>The answer</h4><p>Not quite. Net sales rose 6.3%, from ₹8.56 crore to ₹9.10 crore, while <a href="#g-contribution">contribution</a> fell from ₹79.45 lakh to ₹76.62 lakh. Margin slipped from 9.3% to 8.4%.</p></div>
           <div><h4>The lesson</h4><p>Put a growth number and a margin number side by side. Either one alone tells a happier story.</p></div>
         </div>
       </article>
@@ -125,7 +137,7 @@
         <div class="reads">
           <div><h4>The question</h4><p>Where do sales come from, and when?</p></div>
           <div><h4>The answer</h4><p>Wholesale brings 96.6% of sales. The average invoice is ₹23,111. October is the peak in both years, and rice leads the categories at ₹2.42 crore.</p></div>
-          <div><h4>The lesson</h4><p>The YoY card reads 0.0% when no year is selected, because the previous-year calculation then returns the same two-year total. It only means something once a year is chosen.</p></div>
+          <div><h4>The lesson</h4><p>The <a href="#g-yoy">YoY</a> card reads 0.0% when no year is selected, because the previous-year calculation then returns the same two-year total. It only means something once a year is chosen.</p></div>
         </div>
       </article>
 
@@ -134,7 +146,7 @@
         <figure><a href="../assets/images/hmart/profit.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/profit.webp" width="1600" height="877" loading="lazy" alt="Profitability page: cards for gross profit, margins, logistics cost and profitable SKU share, a monthly margin line, contribution by brand bars and a department to product table."></a></figure>
         <div class="reads">
           <div><h4>The question</h4><p>What is left after the cost of serving?</p></div>
-          <div><h4>The answer</h4><p>Gross margin of 11.0% becomes 8.8% contribution. Retail earns 22.8% against wholesale’s 8.3%, so 3.4% of sales brings 8.8% of contribution. Soft drinks are thinnest at 6.7%.</p></div>
+          <div><h4>The answer</h4><p><a href="#g-gross">Gross margin</a> of 11.0% becomes 8.8% contribution. Retail earns 22.8% against wholesale’s 8.3%, so 3.4% of sales brings 8.8% of contribution. Soft drinks are thinnest at 6.7%.</p></div>
           <div><h4>The lesson</h4><p>A small channel can matter more than its sales suggest. A channel slicer shows it; a total never will.</p></div>
         </div>
       </article>
@@ -144,7 +156,7 @@
         <figure><a href="../assets/images/hmart/inventory.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/inventory.webp" width="1600" height="877" loading="lazy" alt="Inventory page: cards for inventory value, closing stock, inventory days, stock cover, stockout rate and reorder count, a stock value line, stock by department bars and a product table."></a></figure>
         <div class="reads">
           <div><h4>The question</h4><p>Is the stock right?</p></div>
-          <div><h4>The answer</h4><p>Stock of ₹85.83 lakh covers 22.1 days, or 3.2 weeks. Stockouts run at 0.8%, and 36 products need reordering.</p></div>
+          <div><h4>The answer</h4><p>Stock of ₹85.83 lakh <a href="#g-cover">covers</a> 22.1 days, or 3.2 weeks. <a href="#g-stockout">Stockouts</a> run at 0.8%, and 36 products need reordering.</p></div>
           <div><h4>The lesson</h4><p>Stock is a snapshot, so never add it across weeks. The model keeps it in its own fact table, one row per week, product and location.</p></div>
         </div>
       </article>
@@ -154,8 +166,8 @@
         <figure><a href="../assets/images/hmart/distribution.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/distribution.webp" width="1600" height="877" loading="lazy" alt="Distribution and Service page: cards for numeric and weighted distribution at 100 percent, fill rate 93 percent, OTIF 36 percent, on-time 88.7 percent and return rate, with brand bars, a fill rate line and a department to brand table."></a></figure>
         <div class="reads">
           <div><h4>The question</h4><p>Do we deliver what we promise?</p></div>
-          <div><h4>The answer</h4><p>On-time is 88.7% and fill rate 93.0%, yet OTIF is only 36.0%. A line counts as OTIF only if it arrives by the promised date and ships the exact quantity ordered.</p></div>
-          <div><h4>The lesson</h4><p>Strict measures expose what averages hide. So does the drill-down: distribution reads 100% in total, but within Baby Food individual brands reach far fewer customers.</p></div>
+          <div><h4>The answer</h4><p><a href="#g-ontime">On-time</a> is 88.7% and <a href="#g-fill">fill rate</a> 93.0%, yet <a href="#g-otif">OTIF</a> is only 36.0%. A line counts as OTIF only if it arrives by the promised date and ships the exact quantity ordered.</p></div>
+          <div><h4>The lesson</h4><p>Strict measures expose what averages hide. So does the drill-down: <a href="#g-numeric">distribution</a> reads 100% in total, but within Baby Food individual brands reach far fewer customers.</p></div>
         </div>
       </article>
 
@@ -164,7 +176,7 @@
         <figure><a href="../assets/images/hmart/marketing.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/marketing.webp" width="1600" height="877" loading="lazy" alt="Marketing and ROMI page: cards for marketing spend, promotion sales and contribution, ROAS 10.85 times and ROMI minus 61.3 percent, with a sales line, ROMI by promotion bars and a promotion table."></a></figure>
         <div class="reads">
           <div><h4>The question</h4><p>Does marketing pay for itself?</p></div>
-          <div><h4>The answer</h4><p>₹32.61 lakh of spend sits behind ₹3.54 crore of promotion sales, a ROAS of 10.85 times. But those sales earned only ₹12.62 lakh of contribution, so ROMI is −61.3%. Only Dasara Deepavali Mega, at +195%, returned more than it cost.</p></div>
+          <div><h4>The answer</h4><p>₹32.61 lakh of spend sits behind ₹3.54 crore of promotion sales, a <a href="#g-roas">ROAS</a> of 10.85 times. But those sales earned only ₹12.62 lakh of contribution, so <a href="#g-romi">ROMI</a> is −61.3%. Only Dasara Deepavali Mega, at +195%, returned more than it cost.</p></div>
           <div><h4>The lesson</h4><p>ROAS counts sales and ROMI counts margin. On thin-margin FMCG they can point in opposite directions.</p></div>
         </div>
       </article>
@@ -188,7 +200,7 @@
         <h3>Audit: Descriptive Analytics</h3>
         <figure><a href="../assets/images/hmart/descriptive.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/descriptive.webp" width="1600" height="877" loading="lazy" alt="Descriptive Analytics page: summary cards above three statistics tables for sales, profit and invoice amount."></a></figure>
         <div class="reads">
-          <div><h4>The reading</h4><p>The average line is ₹7,063 and the median ₹2,028, with skewness of 3.77. A few big lines pull the average up, the largest being ₹1,24,038. At least one line lost ₹3,900.</p></div>
+          <div><h4>The reading</h4><p>The average line is ₹7,063 and the median ₹2,028, with <a href="#g-median">skewness</a> of 3.77. A few big lines pull the average up, the largest being ₹1,24,038. At least one line lost ₹3,900.</p></div>
           <div><h4>The lesson</h4><p>Start an audit by looking at the shape. Average alone would mislead you about a typical sale, and the minimum tells you where to look first.</p></div>
         </div>
       </article>
@@ -203,10 +215,10 @@
       </article>
 
       <article class="page-card srg-reveal">
-        <h3>Audit: Benford’s Law</h3>
+        <h3>Audit: <a href="#g-benford">Benford’s Law</a></h3>
         <figure><a href="../assets/images/hmart/benford.webp" target="_blank" rel="noopener"><img src="../assets/images/hmart/benford.webp" width="1600" height="877" loading="lazy" alt="Benford's Law page: cards with a mean absolute deviation of 0.0061 and a verdict of acceptable conformity, actual against expected first digit chart and a digit table."></a></figure>
         <div class="reads">
-          <div><h4>The reading</h4><p>First digits of invoice amounts give a MAD of 0.0061, which the report labels acceptable conformity.</p></div>
+          <div><h4>The reading</h4><p>First digits of invoice amounts give a <a href="#g-mad">MAD</a> of 0.0061, which the report labels acceptable conformity.</p></div>
           <div><h4>The lesson</h4><p>Conformity is not proof of honesty, and a failure is not proof of fraud. Benford tells you where to look, not what you will find.</p></div>
         </div>
       </article>
@@ -219,6 +231,74 @@
           <div><h4>The lesson</h4><p>Volume and value are different league tables. The word cloud is a custom SVG measure, drawn entirely in DAX.</p></div>
         </div>
       </article>
+    </section>
+
+    <section id="glossary" class="cs-section srg-reveal">
+      <h2>KPIs in plain language</h2>
+      <p>New to FMCG? These are the terms used on this page, with H Mart’s own figures for the full two years. Three pairs are easy to mix up, so they come first.</p>
+      <div class="pairs">
+        <div class="pair">
+          <h3>ROAS or ROMI?</h3>
+          <p>H Mart spent ₹1 on marketing. That brought ₹10.85 of promotion sales, so ROAS looks excellent. But those sales left only about ₹0.39 of contribution, so it lost ₹0.61 on that rupee, and ROMI is −61.3%.</p>
+          <p class="pair-rule">ROAS asks “how much did we sell?” ROMI asks “did we make money?”</p>
+        </div>
+        <div class="pair">
+          <h3>On-time, fill rate or OTIF?</h3>
+          <p>A shop orders 10 cartons for Monday.</p>
+          <ul>
+            <li>10 arrive on Monday: on time and in full, so it counts for <strong>OTIF</strong>.</li>
+            <li>9 arrive on Monday: <strong>on time</strong>, but not OTIF, and the <strong>fill rate</strong> is 90%.</li>
+            <li>10 arrive on Tuesday: filled completely, but late, so neither on time nor OTIF.</li>
+          </ul>
+          <p class="pair-rule">One line can pass two tests and still fail OTIF, which is why H Mart scores 88.7% and 93.0% but only 36.0%.</p>
+        </div>
+        <div class="pair">
+          <h3>Gross or contribution margin?</h3>
+          <p>Sell rice for ₹100 that cost ₹89, and gross margin is ₹11. Delivery and promotion then cost another ₹2.20, leaving a contribution margin of ₹8.80.</p>
+          <p class="pair-rule">Gross margin is profit on the product. Contribution margin is profit after serving the customer. These round figures match H Mart’s overall 11.0% and 8.8%.</p>
+        </div>
+      </div>
+      <h3 class="g-group">Sales and profit</h3>
+      <dl class="glossary">
+        <div id="g-netsales"><dt>Net sales</dt><dd>Sales after discounts and returns, before tax. H Mart: ₹17.66 crore.</dd></div>
+        <div id="g-cogs"><dt>COGS</dt><dd>Cost of goods sold: what H Mart paid for the goods it sold.</dd></div>
+        <div id="g-gross"><dt>Gross profit and gross margin</dt><dd>Net sales minus COGS. The margin is that profit as a share of net sales. H Mart: 11.0%.</dd></div>
+        <div id="g-contribution"><dt>Contribution margin</dt><dd>Gross profit minus logistics and promotion costs: what a sale really adds. H Mart: ₹1.56 crore, or 8.8%.</dd></div>
+        <div id="g-logistics"><dt>Logistics cost</dt><dd>The cost of getting goods to customers. H Mart: ₹30.01 lakh.</dd></div>
+        <div id="g-sku"><dt>SKU</dt><dd>Stock keeping unit: one sellable item, such as a 5 kg bag of a particular rice. A 1 kg bag is a different SKU.</dd></div>
+        <div id="g-yoy"><dt>YoY</dt><dd>Year on year: this year compared with last year. FY means financial year, April to March.</dd></div>
+        <div id="g-velocity"><dt>Sales velocity</dt><dd>Net sales per selling day. H Mart: ₹2.42 lakh.</dd></div>
+        <div id="g-target"><dt>Target achievement</dt><dd>Net sales as a share of the sales target. 100% means the target was met exactly.</dd></div>
+      </dl>
+      <h3 class="g-group">Stock</h3>
+      <dl class="glossary">
+        <div id="g-cover"><dt>Inventory days and stock cover</dt><dd>How long today’s stock lasts at normal demand. H Mart: 22.1 days, which is 3.2 weeks.</dd></div>
+        <div id="g-stockout"><dt>Stockout rate</dt><dd>The share of stock positions with nothing left to sell in the latest weekly count. H Mart: 0.8%.</dd></div>
+        <div id="g-reorder"><dt>Reorder count</dt><dd>How many products need ordering again now. H Mart: 36.</dd></div>
+      </dl>
+      <h3 class="g-group">Delivery and reach</h3>
+      <dl class="glossary">
+        <div id="g-fill"><dt>Fill rate</dt><dd>Of every 100 units ordered, how many were shipped. H Mart: 93.0%.</dd></div>
+        <div id="g-ontime"><dt>On-time delivery</dt><dd>The share of order lines delivered by the promised date, even if some units were missing. H Mart: 88.7%.</dd></div>
+        <div id="g-otif"><dt>OTIF</dt><dd>On time, in full: the share of lines delivered by the promised date and with the exact quantity ordered. H Mart: 36.0%.</dd></div>
+        <div id="g-returns"><dt>Return rate</dt><dd>The share of shipped units that came back. H Mart: 0.3%.</dd></div>
+        <div id="g-numeric"><dt>Numeric distribution</dt><dd>Of all active customers, the share who bought the item. It counts shops, big or small.</dd></div>
+        <div id="g-weighted"><dt>Weighted distribution</dt><dd>The same shops, measured by their share of total sales. Reaching a few big shops can score higher than reaching many small ones.</dd></div>
+      </dl>
+      <h3 class="g-group">Marketing</h3>
+      <dl class="glossary">
+        <div id="g-spend"><dt>Marketing spend</dt><dd>Money spent on promotions. H Mart: ₹32.61 lakh.</dd></div>
+        <div id="g-mix"><dt>Promotion sales mix</dt><dd>The share of net sales made under a promotion. H Mart: 20.0%.</dd></div>
+        <div id="g-roas"><dt>ROAS</dt><dd>Return on advertising spend: promotion sales for each rupee spent. H Mart: 10.85 times.</dd></div>
+        <div id="g-romi"><dt>ROMI</dt><dd>Return on marketing investment: promotion contribution minus spend, as a share of spend. Below zero means marketing cost more than it earned. H Mart: −61.3%.</dd></div>
+      </dl>
+      <h3 class="g-group">Audit</h3>
+      <dl class="glossary">
+        <div id="g-median"><dt>Average, median and skewness</dt><dd>The median is the middle value. When a few very large values pull the average above it, the data is skewed, and skewness measures by how much.</dd></div>
+        <div id="g-topn"><dt>Top N percent</dt><dd>The largest N percent of items, used to see how much of the total they carry.</dd></div>
+        <div id="g-benford"><dt>Benford’s law</dt><dd>In many natural sets of amounts, about 30% start with the digit 1 and fewer than 5% with 9. A very different pattern is a reason to look closer.</dd></div>
+        <div id="g-mad"><dt>MAD</dt><dd>Mean absolute deviation: the average gap between the actual and expected digit shares. Smaller means a closer match.</dd></div>
+      </dl>
     </section>
 
     <section id="takeaways" class="cs-section srg-reveal">
