@@ -68,7 +68,7 @@ Every page loads two shared files:
 * `assets/site.css` — design tokens for **light and dark themes** (follows the OS setting; the sun/moon toggle remembers your choice), plus shared motion (page transitions, scroll reveals; all respect *reduce motion*).
 * `assets/site.js` — the sticky lesson bar with **Home**, **Previous / Next (with topic names)**, a jump-to-any-lesson menu, and an "Up next" card at the end of each page.
 
-The learning path is defined once in the `LESSONS` array in `assets/site.js`: Foundations (Elements of the Data Cube → R2R → APPASA → Kinds of Analytics → Steps to Power BI → Stages of Data Analysis → OLTP vs OLAP → Data Cube Operations → 5D Datacube) → Power Query Joins → Semantic Model → Model Components → VertiPaq Engine → Star Schema → DAX (Row vs Filter Context → Calculated Column vs Measure → SUM vs SUMX → Filter Context Camera → Water Plant → Context Transition → ALL family → Date Train) → Choose the Right Chart. To reorder or add a lesson, edit that array (and the matching card on `index.html`).
+The learning path is defined once in the `LESSONS` array in `assets/site.js`: Foundations (Stages of Data Analysis → Elements of the Data Cube → From Fact to Wisdom → R2R → APPASA → Kinds of Analytics → Steps to Power BI → OLTP vs OLAP → Data Cube Operations → 5D Datacube) → Power Query Joins → Semantic Model → Model Components → VertiPaq Engine → Star Schema → DAX (Row vs Filter Context → Calculated Column vs Measure → SUM vs SUMX → Filter Context Camera → Water Plant → Context Transition → ALL family → Date Train) → Choose the Right Chart. To reorder or add a lesson, edit that array (and the matching card on `index.html`).
 
 🚀 How to Use
 
